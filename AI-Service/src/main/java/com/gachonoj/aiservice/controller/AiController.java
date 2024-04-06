@@ -8,6 +8,6 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/ai")
+@RequestMapping("/api/ai")
 public class AiController {
 }
