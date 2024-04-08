@@ -1,4 +1,37 @@
 package com.gachonoj.submissionservice.domain.entity;
 
+import com.gachonoj.submissionservice.domain.constant.Language;
+import com.gachonoj.submissionservice.domain.constant.Status;
+import jakarta.persistence.*;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Entity
+@Table
+@NoArgsConstructor
 public class Submission {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long submissionId;
+    @Column(nullable = false)
+    private Long memberId;
+    @Column(nullable = false)
+    private Long problemId;
+    @Column(nullable = false)
+    private String submissionCode;
+    @CreatedDate
+    private LocalDateTime submissionDate;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Status submissionStatus;
+    private Integer submissionTime;
+    private Integer submissionMemory;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Language submissionLang;
+    @OneToMany(mappedBy = "submission", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Love> loves;
 }
