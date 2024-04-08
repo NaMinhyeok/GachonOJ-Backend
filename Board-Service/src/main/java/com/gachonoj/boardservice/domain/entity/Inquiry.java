@@ -25,6 +25,7 @@ public class Inquiry {
     @CreatedDate
     @Column(nullable = false)
     private LocalDateTime inquiryCreatedDate;
+    @Enumerated(EnumType.STRING)
     private InquiryStatus inquiryStatus;
     @OneToOne(mappedBy = "inquiry", cascade = CascadeType.ALL)
     private Reply reply;
