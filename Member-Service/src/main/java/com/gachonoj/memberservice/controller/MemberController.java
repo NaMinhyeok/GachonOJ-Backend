@@ -28,4 +28,14 @@ public class MemberController {
         log.info("authCode: {} ", memberService.joinEmail(emailRequestDto.getMemberEmail()));
         return ResponseEntity.ok(CommonResponseDto.success(emailRequestDto.getMemberEmail()));
     }
+    @PostMapping("/email/verification")
+    public ResponseEntity<CommonResponseDto<String>> verifyEmail(@RequestBody @Valid EmailVerificationRequestDto emailVerificationRequestDto) {
+        if(memberService.verifyEmail(emailVerificationRequestDto.getMemberEmail(), emailVerificationRequestDto.getAuthCode())) {
+            log.info("인증 성공");
+            return ResponseEntity.ok(CommonResponseDto.success());
+        } else {
+            log.info("인증 실패");
+            return ResponseEntity.ok(CommonResponseDto.fail(400, "인증번호가 일치하지 않습니다."));
+        }
+    }
 }

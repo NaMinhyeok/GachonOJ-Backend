@@ -31,7 +31,16 @@ public class MemberService {
         authCode = Integer.parseInt(randomNumber);
     }
     // 이메일 인증코드를 확인하는 메소드
-
+    public boolean verifyEmail(String email, String inputAuthCode) {
+        String key = Integer.toString(authCode);
+        String value = redisService.getData(key);
+        if(value != null && value.equals(email) && inputAuthCode.equals(key)) {
+            redisService.deleteData(key);
+            return true;
+        } else {
+            return false;
+        }
+    }
     // 이메일 인증코드를 전송하는 메소드
     public String joinEmail(String email) {
         makeRandomNumber();
