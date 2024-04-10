@@ -50,10 +50,10 @@ public class MemberController {
         return ResponseEntity.ok(CommonResponseDto.success());
     }
     // 로그인
-    @PostMapping("/login")
-    public ResponseEntity<CommonResponseDto<LoginResponseDto>> login(@RequestBody @Valid LoginRequestDto loginRequestDto) {
-        LoginResponseDto loginResponseDto = memberService.login(loginRequestDto);
-        log.info(loginResponseDto.toString());
-        return ResponseEntity.ok(CommonResponseDto.success(loginResponseDto));
-    }
+//    @PostMapping("/login")
+//    public ResponseEntity<CommonResponseDto<LoginResponseDto>> login(@RequestBody @Valid LoginRequestDto loginRequestDto) {
+//        LoginResponseDto loginResponseDto = memberService.login(loginRequestDto);
+//        log.info(loginResponseDto.toString());
+//        return ResponseEntity.ok(CommonResponseDto.success(loginResponseDto));
+//    }
 }

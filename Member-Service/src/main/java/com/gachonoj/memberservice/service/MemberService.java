@@ -4,7 +4,7 @@ import com.gachonoj.memberservice.domain.dto.request.LoginRequestDto;
 import com.gachonoj.memberservice.domain.dto.request.SignUpRequestDto;
 import com.gachonoj.memberservice.domain.dto.response.LoginResponseDto;
 import com.gachonoj.memberservice.domain.entity.Member;
-import com.gachonoj.memberservice.jwt.JwtTokenProvider;
+//import com.gachonoj.memberservice.jwt.JwtTokenProvider;
 import com.gachonoj.memberservice.repository.MemberRepository;
 import io.jsonwebtoken.Jwt;
 import jakarta.mail.internet.MimeMessage;
@@ -29,7 +29,7 @@ public class MemberService {
     private final RedisService redisService;
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtTokenProvider jwtTokenProvider;
+//    private final JwtTokenProvider jwtTokenProvider;
     // 이메일 인증 코드
     private int authCode;
     // 이메일 인증코드를 위한 난수 생성기
@@ -87,7 +87,7 @@ public class MemberService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        redisService.setDataExpire(Integer.toString(authCode), toMail, 300L);
+        redisService.setDataExpire(toMail,Integer.toString(authCode), 300L);
     }
     // 회원가입
     @Transactional
@@ -108,21 +108,20 @@ public class MemberService {
         memberRepository.save(member);
     }
     // 로그인
-    @Transactional
-    public LoginResponseDto login(LoginRequestDto loginRequestDto) {
-        // 로그인 로직
-        Member member = memberRepository.findByMemberEmail(loginRequestDto.getMemberEmail());
-        if(member == null) {
-            throw new IllegalArgumentException("가입되지 않은 이메일입니다.");
-        }
-        if(!validateMemberPassword(loginRequestDto.getMemberPassword(), member)) {
-            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
-        }
-        String token = jwtTokenProvider.generateAccessToken(member.getMemberId(), member.getMemberRole());
-        LoginResponseDto loginResponseDto = new LoginResponseDto(token,member.getMemberImg());
-        return loginResponseDto;
-    }
-
+//    @Transactional
+//    public LoginResponseDto login(LoginRequestDto loginRequestDto) {
+//        // 로그인 로직
+//        Member member = memberRepository.findByMemberEmail(loginRequestDto.getMemberEmail());
+//        if(member == null) {
+//            throw new IllegalArgumentException("가입되지 않은 이메일입니다.");
+//        }
+//        if(!validateMemberPassword(loginRequestDto.getMemberPassword(), member)) {
+//            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+//        }
+//        String token = jwtTokenProvider.generateAccessToken(member.getMemberId(), member.getMemberRole());
+//        LoginResponseDto loginResponseDto = new LoginResponseDto(token,member.getMemberImg());
+//        return loginResponseDto;
+//    }
 
     // 회원가입 유효성 검사
     public void verifySignUp(SignUpRequestDto signUpRequestDto) {
@@ -159,5 +158,8 @@ public class MemberService {
     public boolean validateMemberPassword(String memberPassword, Member member){
         return passwordEncoder.matches(memberPassword, member.getMemberPassword());
     }
-
+    // 회원 정보 가져오기
+    public Member loadUserByUsername(Long memberId) {
+        return memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException("가입되지 않은 회원입니다."));
+    }
 }
