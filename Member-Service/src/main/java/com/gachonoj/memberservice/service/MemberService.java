@@ -1,8 +1,12 @@
 package com.gachonoj.memberservice.service;
 
+import com.gachonoj.memberservice.domain.dto.request.LoginRequestDto;
 import com.gachonoj.memberservice.domain.dto.request.SignUpRequestDto;
+import com.gachonoj.memberservice.domain.dto.response.LoginResponseDto;
 import com.gachonoj.memberservice.domain.entity.Member;
+import com.gachonoj.memberservice.jwt.JwtTokenProvider;
 import com.gachonoj.memberservice.repository.MemberRepository;
+import io.jsonwebtoken.Jwt;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,11 +25,11 @@ import java.util.Random;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class MemberService {
-    @Autowired
-    private JavaMailSender mailSender;
-    @Autowired
-    private RedisService redisService;
+    private final JavaMailSender mailSender;
+    private final RedisService redisService;
     private final MemberRepository memberRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtTokenProvider jwtTokenProvider;
     // 이메일 인증 코드
     private int authCode;
     // 이메일 인증코드를 위한 난수 생성기
@@ -102,6 +107,23 @@ public class MemberService {
 
         memberRepository.save(member);
     }
+    // 로그인
+    @Transactional
+    public LoginResponseDto login(LoginRequestDto loginRequestDto) {
+        // 로그인 로직
+        Member member = memberRepository.findByMemberEmail(loginRequestDto.getMemberEmail());
+        if(member == null) {
+            throw new IllegalArgumentException("가입되지 않은 이메일입니다.");
+        }
+        if(!validateMemberPassword(loginRequestDto.getMemberPassword(), member)) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+        String token = jwtTokenProvider.generateAccessToken(member.getMemberId(), member.getMemberRole());
+        LoginResponseDto loginResponseDto = new LoginResponseDto(token,member.getMemberImg());
+        return loginResponseDto;
+    }
+
+
     // 회원가입 유효성 검사
     public void verifySignUp(SignUpRequestDto signUpRequestDto) {
         String regExp = "^(?=.*[a-zA-Z])(?=.*[!@#$%^])(?=.*[0-9]).{8,25}$";
@@ -132,6 +154,10 @@ public class MemberService {
     // 이메일 중복 검사
     public boolean validateMemberEmail(String memberEmail) {
         return memberRepository.existsByMemberEmail(memberEmail);
+    }
+    // 비밀번호 일치 검사
+    public boolean validateMemberPassword(String memberPassword, Member member){
+        return passwordEncoder.matches(memberPassword, member.getMemberPassword());
     }
 
 }

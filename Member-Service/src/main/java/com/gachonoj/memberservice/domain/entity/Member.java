@@ -4,6 +4,7 @@ import com.gachonoj.memberservice.domain.constant.MemberLang;
 import com.gachonoj.memberservice.domain.constant.Role;
 import jakarta.persistence.*;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.CreatedDate;
@@ -14,6 +15,7 @@ import java.util.List;
 
 @Entity
 @Table
+@Getter
 @NoArgsConstructor
 public class Member {
     @Id

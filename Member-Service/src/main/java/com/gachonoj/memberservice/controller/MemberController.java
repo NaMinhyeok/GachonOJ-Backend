@@ -2,14 +2,17 @@ package com.gachonoj.memberservice.controller;
 
 import com.gachonoj.memberservice.domain.dto.request.EmailRequestDto;
 import com.gachonoj.memberservice.domain.dto.request.EmailVerificationRequestDto;
+import com.gachonoj.memberservice.domain.dto.request.LoginRequestDto;
 import com.gachonoj.memberservice.domain.dto.request.SignUpRequestDto;
 import com.gachonoj.memberservice.domain.dto.response.CommonResponseDto;
+import com.gachonoj.memberservice.domain.dto.response.LoginResponseDto;
 import com.gachonoj.memberservice.service.MemberService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -45,5 +48,12 @@ public class MemberController {
     public ResponseEntity<CommonResponseDto<String>> signUp(@RequestBody @Valid SignUpRequestDto signUpRequestDto) {
         memberService.signUp(signUpRequestDto);
         return ResponseEntity.ok(CommonResponseDto.success());
+    }
+    // 로그인
+    @PostMapping("/login")
+    public ResponseEntity<CommonResponseDto<LoginResponseDto>> login(@RequestBody @Valid LoginRequestDto loginRequestDto) {
+        LoginResponseDto loginResponseDto = memberService.login(loginRequestDto);
+        log.info(loginResponseDto.toString());
+        return ResponseEntity.ok(CommonResponseDto.success(loginResponseDto));
     }
 }
