@@ -50,6 +50,10 @@ public class MemberService {
     }
     // 이메일 인증코드를 전송하는 메소드
     public String joinEmail(String email) {
+        // 이메일 유효성 검사
+        isValidEmail(email);
+
+        //유효성 검사가 통과하면 이메일 인증코드 생성 및 전송
         makeRandomNumber();
         String setFrom = "gachonlastdance@gmail.com"; // email-config에 설정한 자신의 이메일 주소를 입력
         String toMail = email;
@@ -65,7 +69,7 @@ public class MemberService {
         sendEmail(setFrom, toMail, title, content);
         return Integer.toString(authCode);
     }
-    // 이메일 전송
+    // 이메일 인증 코드 전송
     public void sendEmail(String setFrom, String toMail, String title, String content) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
@@ -83,6 +87,9 @@ public class MemberService {
     // 회원가입
     @Transactional
     public void signUp(SignUpRequestDto signUpRequestDto) {
+        // 회원가입 유효성 검사
+        verifySignUp(signUpRequestDto);
+
         // 회원가입 로직
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         Member member = Member.builder()
@@ -95,4 +102,36 @@ public class MemberService {
 
         memberRepository.save(member);
     }
+    // 회원가입 유효성 검사
+    public void verifySignUp(SignUpRequestDto signUpRequestDto) {
+        String regExp = "^(?=.*[a-zA-Z])(?=.*[!@#$%^])(?=.*[0-9]).{8,25}$";
+        if(!signUpRequestDto.getMemberPassword().matches(regExp)) {
+            throw new IllegalArgumentException("비밀번호는 영문, 숫자, 특수문자를 포함한 8~25자여야 합니다.");
+        }
+        if(validateMemberNumber(signUpRequestDto.getMemberNumber())) {
+            throw new IllegalArgumentException("이미 가입된 학번입니다.");
+        }
+        if(validateMemberEmail(signUpRequestDto.getMemberEmail())) {
+            throw new IllegalArgumentException("이미 가입된 이메일입니다.");
+        }
+    }
+    // 이메일 유효성 검사 (현재 가입된 이메일인지 확인)
+    public void isValidEmail(String email) {
+        if(validateMemberEmail(email)) {
+            throw new IllegalArgumentException("이미 가입된 이메일입니다.");
+        }
+        if(email.endsWith("@gachon.ac.kr")) {
+            throw new IllegalArgumentException("가천대학교 이메일이 아닙니다.");
+        }
+    }
+
+    // 학번 중복 검사
+    public boolean validateMemberNumber(String memberNumber) {
+        return memberRepository.existsByMemberNumber(memberNumber);
+    }
+    // 이메일 중복 검사
+    public boolean validateMemberEmail(String memberEmail) {
+        return memberRepository.existsByMemberEmail(memberEmail);
+    }
+
 }
