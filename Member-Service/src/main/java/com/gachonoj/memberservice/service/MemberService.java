@@ -1,23 +1,30 @@
 package com.gachonoj.memberservice.service;
 
+import com.gachonoj.memberservice.domain.dto.request.SignUpRequestDto;
+import com.gachonoj.memberservice.domain.entity.Member;
+import com.gachonoj.memberservice.repository.MemberRepository;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Random;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class MemberService {
     @Autowired
     private JavaMailSender mailSender;
     @Autowired
     private RedisService redisService;
+    private final MemberRepository memberRepository;
     // 이메일 인증 코드
     private int authCode;
     // 이메일 인증코드를 위한 난수 생성기
@@ -72,5 +79,20 @@ public class MemberService {
             e.printStackTrace();
         }
         redisService.setDataExpire(Integer.toString(authCode), toMail, 300L);
+    }
+    // 회원가입
+    @Transactional
+    public void signUp(SignUpRequestDto signUpRequestDto) {
+        // 회원가입 로직
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        Member member = Member.builder()
+                .memberEmail(signUpRequestDto.getMemberEmail())
+                .memberName(signUpRequestDto.getMemberName())
+                .memberNumber(signUpRequestDto.getMemberNumber())
+                .memberPassword(passwordEncoder.encode(signUpRequestDto.getMemberPassword()))
+                .memberNickname(signUpRequestDto.getMemberNickname())
+                .build();
+
+        memberRepository.save(member);
     }
 }
