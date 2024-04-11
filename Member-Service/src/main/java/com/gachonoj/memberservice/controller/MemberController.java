@@ -2,21 +2,16 @@ package com.gachonoj.memberservice.controller;
 
 import com.gachonoj.memberservice.domain.dto.request.EmailRequestDto;
 import com.gachonoj.memberservice.domain.dto.request.EmailVerificationRequestDto;
-import com.gachonoj.memberservice.domain.dto.request.LoginRequestDto;
 import com.gachonoj.memberservice.domain.dto.request.SignUpRequestDto;
 import com.gachonoj.memberservice.domain.dto.response.CommonResponseDto;
-import com.gachonoj.memberservice.domain.dto.response.LoginResponseDto;
+import com.gachonoj.memberservice.domain.dto.response.NicknameVerificationResponseDto;
 import com.gachonoj.memberservice.service.MemberService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -30,7 +25,7 @@ public class MemberController {
     public ResponseEntity<CommonResponseDto<String>> sendEmail(@RequestBody @Valid EmailRequestDto emailRequestDto) {
         //결과 코드 로그
         log.info("authCode: {} ", memberService.joinEmail(emailRequestDto.getMemberEmail()));
-        return ResponseEntity.ok(CommonResponseDto.success(emailRequestDto.getMemberEmail()));
+        return ResponseEntity.ok(CommonResponseDto.success());
     }
     // 이메일 인증번호 확인
     @PostMapping("/email/verification")
@@ -56,4 +51,12 @@ public class MemberController {
 //        log.info(loginResponseDto.toString());
 //        return ResponseEntity.ok(CommonResponseDto.success(loginResponseDto));
 //    }
+    // 닉네임 중복 확인
+    @GetMapping("/verification/{memberNickname}")
+    public ResponseEntity<CommonResponseDto<NicknameVerificationResponseDto>> verifyMemberNickname(@PathVariable String memberNickname) {
+        boolean result = !memberService.verifyMemberNickname(memberNickname);
+        NicknameVerificationResponseDto nicknameVerificationResponse = new NicknameVerificationResponseDto(result);
+
+        return ResponseEntity.ok(CommonResponseDto.success(nicknameVerificationResponse));
+    }
 }

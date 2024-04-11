@@ -129,6 +129,9 @@ public class MemberService {
         if(!signUpRequestDto.getMemberPassword().matches(regExp)) {
             throw new IllegalArgumentException("비밀번호는 영문, 숫자, 특수문자를 포함한 8~25자여야 합니다.");
         }
+        if(!signUpRequestDto.getMemberPassword().equals(signUpRequestDto.getMemberPasswordConfirm())) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
         if(validateMemberNumber(signUpRequestDto.getMemberNumber())) {
             throw new IllegalArgumentException("이미 가입된 학번입니다.");
         }
@@ -141,7 +144,7 @@ public class MemberService {
         if(validateMemberEmail(email)) {
             throw new IllegalArgumentException("이미 가입된 이메일입니다.");
         }
-        if(email.endsWith("@gachon.ac.kr")) {
+        if(!email.endsWith("@gachon.ac.kr")) {
             throw new IllegalArgumentException("가천대학교 이메일이 아닙니다.");
         }
     }
@@ -161,5 +164,9 @@ public class MemberService {
     // 회원 정보 가져오기
     public Member loadUserByUsername(Long memberId) {
         return memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException("가입되지 않은 회원입니다."));
+    }
+    // 닉네임 중복 확인
+    public boolean verifyMemberNickname(String memberNickname) {
+        return memberRepository.existsByMemberNickname(memberNickname);
     }
 }
