@@ -62,7 +62,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         GrantedAuthority auth = iterator.next();
         String role = auth.getAuthority();
 
-        String accessToken = jwtUtil.createJwt(username, role,memberId);
+        String accessToken = jwtUtil.createAccessJwt(username, role,memberId);
         String refreshToken = jwtUtil.createRefreshJwt(memberId);
 
         redisService.setDataExpire(Long.toString(memberId),refreshToken,jwtUtil.getRefreshTokenExpireTime());
