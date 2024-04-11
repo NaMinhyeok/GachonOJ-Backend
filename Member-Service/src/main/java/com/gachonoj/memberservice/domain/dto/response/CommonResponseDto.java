@@ -1,6 +1,9 @@
 package com.gachonoj.memberservice.domain.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -23,6 +26,11 @@ public class CommonResponseDto<T> {
         this.timestamp = timestamp;
         this.message = message;
         this.reuslt = reuslt;
+    }
+    public String toJson() throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        return mapper.writeValueAsString(this);
     }
     // 성공 응답
     public static <T> CommonResponseDto<T> success(T result) {
