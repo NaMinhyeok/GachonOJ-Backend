@@ -17,6 +17,7 @@ import lombok.Setter;
 public class Testcase {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "testcase_id") // 이 부분을 데이터베이스 컬럼 이름에 맞게 수정
     private Long id;
 
     private String testcaseInput;

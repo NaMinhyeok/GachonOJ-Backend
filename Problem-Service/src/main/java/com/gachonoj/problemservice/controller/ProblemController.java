@@ -52,4 +52,18 @@ public class ProblemController {
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
+    // 알고리즘 문제 삭제
+    @DeleteMapping("/{problemId}")
+    public ResponseEntity<Map<String, Object>> deleteProblem(@PathVariable Long problemId) {
+        problemService.deleteProblem(problemId);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("isSuccess", true);
+        response.put("code", HttpStatus.OK.value());
+        response.put("time", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+        response.put("msg", "문제 삭제 성공");
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+    }
 }
