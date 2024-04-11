@@ -129,6 +129,9 @@ public class MemberService {
         if(!signUpRequestDto.getMemberPassword().matches(regExp)) {
             throw new IllegalArgumentException("비밀번호는 영문, 숫자, 특수문자를 포함한 8~25자여야 합니다.");
         }
+        if(!signUpRequestDto.getMemberPassword().equals(signUpRequestDto.getMemberPasswordConfirm())) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
         if(validateMemberNumber(signUpRequestDto.getMemberNumber())) {
             throw new IllegalArgumentException("이미 가입된 학번입니다.");
         }
