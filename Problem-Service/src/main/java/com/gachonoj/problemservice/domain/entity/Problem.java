@@ -70,4 +70,22 @@ public class Problem {
         problem.testcases = new ArrayList<>(); // 초기화
         return problem;
     }
+
+
+    // 문제 수정
+    public void update(String problemTitle, String problemContents, String problemInputContents, String problemOutputContents,
+                       Integer problemDiff, ProblemClass problemClass, Integer problemTimeLimit, Integer problemMemoryLimit,
+                       ProblemStatus problemStatus, String problemPrompt) {
+        this.problemTitle = problemTitle;
+        this.problemContents = problemContents;
+        this.problemInputContents = problemInputContents;
+        this.problemOutputContents = problemOutputContents;
+        this.problemDiff = problemDiff;
+        this.problemClass = problemClass;
+        this.problemTimeLimit = problemTimeLimit;
+        this.problemMemoryLimit = problemMemoryLimit;
+        this.problemStatus = problemStatus;
+        this.problemPrompt = problemPrompt;
+        this.problemUpdatedDate = LocalDateTime.now(); // 현재 시간으로 업데이트 날짜 설정
+    }
 }
