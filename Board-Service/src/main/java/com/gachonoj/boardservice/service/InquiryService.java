@@ -1,6 +1,6 @@
 package com.gachonoj.boardservice.service;
 
-import com.gachonoj.boardservice.domain.dto.InquiryRequestDto;
+import com.gachonoj.boardservice.domain.dto.request.InquiryRequestDto;
 import com.gachonoj.boardservice.domain.entity.Inquiry;
 import com.gachonoj.boardservice.repository.InquiryRepository;
 import com.gachonoj.boardservice.repository.ReplyRepository;

@@ -1,4 +1,4 @@
-package com.gachonoj.boardservice.domain.dto;
+package com.gachonoj.boardservice.domain.dto.request;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;

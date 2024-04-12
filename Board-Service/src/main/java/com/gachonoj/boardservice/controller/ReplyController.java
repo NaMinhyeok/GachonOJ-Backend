@@ -1,7 +1,7 @@
 package com.gachonoj.boardservice.controller;
 
-import com.gachonoj.boardservice.domain.dto.ReplyRequestDto;
-import com.gachonoj.boardservice.domain.dto.ReplyResponseDto;
+import com.gachonoj.boardservice.domain.dto.request.ReplyRequestDto;
+import com.gachonoj.boardservice.domain.dto.response.ReplyResponseDto;
 import com.gachonoj.boardservice.common.response.CommonResponseDto;
 import com.gachonoj.boardservice.domain.entity.Reply;
 import com.gachonoj.boardservice.service.ReplyService;

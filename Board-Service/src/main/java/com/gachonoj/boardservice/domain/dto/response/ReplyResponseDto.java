@@ -1,4 +1,4 @@
-package com.gachonoj.boardservice.domain.dto;
+package com.gachonoj.boardservice.domain.dto.response;
 
 import com.gachonoj.boardservice.domain.entity.Reply;
 import lombok.Getter;

@@ -1,6 +1,6 @@
 package com.gachonoj.boardservice.service;
 
-import com.gachonoj.boardservice.domain.dto.NoticeRequestDto;
+import com.gachonoj.boardservice.domain.dto.request.NoticeRequestDto;
 import com.gachonoj.boardservice.domain.entity.Notice;
 import com.gachonoj.boardservice.repository.NoticeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,5 +20,11 @@ public class NoticeService {
                 requestDto.getNoticeContents()
         );
         return noticeRepository.save(notice);
+    }
+
+    // 공지사항 삭제
+    @Transactional
+    public void deleteNotice(Long noticeId) {
+        noticeRepository.deleteById(noticeId);
     }
 }
