@@ -29,6 +29,8 @@ public class Reply {
     @CreatedDate
     private LocalDateTime replyCreatedDate;
     private LocalDateTime replyUpdatedDate;
+
+    // 답안 작성
     @Builder(builderMethodName = "create")
     public static Reply create(Inquiry inquiry, String replyContents) {
         Reply reply = new Reply();

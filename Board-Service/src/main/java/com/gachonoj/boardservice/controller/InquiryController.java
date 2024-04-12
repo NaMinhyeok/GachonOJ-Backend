@@ -1,5 +1,6 @@
 package com.gachonoj.boardservice.controller;
 
+import com.gachonoj.boardservice.common.codes.SuccessCode;
 import com.gachonoj.boardservice.domain.dto.InquiryRequestDto;
 import com.gachonoj.boardservice.domain.entity.Inquiry;
 import com.gachonoj.boardservice.common.response.CommonResponseDto;
@@ -25,9 +26,16 @@ public class InquiryController {
     }
 
     //문의사항 삭제
-    @DeleteMapping("admin/{inquiryId}")
-    public ResponseEntity<CommonResponseDto<String>> deleteInquiry(@PathVariable Long inquiryId) {
+    @DeleteMapping("/{inquiryId}")
+    public ResponseEntity<CommonResponseDto<Void>> deleteInquiry(@PathVariable Long inquiryId) {
         inquiryService.deleteInquiry(inquiryId);
-        return ResponseEntity.ok(new CommonResponseDto<String>(true, 200,  LocalDateTime.now(), "문의사항 삭제 완료",null));
+        // SuccessCode를 사용하여 DELETE 성공 응답 설정
+        return ResponseEntity.ok(CommonResponseDto.<Void>builder()
+                .isSuccess(true)
+                .code(SuccessCode.DELETE_SUCCESS.getStatus())
+                .timestamp(LocalDateTime.now())
+                .message(SuccessCode.DELETE_SUCCESS.getMessage())
+                .result(null) // 결과가 없기 때문에 null
+                .build());
     }
 }
