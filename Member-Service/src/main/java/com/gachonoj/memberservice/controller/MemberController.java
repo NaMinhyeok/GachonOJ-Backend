@@ -3,7 +3,7 @@ package com.gachonoj.memberservice.controller;
 import com.gachonoj.memberservice.domain.dto.request.EmailRequestDto;
 import com.gachonoj.memberservice.domain.dto.request.EmailVerificationRequestDto;
 import com.gachonoj.memberservice.domain.dto.request.SignUpRequestDto;
-import com.gachonoj.memberservice.domain.dto.response.CommonResponseDto;
+import com.gachonoj.memberservice.common.response.CommonResponseDto;
 import com.gachonoj.memberservice.domain.dto.response.NicknameVerificationResponseDto;
 import com.gachonoj.memberservice.service.MemberService;
 
@@ -30,13 +30,8 @@ public class MemberController {
     // 이메일 인증번호 확인
     @PostMapping("/email/verification")
     public ResponseEntity<CommonResponseDto<String>> verifyEmail(@RequestBody @Valid EmailVerificationRequestDto emailVerificationRequestDto) {
-        if(memberService.verifyEmail(emailVerificationRequestDto.getMemberEmail(), emailVerificationRequestDto.getAuthCode())) {
-            log.info("인증 성공");
-            return ResponseEntity.ok(CommonResponseDto.success());
-        } else {
-            log.info("인증 실패");
-            return ResponseEntity.ok(CommonResponseDto.fail(400, "인증번호가 일치하지 않습니다."));
-        }
+        memberService.verifyEmail(emailVerificationRequestDto.getMemberEmail(), emailVerificationRequestDto.getAuthCode());
+        return ResponseEntity.ok(CommonResponseDto.success());
     }
     //회원가입
     @PostMapping("/members")
@@ -44,19 +39,9 @@ public class MemberController {
         memberService.signUp(signUpRequestDto);
         return ResponseEntity.ok(CommonResponseDto.success());
     }
-    // 로그인
-//    @PostMapping("/login")
-//    public ResponseEntity<CommonResponseDto<LoginResponseDto>> login(@RequestBody @Valid LoginRequestDto loginRequestDto) {
-//        LoginResponseDto loginResponseDto = memberService.login(loginRequestDto);
-//        log.info(loginResponseDto.toString());
-//        return ResponseEntity.ok(CommonResponseDto.success(loginResponseDto));
-//    }
     // 닉네임 중복 확인
     @GetMapping("/verification/{memberNickname}")
     public ResponseEntity<CommonResponseDto<NicknameVerificationResponseDto>> verifyMemberNickname(@PathVariable String memberNickname) {
-        boolean result = !memberService.verifyMemberNickname(memberNickname);
-        NicknameVerificationResponseDto nicknameVerificationResponse = new NicknameVerificationResponseDto(result);
-
-        return ResponseEntity.ok(CommonResponseDto.success(nicknameVerificationResponse));
+        return ResponseEntity.ok(CommonResponseDto.success(memberService.verifyMemberNickname(memberNickname)));
     }
 }

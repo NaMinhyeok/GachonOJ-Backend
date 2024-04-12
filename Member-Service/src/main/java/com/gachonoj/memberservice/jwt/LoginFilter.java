@@ -4,15 +4,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.gachonoj.memberservice.common.codes.ErrorCode;
 import com.gachonoj.memberservice.domain.dto.request.LoginRequestDto;
-import com.gachonoj.memberservice.domain.dto.response.CommonResponseDto;
+import com.gachonoj.memberservice.common.response.CommonResponseDto;
 import com.gachonoj.memberservice.domain.dto.response.LoginResponseDto;
 import com.gachonoj.memberservice.service.RedisService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -85,7 +85,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     // 로그인 실패 시 실행되는 메소드
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
-        CommonResponseDto<String> commonResponseDto = CommonResponseDto.fail(401, "로그인 실패");
+        CommonResponseDto<String> commonResponseDto = CommonResponseDto.fail(ErrorCode.FAIL_LOGIN, "로그인 실패");
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.registerModule(new Jdk8Module());
