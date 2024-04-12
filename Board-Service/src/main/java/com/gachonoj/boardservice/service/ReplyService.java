@@ -17,6 +17,7 @@ public class ReplyService {
     @Autowired
     private InquiryRepository inquiryRepository;
 
+    // 문의 사항 답변
     @Transactional
     public Reply createReply(Long inquiryId, ReplyRequestDto requestDto) {
         Inquiry inquiry = inquiryRepository.findById(inquiryId)
@@ -25,4 +26,5 @@ public class ReplyService {
         Reply reply = Reply.create(inquiry, requestDto.getReplyContents());
         return replyRepository.save(reply);
     }
+
 }

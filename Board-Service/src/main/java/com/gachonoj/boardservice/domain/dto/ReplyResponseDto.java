@@ -13,6 +13,7 @@ public class ReplyResponseDto {
     private String replyContents;
     private String replyCreatedDate;  // 날짜를 문자열로 변환하여 저장
 
+    // replyCreatedDate를 받기 위한 ResponseDto
     public ReplyResponseDto(Reply reply) {
         this.replyId = reply.getReplyId();
         this.replyContents = reply.getReplyContents();
