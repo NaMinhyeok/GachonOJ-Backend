@@ -3,7 +3,6 @@ package com.gachonoj.memberservice.config.exception;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.gachonoj.memberservice.common.codes.ErrorCode;
-import com.gachonoj.memberservice.common.response.ErrorResponse;
 import com.gachonoj.memberservice.common.response.CommonResponseDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
