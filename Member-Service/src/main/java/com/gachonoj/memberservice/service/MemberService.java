@@ -3,6 +3,7 @@ package com.gachonoj.memberservice.service;
 import com.gachonoj.memberservice.domain.dto.request.LoginRequestDto;
 import com.gachonoj.memberservice.domain.dto.request.SignUpRequestDto;
 import com.gachonoj.memberservice.domain.dto.response.LoginResponseDto;
+import com.gachonoj.memberservice.domain.dto.response.NicknameVerificationResponseDto;
 import com.gachonoj.memberservice.domain.entity.Member;
 //import com.gachonoj.memberservice.jwt.JwtTokenProvider;
 import com.gachonoj.memberservice.repository.MemberRepository;
@@ -43,14 +44,13 @@ public class MemberService {
         authCode = Integer.parseInt(randomNumber);
     }
     // 이메일 인증코드를 확인하는 메소드
-    public boolean verifyEmail(String email, String inputAuthCode) {
+    public void verifyEmail(String email, String inputAuthCode) {
         String key = Integer.toString(authCode);
         String value = redisService.getData(key);
         if(value != null && value.equals(email) && inputAuthCode.equals(key)) {
             redisService.deleteData(key);
-            return true;
         } else {
-            return false;
+            throw new IllegalArgumentException("인증번호가 일치하지 않습니다.");
         }
     }
     // 이메일 인증코드를 전송하는 메소드
@@ -107,21 +107,6 @@ public class MemberService {
 
         memberRepository.save(member);
     }
-    // 로그인
-//    @Transactional
-//    public LoginResponseDto login(LoginRequestDto loginRequestDto) {
-//        // 로그인 로직
-//        Member member = memberRepository.findByMemberEmail(loginRequestDto.getMemberEmail());
-//        if(member == null) {
-//            throw new IllegalArgumentException("가입되지 않은 이메일입니다.");
-//        }
-//        if(!validateMemberPassword(loginRequestDto.getMemberPassword(), member)) {
-//            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
-//        }
-//        String token = jwtTokenProvider.generateAccessToken(member.getMemberId(), member.getMemberRole());
-//        LoginResponseDto loginResponseDto = new LoginResponseDto(token,member.getMemberImg());
-//        return loginResponseDto;
-//    }
 
     // 회원가입 유효성 검사
     public void verifySignUp(SignUpRequestDto signUpRequestDto) {
@@ -166,7 +151,7 @@ public class MemberService {
         return memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException("가입되지 않은 회원입니다."));
     }
     // 닉네임 중복 확인
-    public boolean verifyMemberNickname(String memberNickname) {
-        return memberRepository.existsByMemberNickname(memberNickname);
+    public NicknameVerificationResponseDto verifyMemberNickname(String memberNickname) {
+        return new NicknameVerificationResponseDto(memberRepository.existsByMemberNickname(memberNickname));
     }
 }

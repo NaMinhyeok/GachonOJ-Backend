@@ -1,9 +1,10 @@
-package com.gachonoj.memberservice.domain.dto.response;
+package com.gachonoj.problemservice.common.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.gachonoj.problemservice.common.codes.ErrorCode;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -53,10 +54,10 @@ public class CommonResponseDto<T> {
                 .build();
     }
     // 실패 응답
-    public static <T> CommonResponseDto<T> fail(int code, String message) {
+    public static <T> CommonResponseDto<T> fail(ErrorCode code, String message) {
         return CommonResponseDto.<T>builder()
                 .isSuccess(false)
-                .code(code)
+                .code(code.getStatus())
                 .timestamp(LocalDateTime.now())
                 .message(message)
                 .reuslt(null)
