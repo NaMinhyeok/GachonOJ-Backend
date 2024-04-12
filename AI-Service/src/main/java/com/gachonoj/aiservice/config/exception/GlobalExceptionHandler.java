@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.gachonoj.aiservice.common.codes.ErrorCode;
 import com.gachonoj.aiservice.common.response.CommonResponseDto;
-import com.gachonoj.aiservice.common.response.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
