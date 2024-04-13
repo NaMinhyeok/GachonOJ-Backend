@@ -55,13 +55,12 @@ public class JwtUtil {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
     }
 
-    public String createAccessJwt(String username, String role, Long memberId) {
+    public String createAccessJwt(String role, Long memberId) {
 
         return Jwts.builder()
-                .claim("username", username)
+                .setHeaderParam("type", "access")
                 .claim("role", role)
                 .claim("memberId",memberId)
-                .claim("tokenType", "access")
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + accessTokenExpireTime))
                 .signWith(secretKey)
@@ -70,8 +69,8 @@ public class JwtUtil {
     public String createRefreshJwt(Long memberId) {
 
         return Jwts.builder()
+                .setHeaderParam("type", "refresh")
                 .claim("memberId",memberId)
-                .claim("tokenType", "refresh")
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + refreshTokenExpireTime))
                 .signWith(secretKey)
