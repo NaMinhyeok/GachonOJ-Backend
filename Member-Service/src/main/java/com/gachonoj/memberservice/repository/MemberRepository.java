@@ -1,5 +1,6 @@
 package com.gachonoj.memberservice.repository;
 
+import com.gachonoj.memberservice.domain.dto.response.HoverResponseDto;
 import com.gachonoj.memberservice.domain.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -15,4 +16,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     boolean existsByMemberNickname(String memberNickname);
     // 이메일로 회원 정보 가져오기
     Member findByMemberEmail(String memberEmail);
+    // 멤버 아이디로 회원정보 조회
+    Member findByMemberId(Long memberId);
 }
