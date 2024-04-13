@@ -2,6 +2,7 @@ package com.gachonoj.memberservice.service;
 
 import com.gachonoj.memberservice.domain.dto.request.LoginRequestDto;
 import com.gachonoj.memberservice.domain.dto.request.SignUpRequestDto;
+import com.gachonoj.memberservice.domain.dto.response.HoverResponseDto;
 import com.gachonoj.memberservice.domain.dto.response.LoginResponseDto;
 import com.gachonoj.memberservice.domain.dto.response.NicknameVerificationResponseDto;
 import com.gachonoj.memberservice.domain.entity.Member;
@@ -153,5 +154,32 @@ public class MemberService {
     // 닉네임 중복 확인
     public NicknameVerificationResponseDto verifyMemberNickname(String memberNickname) {
         return new NicknameVerificationResponseDto(memberRepository.existsByMemberNickname(memberNickname));
+    }
+    // 호버시 회원 정보 조회
+    public HoverResponseDto getHoverInfo(Long memberId) {
+        Member member = memberRepository.findByMemberId(memberId);
+        String rating = calculateRating(memberId);
+        return new HoverResponseDto(member.getMemberEmail(), member.getMemberNickname(), rating);
+    }
+    // rating 계산
+    public String calculateRating(Long memberId) {
+        Member member = memberRepository.findByMemberId(memberId);
+        if(member.getMemberRank() < 1000) {
+            return "0";
+        } else if(member.getMemberRank() < 1200) {
+            return "1";
+        } else if(member.getMemberRank() < 1400) {
+            return "2";
+        } else if(member.getMemberRank() < 1600) {
+            return "3";
+        } else if(member.getMemberRank() < 1900) {
+            return "4";
+        } else if(member.getMemberRank() < 2200) {
+            return "5";
+        } else if(member.getMemberRank() < 2500) {
+            return "6";
+        } else {
+            return "7";
+        }
     }
 }

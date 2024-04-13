@@ -19,14 +19,14 @@ public class CommonResponseDto<T> {
     private LocalDateTime timestamp;
     private String message;
     @JsonInclude(JsonInclude.Include.NON_NULL)
-    private T reuslt;
+    private T result;
     @Builder
-    public CommonResponseDto(boolean isSuccess, int code, LocalDateTime timestamp, String message, T reuslt) {
+    public CommonResponseDto(boolean isSuccess, int code, LocalDateTime timestamp, String message, T result) {
         this.isSuccess = isSuccess;
         this.code = code;
         this.timestamp = timestamp;
         this.message = message;
-        this.reuslt = reuslt;
+        this.result = result;
     }
     public String toJson() throws JsonProcessingException {
         ObjectMapper mapper = new ObjectMapper();
@@ -40,7 +40,7 @@ public class CommonResponseDto<T> {
                 .code(200)
                 .timestamp(LocalDateTime.now())
                 .message("성공")
-                .reuslt(result)
+                .result(result)
                 .build();
     }
     //성공 응답 result 없이
@@ -50,7 +50,7 @@ public class CommonResponseDto<T> {
                 .code(200)
                 .timestamp(LocalDateTime.now())
                 .message("성공")
-                .reuslt(null)
+                .result(null)
                 .build();
     }
     // 실패 응답
@@ -60,7 +60,7 @@ public class CommonResponseDto<T> {
                 .code(code.getStatus())
                 .timestamp(LocalDateTime.now())
                 .message(message)
-                .reuslt(null)
+                .result(null)
                 .build();
     }
 }
