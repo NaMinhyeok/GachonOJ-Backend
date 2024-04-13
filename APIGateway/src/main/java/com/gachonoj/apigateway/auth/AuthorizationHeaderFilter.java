@@ -41,8 +41,19 @@ public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactory<Auth
             try{
                 if(!jwtUtil.isExpired(token)){
                     Long memberId = jwtUtil.getMemberId(token);
-                    ServerHttpRequest modifiedRequest = request.mutate().header("X-Authorization-Id", String.valueOf(memberId)).build();
-                    return chain.filter(exchange.mutate().request(modifiedRequest).build());
+                    String memberRole = jwtUtil.getRole(token);
+                    if("ROLE_ADMIN".equals(memberRole)){
+                        ServerHttpRequest modifiedRequest = request.mutate().header("X-Authorization-Id", String.valueOf(memberId)).header("X-Authorization-Role", memberRole).build();
+                        return chain.filter(exchange.mutate().request(modifiedRequest).build());
+                    } else if("ROLE_STUDENT".equals(memberRole)){
+                        ServerHttpRequest modifiedRequest = request.mutate().header("X-Authorization-Id", String.valueOf(memberId)).build();
+                        return chain.filter(exchange.mutate().request(modifiedRequest).build());
+                    } else if("ROLE_PROFESSOR".equals(memberRole)){
+                        ServerHttpRequest modifiedRequest = request.mutate().header("X-Authorization-Id", String.valueOf(memberId)).build();
+                        return chain.filter(exchange.mutate().request(modifiedRequest).build());
+                    } else {
+                        return onError(exchange, "Permission denied", HttpStatus.FORBIDDEN);  // 권한이 없는 경우 에러 반환
+                    }
                 } else {
                     return onError(exchange, "Token is expired", HttpStatus.UNAUTHORIZED);
                 }

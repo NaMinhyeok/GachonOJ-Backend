@@ -17,12 +17,12 @@ import java.util.Map;
 @Slf4j  // Slf4j를 이용한 간편 로깅
 @RestController // Restful 웹 서비스 컨트롤러
 @RequiredArgsConstructor    // 필수 final 필드 주입 생성자 생성
-@RequestMapping("/api/admin/problem")   // 이 컨트롤러의 모든 메서드에 대한 기본 경로
+@RequestMapping("/problem")   // 이 컨트롤러의 모든 메서드에 대한 기본 경로
 public class ProblemController {
     private final ProblemService problemService;    // 주입된 ProblemService 의존성
 
     //알고리즘 문제 등록
-    @PostMapping("/register")
+    @PostMapping("/admin/register")
     public ResponseEntity<Map<String, Object>> registerProblem(@RequestBody ProblemRequestDto problemRequestDto) {
         // ProblemService를 호출하여 요청 DTO에 기반하여 문제 등록
         problemService.registerProblem(problemRequestDto); // 문제 ID 저장하지 않음
@@ -38,7 +38,7 @@ public class ProblemController {
     }
 
     // 알고리즘 문제 수정
-    @PutMapping("/register/{problemId}")
+    @PutMapping("/admin/register/{problemId}")
     public ResponseEntity<Map<String, Object>> updateProblem(@PathVariable Long problemId, @RequestBody ProblemRequestDto problemRequestDto) {
         // ProblemService를 호출하여 요청 DTO에 기반하여 문제 수정
         problemService.updateProblem(problemId, problemRequestDto);
@@ -54,7 +54,7 @@ public class ProblemController {
     }
 
     // 알고리즘 문제 삭제
-    @DeleteMapping("/{problemId}")
+    @DeleteMapping("/admin/{problemId}")
     public ResponseEntity<Map<String, Object>> deleteProblem(@PathVariable Long problemId) {
         problemService.deleteProblem(problemId);
 
