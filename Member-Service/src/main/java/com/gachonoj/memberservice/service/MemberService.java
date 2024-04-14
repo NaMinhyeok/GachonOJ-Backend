@@ -1,6 +1,7 @@
 package com.gachonoj.memberservice.service;
 
 import com.gachonoj.memberservice.domain.dto.request.LoginRequestDto;
+import com.gachonoj.memberservice.domain.dto.request.MemberLangRequestDto;
 import com.gachonoj.memberservice.domain.dto.request.SignUpRequestDto;
 import com.gachonoj.memberservice.domain.dto.response.*;
 import com.gachonoj.memberservice.domain.entity.Member;
@@ -170,6 +171,12 @@ public class MemberService {
     public MemberLangResponseDto getMemberLang(Long memberId) {
         Member member = memberRepository.findByMemberId(memberId);
         return new MemberLangResponseDto(member.getMemberLang());
+    }
+    // 사용자 선호 언어 수정
+    @Transactional
+    public void updateMemberLang(Long memberId, MemberLangRequestDto memberLang) {
+        Member member = memberRepository.findByMemberId(memberId);
+        member.updateMemberLang(memberLang);
     }
     // rating 계산
     public Integer calculateRating(Long memberId) {

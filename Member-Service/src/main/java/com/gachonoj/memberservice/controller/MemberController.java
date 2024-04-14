@@ -2,6 +2,7 @@ package com.gachonoj.memberservice.controller;
 
 import com.gachonoj.memberservice.domain.dto.request.EmailRequestDto;
 import com.gachonoj.memberservice.domain.dto.request.EmailVerificationRequestDto;
+import com.gachonoj.memberservice.domain.dto.request.MemberLangRequestDto;
 import com.gachonoj.memberservice.domain.dto.request.SignUpRequestDto;
 import com.gachonoj.memberservice.common.response.CommonResponseDto;
 import com.gachonoj.memberservice.domain.dto.response.HoverResponseDto;
@@ -68,5 +69,12 @@ public class MemberController {
     public ResponseEntity<CommonResponseDto<MemberLangResponseDto>> getMemberLang(HttpServletRequest request) {
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
         return ResponseEntity.ok(CommonResponseDto.success(memberService.getMemberLang(memberId)));
+    }
+    //사용자 선호 언어 변경
+    @PutMapping("/lang")
+    public ResponseEntity<CommonResponseDto<Void>> updateMemberLang(HttpServletRequest request, @RequestBody MemberLangRequestDto memberLangRequestDto) {
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        memberService.updateMemberLang(memberId,memberLangRequestDto);
+        return ResponseEntity.ok(CommonResponseDto.success());
     }
 }

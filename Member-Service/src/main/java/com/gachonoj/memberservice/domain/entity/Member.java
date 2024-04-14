@@ -2,6 +2,7 @@ package com.gachonoj.memberservice.domain.entity;
 
 import com.gachonoj.memberservice.domain.constant.MemberLang;
 import com.gachonoj.memberservice.domain.constant.Role;
+import com.gachonoj.memberservice.domain.dto.request.MemberLangRequestDto;
 import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
@@ -55,4 +56,8 @@ public class Member {
         this.memberCreatedDate = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS);
         this.memberLang = MemberLang.C;
     }
+    public void updateMemberLang(MemberLangRequestDto memberLangRequestDto) {
+        this.memberLang = memberLangRequestDto.getMemberLang();
+    }
+
 }
