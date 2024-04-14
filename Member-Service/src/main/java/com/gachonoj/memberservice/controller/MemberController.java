@@ -5,6 +5,7 @@ import com.gachonoj.memberservice.domain.dto.request.EmailVerificationRequestDto
 import com.gachonoj.memberservice.domain.dto.request.SignUpRequestDto;
 import com.gachonoj.memberservice.common.response.CommonResponseDto;
 import com.gachonoj.memberservice.domain.dto.response.HoverResponseDto;
+import com.gachonoj.memberservice.domain.dto.response.MemberInfoResponseDto;
 import com.gachonoj.memberservice.domain.dto.response.NicknameVerificationResponseDto;
 import com.gachonoj.memberservice.service.MemberService;
 
@@ -56,6 +57,13 @@ public class MemberController {
     public ResponseEntity<CommonResponseDto<HoverResponseDto>> getHoverInfo(HttpServletRequest request) {
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
         return ResponseEntity.ok(CommonResponseDto.success(memberService.getHoverInfo(memberId)));
+    }
+    // 사용자 정보 조회
+    @Transactional(readOnly = true)
+    @GetMapping("/info")
+    public ResponseEntity<CommonResponseDto<MemberInfoResponseDto>> getMemberInfo(HttpServletRequest request) {
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        return ResponseEntity.ok(CommonResponseDto.success(memberService.getMemberInfo(memberId)));
     }
 
 }
