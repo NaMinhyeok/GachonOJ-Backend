@@ -158,28 +158,30 @@ public class MemberService {
     // 호버시 회원 정보 조회
     public HoverResponseDto getHoverInfo(Long memberId) {
         Member member = memberRepository.findByMemberId(memberId);
-        String rating = calculateRating(memberId);
+        Integer rating = calculateRating(memberId);
         return new HoverResponseDto(member.getMemberEmail(), member.getMemberNickname(), rating);
     }
+    // 사용자 정보 조회 ( 사용자 정보 수정 화면에서 정보 조회)
+
     // rating 계산
-    public String calculateRating(Long memberId) {
+    public Integer calculateRating(Long memberId) {
         Member member = memberRepository.findByMemberId(memberId);
         if(member.getMemberRank() < 1000) {
-            return "0";
+            return 0;
         } else if(member.getMemberRank() < 1200) {
-            return "1";
+            return 1;
         } else if(member.getMemberRank() < 1400) {
-            return "2";
+            return 2;
         } else if(member.getMemberRank() < 1600) {
-            return "3";
+            return 3;
         } else if(member.getMemberRank() < 1900) {
-            return "4";
+            return 4;
         } else if(member.getMemberRank() < 2200) {
-            return "5";
+            return 5;
         } else if(member.getMemberRank() < 2500) {
-            return "6";
+            return 6;
         } else {
-            return "7";
+            return 7;
         }
     }
 }

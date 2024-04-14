@@ -10,5 +10,5 @@ import lombok.NoArgsConstructor;
 public class HoverResponseDto {
     private String memberEmail;
     private String memberNickname;
-    private String rating;
+    private Integer rating;
 }
