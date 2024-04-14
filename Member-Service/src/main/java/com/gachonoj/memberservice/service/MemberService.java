@@ -2,10 +2,7 @@ package com.gachonoj.memberservice.service;
 
 import com.gachonoj.memberservice.domain.dto.request.LoginRequestDto;
 import com.gachonoj.memberservice.domain.dto.request.SignUpRequestDto;
-import com.gachonoj.memberservice.domain.dto.response.HoverResponseDto;
-import com.gachonoj.memberservice.domain.dto.response.LoginResponseDto;
-import com.gachonoj.memberservice.domain.dto.response.MemberInfoResponseDto;
-import com.gachonoj.memberservice.domain.dto.response.NicknameVerificationResponseDto;
+import com.gachonoj.memberservice.domain.dto.response.*;
 import com.gachonoj.memberservice.domain.entity.Member;
 //import com.gachonoj.memberservice.jwt.JwtTokenProvider;
 import com.gachonoj.memberservice.repository.MemberRepository;
@@ -167,6 +164,12 @@ public class MemberService {
         Member member = memberRepository.findByMemberId(memberId);
         Integer rating = calculateRating(memberId);
         return new MemberInfoResponseDto(member.getMemberEmail(), member.getMemberName(), member.getMemberNumber(), member.getMemberIntroduce(), member.getMemberNickname(), member.getMemberImg(), rating);
+    }
+    // 사용자 본인 정보 수정
+    // 사용자 선호 언어 조회
+    public MemberLangResponseDto getMemberLang(Long memberId) {
+        Member member = memberRepository.findByMemberId(memberId);
+        return new MemberLangResponseDto(member.getMemberLang());
     }
     // rating 계산
     public Integer calculateRating(Long memberId) {
