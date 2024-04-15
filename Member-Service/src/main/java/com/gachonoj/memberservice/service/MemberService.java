@@ -1,5 +1,6 @@
 package com.gachonoj.memberservice.service;
 
+import com.gachonoj.memberservice.common.codes.ErrorCode;
 import com.gachonoj.memberservice.domain.dto.request.LoginRequestDto;
 import com.gachonoj.memberservice.domain.dto.request.MemberLangRequestDto;
 import com.gachonoj.memberservice.domain.dto.request.SignUpRequestDto;
@@ -31,7 +32,8 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
     private final SubmissionServiceFeignClient submissionServiceFeignClient;
-//    private final JwtTokenProvider jwtTokenProvider;
+    private final ProblemServiceFeignClient problemServiceFeignClient;
+
     // 이메일 인증 코드
     private int authCode;
     // 이메일 인증코드를 위한 난수 생성기
@@ -213,12 +215,13 @@ public class MemberService {
     public MemberInfoRankingResponseDto getMemberInfoRanking(Long memberId) {
         try {
             SubmissionMemberInfoResponseDto submissionMemberInfoResponseDto = submissionServiceFeignClient.getMemberInfoBySubmission(memberId);
+            Integer bookmarkProblemCount = problemServiceFeignClient.getBookmarkCountByMemberId(memberId);
             Member member = memberRepository.findByMemberId(memberId);
             Integer rating = calculateRating(memberId);
-            return new MemberInfoRankingResponseDto(member.getMemberNickname(),rating,submissionMemberInfoResponseDto.getSolvedProblemCount(), submissionMemberInfoResponseDto.getTryProblemCount());
+            return new MemberInfoRankingResponseDto(member.getMemberNickname(),rating,submissionMemberInfoResponseDto.getSolvedProblemCount(), submissionMemberInfoResponseDto.getTryProblemCount(),bookmarkProblemCount);
         } catch (Exception e) {
-            log.error("Submission Service 연결 실패");
-            throw new IllegalArgumentException("Submission Service 연결 실패");
+            log.error(ErrorCode.OTHER_SERVICE_CONNECTION_FAILURE.getMessage());
+            throw new IllegalArgumentException(ErrorCode.OTHER_SERVICE_CONNECTION_FAILURE.getMessage());
         }
     }
 }

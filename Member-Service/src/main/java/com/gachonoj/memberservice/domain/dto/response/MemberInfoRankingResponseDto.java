@@ -12,5 +12,5 @@ public class MemberInfoRankingResponseDto {
     private Integer rating;
     private Integer solvedProblemCount;
     private Integer tryProblemCount;
-//    private Integer bookmarkProblemCount;
+    private Integer bookmarkProblemCount;
 }
