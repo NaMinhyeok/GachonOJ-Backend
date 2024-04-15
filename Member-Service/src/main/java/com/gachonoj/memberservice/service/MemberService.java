@@ -89,6 +89,9 @@ public class MemberService {
         }
         redisService.setDataExpire(toMail,Integer.toString(authCode), 300L);
     }
+    //TODO : 캡슐화
+    // 비밀번호 암호화 엔티티객체에 구현하여 캡슐화하기
+
     // 회원가입
     @Transactional
     public void signUp(SignUpRequestDto signUpRequestDto) {
@@ -107,7 +110,6 @@ public class MemberService {
 
         memberRepository.save(member);
     }
-
     // 회원가입 유효성 검사
     public void verifySignUp(SignUpRequestDto signUpRequestDto) {
         String regExp = "^(?=.*[a-zA-Z])(?=.*[!@#$%^])(?=.*[0-9]).{8,25}$";
@@ -177,6 +179,12 @@ public class MemberService {
     public void updateMemberLang(Long memberId, MemberLangRequestDto memberLang) {
         Member member = memberRepository.findByMemberId(memberId);
         member.updateMemberLang(memberLang);
+    }
+    // 대회 페이지 사용자 정보 조회
+    public MemberInfoExamResponseDto getMemberInfoExam(Long memberId) {
+        Member member = memberRepository.findByMemberId(memberId);
+        Integer rating = calculateRating(memberId);
+        return new MemberInfoExamResponseDto(member.getMemberNickname(), rating, member.getMemberName(), member.getMemberNumber());
     }
     // rating 계산
     public Integer calculateRating(Long memberId) {

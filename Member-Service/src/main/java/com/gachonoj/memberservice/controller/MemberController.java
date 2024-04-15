@@ -5,10 +5,7 @@ import com.gachonoj.memberservice.domain.dto.request.EmailVerificationRequestDto
 import com.gachonoj.memberservice.domain.dto.request.MemberLangRequestDto;
 import com.gachonoj.memberservice.domain.dto.request.SignUpRequestDto;
 import com.gachonoj.memberservice.common.response.CommonResponseDto;
-import com.gachonoj.memberservice.domain.dto.response.HoverResponseDto;
-import com.gachonoj.memberservice.domain.dto.response.MemberInfoResponseDto;
-import com.gachonoj.memberservice.domain.dto.response.MemberLangResponseDto;
-import com.gachonoj.memberservice.domain.dto.response.NicknameVerificationResponseDto;
+import com.gachonoj.memberservice.domain.dto.response.*;
 import com.gachonoj.memberservice.service.MemberService;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -76,5 +73,11 @@ public class MemberController {
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
         memberService.updateMemberLang(memberId,memberLangRequestDto);
         return ResponseEntity.ok(CommonResponseDto.success());
+    }
+    //대회 페이지 사용자 정보
+    @GetMapping("/info/exam")
+    public ResponseEntity<CommonResponseDto<MemberInfoExamResponseDto>> getMemberInfoExam(HttpServletRequest request) {
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        return ResponseEntity.ok(CommonResponseDto.success(memberService.getMemberInfoExam(memberId)));
     }
 }
