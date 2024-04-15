@@ -42,6 +42,8 @@ public class Problem {
     private String problemPrompt;
     @OneToMany(mappedBy = "problem", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Testcase> testcases = new ArrayList<>();
+    @OneToMany(mappedBy = "problem", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Bookmark> bookmarks;
 
     public void addTestcase(Testcase testcase) {
         if (this.testcases == null) {

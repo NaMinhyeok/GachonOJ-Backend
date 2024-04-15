@@ -1,10 +1,10 @@
 package com.gachonoj.memberservice.service;
 
+import com.gachonoj.memberservice.common.codes.ErrorCode;
 import com.gachonoj.memberservice.domain.dto.request.LoginRequestDto;
+import com.gachonoj.memberservice.domain.dto.request.MemberLangRequestDto;
 import com.gachonoj.memberservice.domain.dto.request.SignUpRequestDto;
-import com.gachonoj.memberservice.domain.dto.response.HoverResponseDto;
-import com.gachonoj.memberservice.domain.dto.response.LoginResponseDto;
-import com.gachonoj.memberservice.domain.dto.response.NicknameVerificationResponseDto;
+import com.gachonoj.memberservice.domain.dto.response.*;
 import com.gachonoj.memberservice.domain.entity.Member;
 //import com.gachonoj.memberservice.jwt.JwtTokenProvider;
 import com.gachonoj.memberservice.repository.MemberRepository;
@@ -31,7 +31,9 @@ public class MemberService {
     private final RedisService redisService;
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
-//    private final JwtTokenProvider jwtTokenProvider;
+    private final SubmissionServiceFeignClient submissionServiceFeignClient;
+    private final ProblemServiceFeignClient problemServiceFeignClient;
+
     // 이메일 인증 코드
     private int authCode;
     // 이메일 인증코드를 위한 난수 생성기
@@ -90,6 +92,9 @@ public class MemberService {
         }
         redisService.setDataExpire(toMail,Integer.toString(authCode), 300L);
     }
+    //TODO : 캡슐화
+    // 비밀번호 암호화 엔티티객체에 구현하여 캡슐화하기
+
     // 회원가입
     @Transactional
     public void signUp(SignUpRequestDto signUpRequestDto) {
@@ -108,7 +113,6 @@ public class MemberService {
 
         memberRepository.save(member);
     }
-
     // 회원가입 유효성 검사
     public void verifySignUp(SignUpRequestDto signUpRequestDto) {
         String regExp = "^(?=.*[a-zA-Z])(?=.*[!@#$%^])(?=.*[0-9]).{8,25}$";
@@ -158,28 +162,66 @@ public class MemberService {
     // 호버시 회원 정보 조회
     public HoverResponseDto getHoverInfo(Long memberId) {
         Member member = memberRepository.findByMemberId(memberId);
-        String rating = calculateRating(memberId);
+        Integer rating = calculateRating(memberId);
         return new HoverResponseDto(member.getMemberEmail(), member.getMemberNickname(), rating);
     }
+    // 사용자 정보 조회 ( 사용자 정보 수정 화면에서 정보 조회)
+    public MemberInfoResponseDto getMemberInfo(Long memberId) {
+        Member member = memberRepository.findByMemberId(memberId);
+        Integer rating = calculateRating(memberId);
+        return new MemberInfoResponseDto(member.getMemberEmail(), member.getMemberName(), member.getMemberNumber(), member.getMemberIntroduce(), member.getMemberNickname(), member.getMemberImg(), rating);
+    }
+    // 사용자 본인 정보 수정
+    // 사용자 선호 언어 조회
+    public MemberLangResponseDto getMemberLang(Long memberId) {
+        Member member = memberRepository.findByMemberId(memberId);
+        return new MemberLangResponseDto(member.getMemberLang());
+    }
+    // 사용자 선호 언어 수정
+    @Transactional
+    public void updateMemberLang(Long memberId, MemberLangRequestDto memberLang) {
+        Member member = memberRepository.findByMemberId(memberId);
+        member.updateMemberLang(memberLang);
+    }
+    // 대회 페이지 사용자 정보 조회
+    public MemberInfoExamResponseDto getMemberInfoExam(Long memberId) {
+        Member member = memberRepository.findByMemberId(memberId);
+        Integer rating = calculateRating(memberId);
+        return new MemberInfoExamResponseDto(member.getMemberNickname(), rating, member.getMemberName(), member.getMemberNumber());
+    }
     // rating 계산
-    public String calculateRating(Long memberId) {
+    public Integer calculateRating(Long memberId) {
         Member member = memberRepository.findByMemberId(memberId);
         if(member.getMemberRank() < 1000) {
-            return "0";
+            return 0;
         } else if(member.getMemberRank() < 1200) {
-            return "1";
+            return 1;
         } else if(member.getMemberRank() < 1400) {
-            return "2";
+            return 2;
         } else if(member.getMemberRank() < 1600) {
-            return "3";
+            return 3;
         } else if(member.getMemberRank() < 1900) {
-            return "4";
+            return 4;
         } else if(member.getMemberRank() < 2200) {
-            return "5";
+            return 5;
         } else if(member.getMemberRank() < 2500) {
-            return "6";
+            return 6;
         } else {
-            return "7";
+            return 7;
+        }
+    }
+    // 랭킹 화면 사용자 정보 조회
+    @Transactional
+    public MemberInfoRankingResponseDto getMemberInfoRanking(Long memberId) {
+        try {
+            SubmissionMemberInfoResponseDto submissionMemberInfoResponseDto = submissionServiceFeignClient.getMemberInfoBySubmission(memberId);
+            Integer bookmarkProblemCount = problemServiceFeignClient.getBookmarkCountByMemberId(memberId);
+            Member member = memberRepository.findByMemberId(memberId);
+            Integer rating = calculateRating(memberId);
+            return new MemberInfoRankingResponseDto(member.getMemberNickname(),rating,submissionMemberInfoResponseDto.getSolvedProblemCount(), submissionMemberInfoResponseDto.getTryProblemCount(),bookmarkProblemCount);
+        } catch (Exception e) {
+            log.error(ErrorCode.OTHER_SERVICE_CONNECTION_FAILURE.getMessage());
+            throw new IllegalArgumentException(ErrorCode.OTHER_SERVICE_CONNECTION_FAILURE.getMessage());
         }
     }
 }

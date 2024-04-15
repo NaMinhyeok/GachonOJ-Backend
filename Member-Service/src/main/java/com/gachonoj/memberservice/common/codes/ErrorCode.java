@@ -75,7 +75,20 @@ public enum ErrorCode {
      * ******************************* Custom Error CodeList ***************************************
      */
     // Login Fail
-    FAIL_LOGIN(401, "C001", "Login Fail"),
+    FAIL_LOGIN(401, "L001", "Login Fail"),
+    // Member Service Connection Failure
+    MEMBER_SERVICE_CONNECTION_FAILURE(500, "C001", "Member Service Connection Failure"),
+    // Problem Service Connection Failure
+    PROBLEM_SERVICE_CONNECTION_FAILURE(500, "C002", "Problem Service Connection Failure"),
+    // Submission Service Connection Failure
+    SUBMISSION_SERVICE_CONNECTION_FAILURE(500, "C003", "Submission Service Connection Failure"),
+    // Board Service Connection Failure
+    BOARD_SERVICE_CONNECTION_FAILURE(500, "C004", "Board Service Connection Failure"),
+    // AI Service Connection Failure
+    AI_SERVICE_CONNECTION_FAILURE(500, "C005", "AI Service Connection Failure"),
+
+    // Other Service Connection Failure
+    OTHER_SERVICE_CONNECTION_FAILURE(500, "C999", "Other Service Connection Failure"),
 
     // Business Exception Error
     BUSINESS_EXCEPTION_ERROR(200, "B999", "Business Exception Error"),

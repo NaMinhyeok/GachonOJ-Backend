@@ -7,8 +7,12 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class HoverResponseDto {
+public class MemberInfoResponseDto {
     private String memberEmail;
+    private String memberName;
+    private String memberNumber;
+    private String memberIntroduce;
     private String memberNickname;
+    private String memberImg;
     private Integer rating;
 }
