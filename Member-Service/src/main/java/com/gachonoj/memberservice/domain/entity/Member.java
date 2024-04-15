@@ -41,8 +41,6 @@ public class Member {
     private LocalDateTime memberCreatedDate;
     @Enumerated(EnumType.STRING)
     private MemberLang memberLang;
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Bookmark> bookmarks;
 
     @Builder
     public Member(String memberEmail, String memberPassword, String memberName, String memberNumber, String memberNickname) {

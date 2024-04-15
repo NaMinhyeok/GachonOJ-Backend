@@ -1,4 +1,4 @@
-package com.gachonoj.memberservice.domain.entity;
+package com.gachonoj.problemservice.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.NoArgsConstructor;
@@ -11,7 +11,7 @@ public class Bookmark {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long bookmarkId;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
-    private Long problemId;
+    @JoinColumn(name = "problem_id", nullable = false)
+    private Problem problem;
+    private Long memberId;
 }

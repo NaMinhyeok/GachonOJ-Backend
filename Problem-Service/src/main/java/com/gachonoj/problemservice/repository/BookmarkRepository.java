@@ -1,6 +1,6 @@
-package com.gachonoj.memberservice.repository;
+package com.gachonoj.problemservice.repository;
 
-import com.gachonoj.memberservice.domain.entity.Bookmark;
+import com.gachonoj.problemservice.domain.entity.Bookmark;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface BookmarkRepository extends JpaRepository<Bookmark,Long> {
