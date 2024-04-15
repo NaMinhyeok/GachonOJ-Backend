@@ -80,4 +80,10 @@ public class MemberController {
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
         return ResponseEntity.ok(CommonResponseDto.success(memberService.getMemberInfoExam(memberId)));
     }
+    //랭킹 사용자 정보 확인
+    @GetMapping("/info/ranking")
+    public ResponseEntity<CommonResponseDto<MemberInfoRankingResponseDto>> getMemberInfoRanking(HttpServletRequest request) {
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        return ResponseEntity.ok(CommonResponseDto.success(memberService.getMemberInfoRanking(memberId)));
+    }
 }

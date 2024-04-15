@@ -30,6 +30,7 @@ public class MemberService {
     private final RedisService redisService;
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final SubmissionServiceFeignClient submissionServiceFeignClient;
 //    private final JwtTokenProvider jwtTokenProvider;
     // 이메일 인증 코드
     private int authCode;
@@ -205,6 +206,19 @@ public class MemberService {
             return 6;
         } else {
             return 7;
+        }
+    }
+    // 랭킹 화면 사용자 정보 조회
+    @Transactional
+    public MemberInfoRankingResponseDto getMemberInfoRanking(Long memberId) {
+        try {
+            SubmissionMemberInfoResponseDto submissionMemberInfoResponseDto = submissionServiceFeignClient.getMemberInfoBySubmission(memberId);
+            Member member = memberRepository.findByMemberId(memberId);
+            Integer rating = calculateRating(memberId);
+            return new MemberInfoRankingResponseDto(member.getMemberNickname(),rating,submissionMemberInfoResponseDto.getSolvedProblemCount(), submissionMemberInfoResponseDto.getTryProblemCount());
+        } catch (Exception e) {
+            log.error("Submission Service 연결 실패");
+            throw new IllegalArgumentException("Submission Service 연결 실패");
         }
     }
 }
