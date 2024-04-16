@@ -1,6 +1,7 @@
 package com.gachonoj.memberservice.service;
 
 import com.gachonoj.memberservice.common.codes.ErrorCode;
+import com.gachonoj.memberservice.domain.constant.Role;
 import com.gachonoj.memberservice.domain.dto.request.LoginRequestDto;
 import com.gachonoj.memberservice.domain.dto.request.MemberLangRequestDto;
 import com.gachonoj.memberservice.domain.dto.request.SignUpRequestDto;
@@ -13,6 +14,10 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -20,6 +25,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.Random;
 
 @Slf4j
@@ -33,6 +39,8 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
     private final SubmissionServiceFeignClient submissionServiceFeignClient;
     private final ProblemServiceFeignClient problemServiceFeignClient;
+
+    private static final int PAGE_SIZE = 10;
 
     // 이메일 인증 코드
     private int authCode;
@@ -223,5 +231,38 @@ public class MemberService {
             log.error(ErrorCode.OTHER_SERVICE_CONNECTION_FAILURE.getMessage());
             throw new IllegalArgumentException(ErrorCode.OTHER_SERVICE_CONNECTION_FAILURE.getMessage());
         }
+    }
+    // 사용자 목록 조회
+    public Page<MemberListResponseDto> getMemberList(String memberRole, int pageNo) {
+        Pageable pageable = PageRequest.of(pageNo-1, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "memberId"));
+        if(Objects.equals(memberRole, "학생")) {
+            Page<Member> memberList = memberRepository.findByMemberRole(Role.ROLE_STUDENT, pageable);
+            return memberList.map(MemberListResponseDto::new);
+        } else if(Objects.equals(memberRole, "교수")) {
+            Page<Member> memberList = memberRepository.findByMemberRole(Role.ROLE_PROFESSOR, pageable);
+            return memberList.map(MemberListResponseDto::new);
+        } else if(Objects.equals(memberRole, "관리자")) {
+            Page<Member> memberList = memberRepository.findByMemberRole(Role.ROLE_ADMIN, pageable);
+            return memberList.map(MemberListResponseDto::new);
+        } else {
+            throw new IllegalArgumentException(ErrorCode.NOT_VALID_ERROR.getMessage());
+        }
+    }
+    // 사용자 랭킹 목록 조회
+    //TODO
+    // 한번에 검색이 잘 진행이 안되고있음 왜그런지 확인해서 추후에 수정하기
+    @Transactional
+    public Page<MemberRankingResponseDto> getMemberRankingList(int pageNo,String search) {
+        Pageable pageable = PageRequest.of(pageNo-1, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "memberRank"));
+        Page<Member> memberList;
+        if(search != null && !search.isEmpty()) {
+            memberList = memberRepository.findByMemberNicknameContaining(search, pageable);
+        } else {
+            memberList = memberRepository.findAll(pageable);
+        }
+        return memberList.map(member -> {
+            Integer memberSolved = submissionServiceFeignClient.getMemberSolved(member.getMemberId());
+            return new MemberRankingResponseDto(member, memberSolved);
+        });
     }
 }

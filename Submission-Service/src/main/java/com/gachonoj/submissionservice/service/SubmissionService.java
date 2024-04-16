@@ -19,4 +19,8 @@ public class SubmissionService {
         log.info("solvedProblem: {}, tryProblem: {}, memberId : {}", solvedProblem, tryProblem,memberId);
         return new SubmissionMemberInfoResponseDto(submissionRepository.countSolvedProblemByMemberId(memberId), submissionRepository.countTryProblemByMemberId(memberId));
     }
+    // memberId로 푼 문제 수 조회
+    public Integer getMemberSolved(Long memberId) {
+        return submissionRepository.countSolvedProblemByMemberId(memberId);
+    }
 }
