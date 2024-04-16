@@ -1,5 +1,6 @@
 package com.gachonoj.memberservice.controller;
 
+import com.gachonoj.memberservice.domain.constant.Role;
 import com.gachonoj.memberservice.domain.dto.request.EmailRequestDto;
 import com.gachonoj.memberservice.domain.dto.request.EmailVerificationRequestDto;
 import com.gachonoj.memberservice.domain.dto.request.MemberLangRequestDto;
@@ -13,6 +14,7 @@ import jakarta.validation.Valid;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -85,5 +87,11 @@ public class MemberController {
     public ResponseEntity<CommonResponseDto<MemberInfoRankingResponseDto>> getMemberInfoRanking(HttpServletRequest request) {
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
         return ResponseEntity.ok(CommonResponseDto.success(memberService.getMemberInfoRanking(memberId)));
+    }
+    // 사용자 목록 조회
+    @GetMapping("/admin/members/list")
+    public ResponseEntity<CommonResponseDto<Page<MemberListResponseDto>>> getMemberList(@RequestParam String memberRole,
+                                                                                        @RequestParam(required = false,defaultValue = "1") int pageNo) {
+        return ResponseEntity.ok(CommonResponseDto.success(memberService.getMemberList(memberRole, pageNo)));
     }
 }
