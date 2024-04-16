@@ -249,9 +249,17 @@ public class MemberService {
         }
     }
     // 사용자 랭킹 목록 조회
-    public Page<MemberRankingResponseDto> getMemberRankingList(int pageNo) {
+    //TODO
+    // 한번에 검색이 잘 진행이 안되고있음 왜그런지 확인해서 추후에 수정하기
+    @Transactional
+    public Page<MemberRankingResponseDto> getMemberRankingList(int pageNo,String search) {
         Pageable pageable = PageRequest.of(pageNo-1, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "memberRank"));
-        Page<Member> memberList = memberRepository.findAll(pageable);
+        Page<Member> memberList;
+        if(search != null && !search.isEmpty()) {
+            memberList = memberRepository.findByMemberNicknameContaining(search, pageable);
+        } else {
+            memberList = memberRepository.findAll(pageable);
+        }
         return memberList.map(member -> {
             Integer memberSolved = submissionServiceFeignClient.getMemberSolved(member.getMemberId());
             return new MemberRankingResponseDto(member, memberSolved);
