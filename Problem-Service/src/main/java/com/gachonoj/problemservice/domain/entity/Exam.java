@@ -3,22 +3,28 @@ package com.gachonoj.problemservice.domain.entity;
 import com.gachonoj.problemservice.domain.constant.ExamStatus;
 import com.gachonoj.problemservice.domain.constant.ExamType;
 import jakarta.persistence.*;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
+@Getter
+@Setter
 @Entity
-@Table
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@EntityListeners(AuditingEntityListener.class)  // examCreatedDate를 받기 위한 어노테이션
 public class Exam {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long examId;
     @Column(nullable = false)
     private Long userId;
-    private String examName;
+    private String examTitle;
     @Column(columnDefinition = "TEXT")
     private String examContents;
     @CreatedDate

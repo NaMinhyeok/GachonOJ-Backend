@@ -47,7 +47,7 @@ public class ProblemService {
 
     // 문제 수정
     @Transactional
-    public void updateProblem(Long problemId, ProblemRequestDto requestDto) {
+    public Long updateProblem(Long problemId, ProblemRequestDto requestDto) {
         Problem problem = problemRepository.findById(problemId)
                 .orElseThrow(() -> new IllegalArgumentException("Problem not found with id: " + problemId));
 
@@ -63,6 +63,7 @@ public class ProblemService {
                 ProblemStatus.valueOf(requestDto.getProblemStatus()), // Enum 변환
                 requestDto.getProblemPrompt()
         );
+        return problemId;
     }
 
     // 문제 삭제
