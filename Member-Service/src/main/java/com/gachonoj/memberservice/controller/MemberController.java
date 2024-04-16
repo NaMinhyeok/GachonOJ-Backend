@@ -94,4 +94,9 @@ public class MemberController {
                                                                                         @RequestParam(required = false,defaultValue = "1") int pageNo) {
         return ResponseEntity.ok(CommonResponseDto.success(memberService.getMemberList(memberRole, pageNo)));
     }
+    // 사용자 랭킹 목록 조회
+    @GetMapping("/ranking")
+    public ResponseEntity<CommonResponseDto<Page<MemberRankingResponseDto>>> getMemberRankingList(@RequestParam(required = false,defaultValue = "1") int pageNo) {
+        return ResponseEntity.ok(CommonResponseDto.success(memberService.getMemberRankingList(pageNo)));
+    }
 }

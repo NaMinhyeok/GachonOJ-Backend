@@ -248,4 +248,13 @@ public class MemberService {
             throw new IllegalArgumentException(ErrorCode.NOT_VALID_ERROR.getMessage());
         }
     }
+    // 사용자 랭킹 목록 조회
+    public Page<MemberRankingResponseDto> getMemberRankingList(int pageNo) {
+        Pageable pageable = PageRequest.of(pageNo-1, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "memberRank"));
+        Page<Member> memberList = memberRepository.findAll(pageable);
+        return memberList.map(member -> {
+            Integer memberSolved = submissionServiceFeignClient.getMemberSolved(member.getMemberId());
+            return new MemberRankingResponseDto(member, memberSolved);
+        });
+    }
 }

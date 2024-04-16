@@ -24,6 +24,11 @@ public class SubmissionController {
     public SubmissionMemberInfoResponseDto getMemberInfo(Long memberId) {
         return submissionService.getMemberInfo(memberId);
     }
+    // 사용자 푼 문제 수 조회
+    @GetMapping("/solved")
+    public Integer getMemberSolved(Long memberId) {
+        return submissionService.getMemberSolved(memberId);
+    }
     /*
     * 자체적으로 사용 하는 API 작성
     * */
