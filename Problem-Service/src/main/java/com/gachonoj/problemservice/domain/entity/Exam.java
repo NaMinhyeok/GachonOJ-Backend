@@ -18,7 +18,7 @@ public class Exam {
     private Long examId;
     @Column(nullable = false)
     private Long userId;
-    private String examName;
+    private String examTitle;
     @Column(columnDefinition = "TEXT")
     private String examContents;
     @CreatedDate

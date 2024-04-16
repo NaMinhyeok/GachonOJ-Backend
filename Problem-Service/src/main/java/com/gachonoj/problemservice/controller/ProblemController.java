@@ -17,9 +17,19 @@ import java.util.Map;
 @Slf4j  // Slf4j를 이용한 간편 로깅
 @RestController // Restful 웹 서비스 컨트롤러
 @RequiredArgsConstructor    // 필수 final 필드 주입 생성자 생성
-@RequestMapping("/problem")   // 이 컨트롤러의 모든 메서드에 대한 기본 경로
+@RequestMapping("/api/problem")   // 이 컨트롤러의 모든 메서드에 대한 기본 경로
 public class ProblemController {
     private final ProblemService problemService;    // 주입된 ProblemService 의존성
+    /*
+     * feign Client를 이용한 API 작성
+     * */
+    @GetMapping("/member/bookmark")
+    public Integer getBookmarkCountByMemberId(@RequestParam Long memberId) {
+        return problemService.getBookmarkCountByMemberId(memberId);
+    }
+    /*
+     * 문제 서비스 자체적으로 사용하는 API 작성
+     * */
 
     //알고리즘 문제 등록
     @PostMapping("/admin/register")
