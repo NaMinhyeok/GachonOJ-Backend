@@ -23,15 +23,15 @@ public class Exam {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long examId;
     @Column(nullable = false)
-    private Long userId;
+    private Long memberId;
     private String examTitle;
     @Column(columnDefinition = "TEXT")
     private String examContents;
     @CreatedDate
     private LocalDateTime examCreatedDate;
     private LocalDateTime examUpdateDate;
-    private LocalDateTime examStartDate;
-    private LocalDateTime examEndDate;
+    private String examStartDate;
+    private String examEndDate;
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ExamStatus examStatus;

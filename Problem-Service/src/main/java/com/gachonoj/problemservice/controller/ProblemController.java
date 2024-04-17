@@ -1,9 +1,14 @@
 package com.gachonoj.problemservice.controller;
 
+import com.gachonoj.problemservice.common.response.CommonResponseDto;
+import com.gachonoj.problemservice.domain.dto.request.ExamRequestDto;
 import com.gachonoj.problemservice.domain.dto.request.ProblemRequestDto;
+import com.gachonoj.problemservice.service.ExamService;
 import com.gachonoj.problemservice.service.ProblemService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,9 +22,10 @@ import java.util.Map;
 @Slf4j  // Slf4j를 이용한 간편 로깅
 @RestController // Restful 웹 서비스 컨트롤러
 @RequiredArgsConstructor    // 필수 final 필드 주입 생성자 생성
-@RequestMapping("/api/problem")   // 이 컨트롤러의 모든 메서드에 대한 기본 경로
+@RequestMapping("/problem")   // 이 컨트롤러의 모든 메서드에 대한 기본 경로
 public class ProblemController {
     private final ProblemService problemService;    // 주입된 ProblemService 의존성
+    private final ExamService examService;
     /*
      * feign Client를 이용한 API 작성
      * */
@@ -30,6 +36,13 @@ public class ProblemController {
     /*
      * 문제 서비스 자체적으로 사용하는 API 작성
      * */
+
+    @PostMapping("/exam/register")
+    public ResponseEntity<CommonResponseDto<Void>> registerExam(@RequestBody ExamRequestDto examDto, HttpServletRequest request) {
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        examService.registerExam(examDto, memberId);
+        return ResponseEntity.ok(CommonResponseDto.success());
+    }
 
     //알고리즘 문제 등록
     @PostMapping("/admin/register")
