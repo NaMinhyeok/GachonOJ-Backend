@@ -165,7 +165,7 @@ public class MemberService {
     }
     // 닉네임 중복 확인
     public NicknameVerificationResponseDto verifyMemberNickname(String memberNickname) {
-        return new NicknameVerificationResponseDto(memberRepository.existsByMemberNickname(memberNickname));
+        return new NicknameVerificationResponseDto(!memberRepository.existsByMemberNickname(memberNickname));
     }
     // 호버시 회원 정보 조회
     public HoverResponseDto getHoverInfo(Long memberId) {
