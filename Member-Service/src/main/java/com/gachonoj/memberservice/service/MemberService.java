@@ -56,11 +56,13 @@ public class MemberService {
     }
     // 이메일 인증코드를 확인하는 메소드
     public void verifyEmail(String email, String inputAuthCode) {
-        String key = Integer.toString(authCode);
-        String value = redisService.getData(key);
-        if(value != null && value.equals(email) && inputAuthCode.equals(key)) {
-            redisService.deleteData(key);
-        } else {
+        String value = redisService.getData(email);
+        if(value != null && value.equals(inputAuthCode)) {
+            redisService.deleteData(email);
+        } else if(value == null) {
+            throw new IllegalArgumentException("인증번호가 만료되었습니다.");
+        }
+        else {
             throw new IllegalArgumentException("인증번호가 일치하지 않습니다.");
         }
     }
