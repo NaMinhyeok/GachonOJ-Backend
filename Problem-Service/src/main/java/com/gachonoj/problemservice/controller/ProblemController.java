@@ -44,6 +44,16 @@ public class ProblemController {
         return ResponseEntity.ok(CommonResponseDto.success());
     }
 
+    @PutMapping("/exam/{examId}")
+    public ResponseEntity<CommonResponseDto<Void>> updateExam(
+            @PathVariable Long examId,  // 시험 ID는 URL 매개변수로 받는다
+            @RequestBody ExamRequestDto examDto,  // 수정할 시험 정보는 Request Body에서 받는다
+            HttpServletRequest request) {
+
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));  // 회원 ID를 헤더에서 추출
+        examService.updateExam(examId, memberId, examDto);  // 서비스 레이어에 업데이트 로직 위임
+        return ResponseEntity.ok(CommonResponseDto.success());  // 성공 응답
+    }
     //알고리즘 문제 등록
     @PostMapping("/admin/register")
     public ResponseEntity<Map<String, Object>> registerProblem(@RequestBody ProblemRequestDto problemRequestDto) {

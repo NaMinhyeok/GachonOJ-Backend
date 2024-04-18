@@ -14,8 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -84,5 +85,59 @@ public class ExamService {
             test.setMemberId(candidateId);
             testRepository.save(test);  // 테스트 정보 저장
         }
+    }
+    @Transactional
+    public void updateExam(Long examId, Long memberId, ExamRequestDto request) {
+        // 시험 정보를 ID를 통해 찾아 업데이트
+        Exam exam = examRepository.findById(examId)
+                .orElseThrow(() -> new RuntimeException("Exam not found with id: " + examId));
+
+        // 시험 정보 업데이트
+        exam.setExamTitle(request.getExamTitle());
+        exam.setMemberId(memberId);
+        exam.setExamMemo(request.getExamMemo());
+        exam.setExamNotice(request.getExamNotice());
+        exam.setExamStartDate(request.getExamStartDate());
+        exam.setExamEndDate(request.getExamEndDate());
+        exam.setExamDueTime(request.getExamDueTime());
+        exam.setExamStatus(request.getExamStatus());
+        exam.setExamType(request.getExamType());
+        exam.setExamUpdateDate(LocalDateTime.now());  // 현재 시간으로 업데이트 날짜 설정
+        examRepository.save(exam);
+
+        // 요청된 문제들만 업데이트
+        for (ProblemRequestDto problemDto : request.getTests()) {
+            if (problemDto.getProblemId() != null) {
+                updateProblem(problemDto.getProblemId(), problemDto);
+            }
+        }
+    }
+
+    private void updateProblem(Long problemId, ProblemRequestDto problemDto) {
+        Problem problem = problemRepository.findById(problemId)
+                .orElseThrow(() -> new RuntimeException("Problem not found with id: " + problemId));
+
+        // 문제 정보 업데이트
+        problem.setProblemTitle(problemDto.getProblemTitle());
+        problem.setProblemContents(problemDto.getProblemContents());
+        problem.setProblemClass(ProblemClass.valueOf(problemDto.getProblemClass()));
+        problem.setProblemTimeLimit(problemDto.getProblemTimeLimit());
+        problem.setProblemMemoryLimit(problemDto.getProblemMemoryLimit());
+        problem.setProblemStatus(ProblemStatus.valueOf(problemDto.getProblemStatus()));
+        problem.setProblemPrompt(problemDto.getProblemPrompt());
+        problem.setProblemUpdatedDate(LocalDateTime.now());
+
+        // 기존 테스트케이스를 삭제하고 새로 추가
+        problem.getTestcases().clear();
+        for (TestcaseRequestDto testcaseDto : problemDto.getTestcases()) {
+            Testcase testcase = new Testcase();
+            testcase.setTestcaseInput(testcaseDto.getTestcaseInput());
+            testcase.setTestcaseOutput(testcaseDto.getTestcaseOutput());
+            testcase.setTestcaseStatus(TestcaseStatus.valueOf(testcaseDto.getTestcaseStatus()));
+            testcase.setProblem(problem);
+            problem.getTestcases().add(testcase);
+        }
+
+        problemRepository.save(problem);
     }
 }

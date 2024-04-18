@@ -10,6 +10,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 public class ProblemRequestDto {
+    private Long problemId;
     private String problemTitle;
     private String problemContents;
     private String problemInputContents;
@@ -22,5 +23,8 @@ public class ProblemRequestDto {
     private String problemPrompt;
     private List<TestcaseRequestDto> testcases;
 
+
     // 필요한 경우, 추가적인 생성자, 메서드 또는 로직을 여기에 구현할 수 있습니다.
+    // problemId 필드에 대한 getter 메서드
+
 }
