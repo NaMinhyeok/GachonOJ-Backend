@@ -1,14 +1,12 @@
 package com.gachonoj.memberservice.controller;
 
 import com.gachonoj.memberservice.domain.constant.Role;
-import com.gachonoj.memberservice.domain.dto.request.EmailRequestDto;
-import com.gachonoj.memberservice.domain.dto.request.EmailVerificationRequestDto;
-import com.gachonoj.memberservice.domain.dto.request.MemberLangRequestDto;
-import com.gachonoj.memberservice.domain.dto.request.SignUpRequestDto;
+import com.gachonoj.memberservice.domain.dto.request.*;
 import com.gachonoj.memberservice.common.response.CommonResponseDto;
 import com.gachonoj.memberservice.domain.dto.response.*;
 import com.gachonoj.memberservice.service.MemberService;
 
+import com.gachonoj.memberservice.service.S3UploadService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.Getter;
@@ -18,6 +16,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @Slf4j
 @RestController
@@ -48,7 +49,7 @@ public class MemberController {
     // 닉네임 중복 확인
     @GetMapping("/verification/{memberNickname}")
     public ResponseEntity<CommonResponseDto<NicknameVerificationResponseDto>> verifyMemberNickname(@PathVariable String memberNickname) {
-        return ResponseEntity.ok(CommonResponseDto.success(memberService.verifyMemberNickname(memberNickname)));
+        return ResponseEntity.ok(CommonResponseDto.success(memberService.verifiedMemberNickname(memberNickname)));
     }
     // 호버 창 정보 조회
     @GetMapping("/hover")
@@ -99,5 +100,12 @@ public class MemberController {
     public ResponseEntity<CommonResponseDto<Page<MemberRankingResponseDto>>> getMemberRankingList(@RequestParam(required = false,defaultValue = "1") int pageNo,
                                                                                                   @RequestParam(required = false) String search) {
         return ResponseEntity.ok(CommonResponseDto.success(memberService.getMemberRankingList(pageNo,search)));
+    }
+    // 사용자 정보 수정
+    @PutMapping("/info")
+    public ResponseEntity<CommonResponseDto<Void>> updateMemberInfo(HttpServletRequest request, @RequestPart(required = false, name = "img") MultipartFile memberImg, @RequestPart(name = "info") MemberInfoRequestDto memberInfoRequestDto) throws IOException {
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        memberService.updateMemberInfo(memberId, memberImg, memberInfoRequestDto);
+        return ResponseEntity.ok(CommonResponseDto.success());
     }
 }

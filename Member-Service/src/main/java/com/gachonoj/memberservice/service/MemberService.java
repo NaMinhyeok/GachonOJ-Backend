@@ -3,6 +3,7 @@ package com.gachonoj.memberservice.service;
 import com.gachonoj.memberservice.common.codes.ErrorCode;
 import com.gachonoj.memberservice.domain.constant.Role;
 import com.gachonoj.memberservice.domain.dto.request.LoginRequestDto;
+import com.gachonoj.memberservice.domain.dto.request.MemberInfoRequestDto;
 import com.gachonoj.memberservice.domain.dto.request.MemberLangRequestDto;
 import com.gachonoj.memberservice.domain.dto.request.SignUpRequestDto;
 import com.gachonoj.memberservice.domain.dto.response.*;
@@ -24,7 +25,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Objects;
 import java.util.Random;
 
@@ -39,6 +42,7 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
     private final SubmissionServiceFeignClient submissionServiceFeignClient;
     private final ProblemServiceFeignClient problemServiceFeignClient;
+    private final S3UploadService s3UploadService;
 
     private static final int PAGE_SIZE = 10;
 
@@ -166,8 +170,8 @@ public class MemberService {
         return memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException("가입되지 않은 회원입니다."));
     }
     // 닉네임 중복 확인
-    public NicknameVerificationResponseDto verifyMemberNickname(String memberNickname) {
-        return new NicknameVerificationResponseDto(!memberRepository.existsByMemberNickname(memberNickname));
+    public NicknameVerificationResponseDto verifiedMemberNickname(String memberNickname) {
+        return new NicknameVerificationResponseDto(verifyMemberNickname(memberNickname));
     }
     // 호버시 회원 정보 조회
     public HoverResponseDto getHoverInfo(Long memberId) {
@@ -266,5 +270,25 @@ public class MemberService {
             Integer memberSolved = submissionServiceFeignClient.getMemberSolved(member.getMemberId());
             return new MemberRankingResponseDto(member, memberSolved);
         });
+    }
+    // 회원정보 수정
+    @Transactional
+    public void updateMemberInfo(Long memberId, MultipartFile memberImg, MemberInfoRequestDto memberInfoRequestDto) throws IOException {
+        Member member = memberRepository.findByMemberId(memberId);
+        if(memberImg != null) {
+            // 원래 있던 이미지 삭제
+            if(member.getMemberImg() != null) {
+                s3UploadService.deleteImage(member.getMemberImg());
+            }
+            // 이미지 저장
+            String memberImgUrl = s3UploadService.saveFile(memberImg);
+            member.updateMemberInfo(memberInfoRequestDto.getMemberNickname(), memberInfoRequestDto.getMemberName(), memberInfoRequestDto.getMemberIntroduce(), memberImgUrl);
+        } else {
+            member.updateMemberInfo(memberInfoRequestDto.getMemberNickname(), memberInfoRequestDto.getMemberName(), memberInfoRequestDto.getMemberIntroduce(), member.getMemberImg());
+        }
+    }
+    // 닉네임 중복 확인 True False 반환 메소드
+    public boolean verifyMemberNickname(String memberNickname) {
+        return !memberRepository.existsByMemberNickname(memberNickname);
     }
 }
