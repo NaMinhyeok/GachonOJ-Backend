@@ -67,4 +67,8 @@ public class Member {
         this.memberIntroduce = memberIntroduce;
         this.memberImg = memberImg;
     }
+    // 사용자 비밀번호 수정
+    public void updateMemberPassword(String encode) {
+        this.memberPassword = encode;
+    }
 }

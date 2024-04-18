@@ -2,10 +2,7 @@ package com.gachonoj.memberservice.service;
 
 import com.gachonoj.memberservice.common.codes.ErrorCode;
 import com.gachonoj.memberservice.domain.constant.Role;
-import com.gachonoj.memberservice.domain.dto.request.LoginRequestDto;
-import com.gachonoj.memberservice.domain.dto.request.MemberInfoRequestDto;
-import com.gachonoj.memberservice.domain.dto.request.MemberLangRequestDto;
-import com.gachonoj.memberservice.domain.dto.request.SignUpRequestDto;
+import com.gachonoj.memberservice.domain.dto.request.*;
 import com.gachonoj.memberservice.domain.dto.response.*;
 import com.gachonoj.memberservice.domain.entity.Member;
 //import com.gachonoj.memberservice.jwt.JwtTokenProvider;
@@ -14,6 +11,7 @@ import io.jsonwebtoken.Jwt;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.sql.Update;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -296,4 +294,19 @@ public class MemberService {
     public void deleteMember(Long memberId) {
         memberRepository.deleteById(memberId);
     }
+    // 비밀번호 변경
+    @Transactional
+    public void updateMemberPassword(Long memberId, UpdatePasswordRequestDto updatePasswordRequestDto) {
+        Member member = memberRepository.findByMemberId(memberId);
+        if(!validateMemberPassword(updatePasswordRequestDto.getMemberPassword(), member)) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        } else if(!updatePasswordRequestDto.getMemberNewPassword().equals(updatePasswordRequestDto.getMemberNewPasswordConfirm())) {
+            throw new IllegalArgumentException("새로운 비밀번호가 일치하지 않습니다.");
+        } else {
+            member.updateMemberPassword(passwordEncoder.encode(updatePasswordRequestDto.getMemberNewPassword()));
+            log.info("새로운 비밀번호 : " + updatePasswordRequestDto.getMemberNewPassword(),"로 변경되었습니다.");
+            log.info("인코더로 인코딩된 비밀번호 : " + passwordEncoder.encode(updatePasswordRequestDto.getMemberNewPassword()));
+        }
+    }
+
 }

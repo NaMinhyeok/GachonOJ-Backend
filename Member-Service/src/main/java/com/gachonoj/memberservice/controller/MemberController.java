@@ -115,4 +115,11 @@ public class MemberController {
         memberService.deleteMember(memberId);
         return ResponseEntity.ok(CommonResponseDto.success());
     }
+    // 비밀번호 변경
+    @PutMapping("/password")
+    public ResponseEntity<CommonResponseDto<Void>> updatePassword(HttpServletRequest request, @RequestBody @Valid UpdatePasswordRequestDto updatePasswordRequestDto ) {
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        memberService.updateMemberPassword(memberId, updatePasswordRequestDto);
+        return ResponseEntity.ok(CommonResponseDto.success());
+    }
 }
