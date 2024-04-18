@@ -108,4 +108,11 @@ public class MemberController {
         memberService.updateMemberInfo(memberId, memberImg, memberInfoRequestDto);
         return ResponseEntity.ok(CommonResponseDto.success());
     }
+    // 회원 탈퇴
+    @DeleteMapping("/member")
+    public ResponseEntity<CommonResponseDto<Void>> deleteMember(HttpServletRequest request) {
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        memberService.deleteMember(memberId);
+        return ResponseEntity.ok(CommonResponseDto.success());
+    }
 }

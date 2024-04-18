@@ -291,4 +291,9 @@ public class MemberService {
     public boolean verifyMemberNickname(String memberNickname) {
         return !memberRepository.existsByMemberNickname(memberNickname);
     }
+    // 회원 탈퇴
+    @Transactional
+    public void deleteMember(Long memberId) {
+        memberRepository.deleteById(memberId);
+    }
 }
