@@ -119,10 +119,17 @@ public class ProblemController {
 
     @GetMapping("/bookmark/list")
     public ResponseEntity<CommonResponseDto<Page<BookmarkProblemResponseDto>>> getBookmarkProblemList(
-            @RequestParam(defaultValue = "1") int pageNo,
-            @RequestParam(required = false) Long memberId) {
+            @RequestParam(defaultValue = "1") int pageNo, HttpServletRequest request) {
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
         // 강제로 회원 ID를 받아 사용하거나, 인증 정보에서 회원 ID를 추출해야 할 경우 로직 추가
         Page<BookmarkProblemResponseDto> result = problemService.getBookmarkProblemList(memberId, pageNo);
         return ResponseEntity.ok(CommonResponseDto.success(result));
+    }
+
+    @PostMapping("/bookmark/{problemId}")
+    public ResponseEntity<CommonResponseDto<Void>> addBookmark(@PathVariable Long problemId, HttpServletRequest request){
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        problemService.addBookmark(memberId, problemId);
+        return ResponseEntity.ok(CommonResponseDto.success());
     }
 }

@@ -43,7 +43,7 @@ public class Problem {
     @OneToMany(mappedBy = "problem", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Testcase> testcases = new ArrayList<>();
     @OneToMany(mappedBy = "problem", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Bookmark> bookmarks;
+    private List<Bookmark> bookmarks = new ArrayList<>();
 
     public void addTestcase(Testcase testcase) {
         if (this.testcases == null) {

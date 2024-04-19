@@ -11,6 +11,6 @@ import java.util.Optional;
 public interface ProblemRepository extends JpaRepository<Problem,Long> {
     @Query("SELECT COUNT(b) FROM Bookmark b WHERE b.memberId = :memberId")
     Integer getBookmarkCountByMemberId(Long memberId);
-    @Query("SELECT b FROM Bookmark b WHERE b.problem.problemId = :problemId")
+
     Optional<Problem> findByProblemId(Long problemId);
 }

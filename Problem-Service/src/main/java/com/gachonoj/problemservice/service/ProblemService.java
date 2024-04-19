@@ -90,7 +90,6 @@ public class ProblemService {
     }
 
     // 사용자 북마크 문제 조회
-
     @Transactional(readOnly = true)
     public Page<BookmarkProblemResponseDto> getBookmarkProblemList(Long memberId, int pageNo) {
         Pageable pageable = PageRequest.of(pageNo-1, 10, Sort.by(Sort.Direction.DESC, "problem.problemId")); // 정렬 기준 수정
@@ -112,5 +111,18 @@ public class ProblemService {
                     true
             );
         });
+    }
+
+    // 북마크 기능 구현
+    @Transactional
+    public void addBookmark(Long memberId, Long problemId) {
+        if (!bookmarkRepository.existsByMemberIdAndProblemProblemId(memberId, problemId)) {
+            Problem problem = problemRepository.findByProblemId(problemId)
+                    .orElseThrow(() -> new IllegalArgumentException("Problem not found with id: " + problemId));
+            Bookmark bookmark = new Bookmark(memberId, problem);
+            bookmarkRepository.save(bookmark);
+        } else {
+            throw new IllegalStateException("Bookmark already exists");
+        }
     }
 }
