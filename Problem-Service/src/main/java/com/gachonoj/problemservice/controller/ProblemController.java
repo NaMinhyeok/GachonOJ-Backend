@@ -1,7 +1,12 @@
 package com.gachonoj.problemservice.controller;
 
+import com.gachonoj.problemservice.common.codes.ErrorCode;
+import com.gachonoj.problemservice.common.response.CommonResponseDto;
+import com.gachonoj.problemservice.domain.dto.request.ExamRequestDto;
 import com.gachonoj.problemservice.domain.dto.request.ProblemRequestDto;
+import com.gachonoj.problemservice.service.ExamService;
 import com.gachonoj.problemservice.service.ProblemService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -20,17 +25,60 @@ import java.util.Map;
 @RequestMapping("/problem")   // 이 컨트롤러의 모든 메서드에 대한 기본 경로
 public class ProblemController {
     private final ProblemService problemService;    // 주입된 ProblemService 의존성
+    private final ExamService examService;
     /*
-    * feign Client를 이용한 API 작성
-    * */
+     * feign Client를 이용한 API 작성
+     * */
     @GetMapping("/member/bookmark")
     public Integer getBookmarkCountByMemberId(@RequestParam Long memberId) {
         return problemService.getBookmarkCountByMemberId(memberId);
     }
     /*
-    * 문제 서비스 자체적으로 사용하는 API 작성
-    * */
+     * 문제 서비스 자체적으로 사용하는 API 작성
+     * */
 
+    @PostMapping("/exam/register")
+    public ResponseEntity<CommonResponseDto<Void>> registerExam(@RequestBody ExamRequestDto examDto, HttpServletRequest request) {
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        examService.registerExam(examDto, memberId);
+        return ResponseEntity.ok(CommonResponseDto.success());
+    }
+
+    @PutMapping("/exam/{examId}")
+    public ResponseEntity<CommonResponseDto<Void>> updateExam(
+            @PathVariable Long examId,  // 시험 ID는 URL 매개변수로 받는다
+            @RequestBody ExamRequestDto examDto,  // 수정할 시험 정보는 Request Body에서 받는다
+            HttpServletRequest request) {
+
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));  // 회원 ID를 헤더에서 추출
+        examService.updateExam(examId, memberId, examDto);  // 서비스 레이어에 업데이트 로직 위임
+        return ResponseEntity.ok(CommonResponseDto.success());  // 성공 응답
+    }
+    @DeleteMapping("/exam/{examId}")
+    public ResponseEntity<CommonResponseDto<Void>> deleteExam(@PathVariable Long examId, HttpServletRequest request) {
+        String memberIdStr = request.getHeader("X-Authorization-Id");
+        Long memberId;
+        try {
+            memberId = Long.parseLong(memberIdStr);
+        } catch (NumberFormatException e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(CommonResponseDto.fail(ErrorCode.BAD_REQUEST_ERROR, "Invalid member ID"));
+        }
+
+        try {
+            examService.deleteExam(examId, memberId);
+            return ResponseEntity.ok(CommonResponseDto.success());
+        } catch (SecurityException e) {
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(CommonResponseDto.fail(ErrorCode.FORBIDDEN_ERROR, "Access denied"));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(CommonResponseDto.fail(ErrorCode.INTERNAL_SERVER_ERROR, "Internal server error"));
+        }
+    }
     //알고리즘 문제 등록
     @PostMapping("/admin/register")
     public ResponseEntity<Map<String, Object>> registerProblem(@RequestBody ProblemRequestDto problemRequestDto) {

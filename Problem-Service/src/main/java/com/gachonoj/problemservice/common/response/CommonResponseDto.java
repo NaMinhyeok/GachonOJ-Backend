@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.gachonoj.problemservice.common.codes.ErrorCode;
+import com.gachonoj.problemservice.domain.entity.Problem;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

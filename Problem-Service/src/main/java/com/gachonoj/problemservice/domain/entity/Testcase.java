@@ -26,7 +26,12 @@ public class Testcase {
     @Enumerated(EnumType.STRING)
     private TestcaseStatus testcaseStatus;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "problem_id") // 외래 키를 'problem_id'로 명시적으로 지정
+    @ManyToOne(fetch = FetchType.LAZY) // 선택적 관계로 변경
+    @JoinColumn(name = "problem_id")  // null 허용
     private Problem problem;
+
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = true)  // 선택적 관계로 변경
+    @JoinColumn(name = "question_id", nullable = true)  // null 허용
+    private Question question;
 }

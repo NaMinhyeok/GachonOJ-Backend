@@ -73,7 +73,6 @@ public class Problem {
         return problem;
     }
 
-
     // 문제 수정
     public void update(String problemTitle, String problemContents, String problemInputContents, String problemOutputContents,
                        Integer problemDiff, ProblemClass problemClass, Integer problemTimeLimit, Integer problemMemoryLimit,
