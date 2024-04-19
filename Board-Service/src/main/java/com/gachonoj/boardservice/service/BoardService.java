@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -40,5 +42,12 @@ public class BoardService {
     public void createInquiry(InquiryRequestDto inquiryRequestDto, Long memberId) {
         Inquiry inquiry = new Inquiry(inquiryRequestDto.getInquiryTitle(), inquiryRequestDto.getInquiryContents(), memberId);
         inquiryRepository.save(inquiry);
+    }
+    // 문의사항 삭제 회원
+    public void deleteInquiryByMember(Long inquiryId,Long memberId) {
+        Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new IllegalArgumentException("해당 문의사항이 존재하지 않습니다."));
+        if (inquiry.getMemberId().equals(memberId)) {
+            inquiryRepository.delete(inquiry);
+        }
     }
 }
