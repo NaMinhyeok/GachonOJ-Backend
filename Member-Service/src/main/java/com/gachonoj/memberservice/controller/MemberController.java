@@ -139,4 +139,10 @@ public class MemberController {
     public ResponseEntity<CommonResponseDto<MemberInfoByAdminResponseDto>> getMemberInfoByAdmin(@PathVariable Long memberId) {
         return ResponseEntity.ok(CommonResponseDto.success(memberService.getMemberInfoByAdmin(memberId)));
     }
+    // 관리자가 회원 탈퇴 시키기
+    @DeleteMapping("/admin/members/{memberId}")
+    public ResponseEntity<CommonResponseDto<Void>> deleteMemberByAdmin(@PathVariable Long memberId) {
+        memberService.deleteMemberByAdmin(memberId);
+        return ResponseEntity.ok(CommonResponseDto.success());
+    }
 }

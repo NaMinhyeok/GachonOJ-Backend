@@ -367,4 +367,9 @@ public class MemberService {
         }
         return new MemberInfoByAdminResponseDto(member.getMemberEmail(),member.getMemberName(),member.getMemberNumber(),member.getMemberNickname(),memberRole);
     }
+    // 관리자가 회원 탈퇴 시키기
+    @Transactional
+    public void deleteMemberByAdmin(Long memberId) {
+        memberRepository.deleteById(memberId);
+    }
 }
