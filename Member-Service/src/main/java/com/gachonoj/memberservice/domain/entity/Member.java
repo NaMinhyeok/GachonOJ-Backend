@@ -45,12 +45,12 @@ public class Member {
     private MemberLang memberLang;
 
     @Builder
-    public Member(String memberEmail, String memberPassword, String memberName, String memberNumber, String memberNickname) {
+    public Member(String memberEmail, String memberPassword, String memberName, String memberNumber, String memberNickname,Role memberRole) {
         this.memberEmail = memberEmail;
         this.memberPassword = memberPassword;
         this.memberName = memberName;
         this.memberNumber = memberNumber;
-        this.memberRole = Role.ROLE_STUDENT;
+        this.memberRole = memberRole;
         this.memberNickname = memberNickname;
         this.memberRank = 1000;
         this.memberCreatedDate = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS);

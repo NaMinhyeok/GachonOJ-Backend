@@ -111,7 +111,7 @@ public class MemberService {
     @Transactional
     public void signUp(SignUpRequestDto signUpRequestDto) {
         // 회원가입 유효성 검사
-        verifySignUp(signUpRequestDto);
+        verifySignUp(signUpRequestDto.getMemberPassword(), signUpRequestDto.getMemberPasswordConfirm(), signUpRequestDto.getMemberEmail(), signUpRequestDto.getMemberNumber());
 
         // 회원가입 로직
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -121,23 +121,26 @@ public class MemberService {
                 .memberNumber(signUpRequestDto.getMemberNumber())
                 .memberPassword(passwordEncoder.encode(signUpRequestDto.getMemberPassword()))
                 .memberNickname(signUpRequestDto.getMemberNickname())
+                .memberRole(Role.ROLE_STUDENT)
                 .build();
 
         memberRepository.save(member);
     }
     // 회원가입 유효성 검사
-    public void verifySignUp(SignUpRequestDto signUpRequestDto) {
+    public void verifySignUp(String password, String passwordConfirm, String email, String number) {
         String regExp = "^(?=.*[a-zA-Z])(?=.*[!@#$%^])(?=.*[0-9]).{8,25}$";
-        if(!signUpRequestDto.getMemberPassword().matches(regExp)) {
+        if(!password.matches(regExp)) {
             throw new IllegalArgumentException("비밀번호는 영문, 숫자, 특수문자를 포함한 8~25자여야 합니다.");
         }
-        if(!signUpRequestDto.getMemberPassword().equals(signUpRequestDto.getMemberPasswordConfirm())) {
+        if(!password.equals(passwordConfirm)) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
-        if(validateMemberNumber(signUpRequestDto.getMemberNumber())) {
-            throw new IllegalArgumentException("이미 가입된 학번입니다.");
+        if(number!=null){
+            if(validateMemberNumber(number)) {
+                throw new IllegalArgumentException("이미 가입된 학번입니다.");
+            }
         }
-        if(validateMemberEmail(signUpRequestDto.getMemberEmail())) {
+        if(validateMemberEmail(email)) {
             throw new IllegalArgumentException("이미 가입된 이메일입니다.");
         }
     }
@@ -308,5 +311,33 @@ public class MemberService {
             log.info("인코더로 인코딩된 비밀번호 : " + passwordEncoder.encode(updatePasswordRequestDto.getMemberNewPassword()));
         }
     }
+    // 사용자 추가 생성
+    @Transactional
+    public void createMember(CreateMemberRequestDto createMemberRequestDto) {
+        // 회원가입 유효성 검사
+        verifySignUp(createMemberRequestDto.getMemberPassword(), createMemberRequestDto.getMemberPasswordConfirm(), createMemberRequestDto.getMemberEmail(), createMemberRequestDto.getMemberNumber());
+        Role role;
+        if(Objects.equals(createMemberRequestDto.getMemberRole(), "학생")) {
+            role = Role.ROLE_STUDENT;
+        } else if(Objects.equals(createMemberRequestDto.getMemberRole(), "교수")) {
+            role = Role.ROLE_PROFESSOR;
+        } else if(Objects.equals(createMemberRequestDto.getMemberRole(), "관리자")) {
+            role = Role.ROLE_ADMIN;
+        } else {
+            throw new IllegalArgumentException(ErrorCode.NOT_VALID_ERROR.getMessage());
+        }
 
+        // 회원가입 로직
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        Member member = Member.builder()
+                .memberEmail(createMemberRequestDto.getMemberEmail())
+                .memberName(createMemberRequestDto.getMemberName())
+                .memberNumber(createMemberRequestDto.getMemberNumber())
+                .memberPassword(passwordEncoder.encode(createMemberRequestDto.getMemberPassword()))
+                .memberNickname(createMemberRequestDto.getMemberNickname())
+                .memberRole(role)
+                .build();
+
+        memberRepository.save(member);
+    }
 }

@@ -122,4 +122,10 @@ public class MemberController {
         memberService.updateMemberPassword(memberId, updatePasswordRequestDto);
         return ResponseEntity.ok(CommonResponseDto.success());
     }
+    // 사용자 추가 생성
+    @PostMapping("/admin/members")
+    public ResponseEntity<CommonResponseDto<Void>> createMember(@RequestBody @Valid CreateMemberRequestDto createMemberRequestDto) {
+        memberService.createMember(createMemberRequestDto);
+        return ResponseEntity.ok(CommonResponseDto.success());
+    }
 }
