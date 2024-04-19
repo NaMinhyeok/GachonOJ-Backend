@@ -7,10 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -24,7 +21,16 @@ public class BoardController {
     public ResponseEntity<CommonResponseDto<Void>> createNotice(HttpServletRequest request,@RequestBody NoticeRequestDto noticeRequestDto){
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
         boardService.createNotice(noticeRequestDto, memberId);
-        return ResponseEntity.ok(CommonResponseDto.success(null));
+        return ResponseEntity.ok(CommonResponseDto.success());
     }
+    // 공지사항 수정 API
+    @PutMapping("/admin/notice/{noticeId}")
+    public ResponseEntity<CommonResponseDto<Void>> updateNotice(HttpServletRequest request,@PathVariable Long noticeId,@RequestBody NoticeRequestDto noticeRequestDto){
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        boardService.updateNotice(noticeId,noticeRequestDto, memberId);
+        return ResponseEntity.ok(CommonResponseDto.success());
+    }
+    // 공지사항 삭제 API
+
 }
 

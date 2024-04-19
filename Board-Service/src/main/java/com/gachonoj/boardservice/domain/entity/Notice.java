@@ -32,5 +32,11 @@ public class Notice {
         this.noticeContents = noticeContents;
         this.memberId = memberId;
     }
+    // 공지사항 수정
+    public void updateNotice(String noticeTitle,String noticeContents,Long memberId){
+        this.noticeTitle = noticeTitle;
+        this.noticeContents = noticeContents;
+        this.memberId = memberId;
+    }
 }
 

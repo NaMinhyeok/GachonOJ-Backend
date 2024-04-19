@@ -14,9 +14,16 @@ public class BoardService {
 
     private final NoticeRepository noticeRepository;
 
-    //공지사항 작성
+    // 공지사항 작성
     public void createNotice(NoticeRequestDto noticeRequestDto,Long memberId) {
         Notice notice = new Notice(noticeRequestDto.getNoticeTitle(), noticeRequestDto.getNoticeContents(),memberId);
         noticeRepository.save(notice);
     }
+    // 공지사항 수정
+    public void updateNotice(Long noticeId, NoticeRequestDto noticeRequestDto, Long memberId) {
+        Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new IllegalArgumentException("해당 공지사항이 존재하지 않습니다."));
+        notice.updateNotice(noticeRequestDto.getNoticeTitle(), noticeRequestDto.getNoticeContents(),memberId);
+        noticeRepository.save(notice);
+    }
+    // 공지사항 삭제
 }
