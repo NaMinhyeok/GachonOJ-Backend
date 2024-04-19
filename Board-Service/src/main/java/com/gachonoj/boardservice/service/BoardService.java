@@ -26,4 +26,8 @@ public class BoardService {
         noticeRepository.save(notice);
     }
     // 공지사항 삭제
+    public void deleteNotice(Long noticeId) {
+        Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new IllegalArgumentException("해당 공지사항이 존재하지 않습니다."));
+        noticeRepository.delete(notice);
+    }
 }

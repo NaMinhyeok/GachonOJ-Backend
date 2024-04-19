@@ -31,6 +31,10 @@ public class BoardController {
         return ResponseEntity.ok(CommonResponseDto.success());
     }
     // 공지사항 삭제 API
-
+    @DeleteMapping("/admin/notice/{noticeId}")
+    public ResponseEntity<CommonResponseDto<Void>> deleteNotice(@PathVariable Long noticeId){
+        boardService.deleteNotice(noticeId);
+        return ResponseEntity.ok(CommonResponseDto.success());
+    }
 }
 
