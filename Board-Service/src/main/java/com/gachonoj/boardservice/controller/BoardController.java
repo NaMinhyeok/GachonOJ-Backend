@@ -3,6 +3,7 @@ package com.gachonoj.boardservice.controller;
 import com.gachonoj.boardservice.common.response.CommonResponseDto;
 import com.gachonoj.boardservice.domain.dto.request.InquiryRequestDto;
 import com.gachonoj.boardservice.domain.dto.request.NoticeRequestDto;
+import com.gachonoj.boardservice.domain.dto.request.ReplyRequestDto;
 import com.gachonoj.boardservice.service.BoardService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -62,6 +63,12 @@ public class BoardController {
     @DeleteMapping("/admin/inquiry/{inquiryId}")
     public ResponseEntity<CommonResponseDto<Void>> deleteInquiryByAdmin(@PathVariable Long inquiryId){
         boardService.deleteInquiryByAdmin(inquiryId);
+        return ResponseEntity.ok(CommonResponseDto.success());
+    }
+    // 문의사항 답변 API
+    @PostMapping("/admin/inquiry/{inquiryId}/reply")
+    public ResponseEntity<CommonResponseDto<Void>> createReply(@PathVariable Long inquiryId, @RequestBody ReplyRequestDto replyRequestDto){
+        boardService.createReply(inquiryId,replyRequestDto);
         return ResponseEntity.ok(CommonResponseDto.success());
     }
 

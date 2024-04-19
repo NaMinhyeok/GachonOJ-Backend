@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
@@ -28,14 +29,11 @@ public class Reply {
     @Column(nullable = false)
     @CreatedDate
     private LocalDateTime replyCreatedDate;
+    @LastModifiedDate
     private LocalDateTime replyUpdatedDate;
 
-    // 답안 작성
-    @Builder(builderMethodName = "create")
-    public static Reply create(Inquiry inquiry, String replyContents) {
-        Reply reply = new Reply();
-        reply.inquiry = inquiry;
-        reply.replyContents = replyContents;
-        return reply;
+    public Reply(Inquiry inquiry, String replyContents) {
+        this.inquiry = inquiry;
+        this.replyContents = replyContents;
     }
 }

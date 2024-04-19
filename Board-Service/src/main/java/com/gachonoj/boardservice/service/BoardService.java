@@ -2,8 +2,10 @@ package com.gachonoj.boardservice.service;
 
 import com.gachonoj.boardservice.domain.dto.request.InquiryRequestDto;
 import com.gachonoj.boardservice.domain.dto.request.NoticeRequestDto;
+import com.gachonoj.boardservice.domain.dto.request.ReplyRequestDto;
 import com.gachonoj.boardservice.domain.entity.Inquiry;
 import com.gachonoj.boardservice.domain.entity.Notice;
+import com.gachonoj.boardservice.domain.entity.Reply;
 import com.gachonoj.boardservice.repository.InquiryRepository;
 import com.gachonoj.boardservice.repository.NoticeRepository;
 import com.gachonoj.boardservice.repository.ReplyRepository;
@@ -68,5 +70,12 @@ public class BoardService {
     public void deleteInquiryByAdmin(Long inquiryId) {
         Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new IllegalArgumentException("해당 문의사항이 존재하지 않습니다."));
         inquiryRepository.delete(inquiry);
+    }
+    // 문의사항 답변 작성
+    @Transactional
+    public void createReply(Long inquiryId, ReplyRequestDto replyRequestDto) {
+        Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new IllegalArgumentException("해당 문의사항이 존재하지 않습니다."));
+        Reply reply = new Reply(inquiry, replyRequestDto.getReplyContents());
+        replyRepository.save(reply);
     }
 }

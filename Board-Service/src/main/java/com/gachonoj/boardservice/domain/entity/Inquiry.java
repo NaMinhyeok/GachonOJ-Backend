@@ -30,6 +30,8 @@ public class Inquiry {
     private LocalDateTime inquiryCreatedDate;
     @LastModifiedDate
     private LocalDateTime inquiryUpdatedDate;
+    @OneToOne(mappedBy = "inquiry", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Reply reply;
 
     public Inquiry(String inquiryTitle, String inquiryContents, Long memberId) {
         this.inquiryTitle = inquiryTitle;
