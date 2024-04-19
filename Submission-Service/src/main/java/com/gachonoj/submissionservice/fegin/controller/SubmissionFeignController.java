@@ -26,4 +26,15 @@ public class SubmissionFeignController {
         return submissionFeignService.getMemberSolved(memberId);
     }
 
+    // 정답자 제출 인원 조회
+    @GetMapping("/problem/people")
+    public Integer getCorrectSubmission(Long problemId) {
+        return submissionFeignService.getCorrectSubmission(problemId);
+    }
+
+    // 정답률 조회
+    @GetMapping("/problem/rate")
+    public double getProblemCorrectRate(Long problemId) {
+        return submissionFeignService.getProblemCorrectRate(problemId);
+    }
 }
