@@ -7,8 +7,10 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class HoverResponseDto {
-    private String memberEmail;
+public class MemberInfoRankingResponseDto {
     private String memberNickname;
     private Integer rating;
+    private Integer solvedProblemCount;
+    private Integer tryProblemCount;
+    private Integer bookmarkProblemCount;
 }

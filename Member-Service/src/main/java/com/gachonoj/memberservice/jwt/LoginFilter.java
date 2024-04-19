@@ -32,7 +32,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.redisService = redisService;
-        setFilterProcessesUrl("/api/member/login");
+        setFilterProcessesUrl("/member/login");
     }
     // 로그인 시도 시 실행되는 메소드
     @Override
