@@ -1,4 +1,4 @@
-package com.gachonoj.memberservice.domain.dto.response;
+package com.gachonoj.submissionservice.fegin.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -7,6 +7,7 @@ import com.gachonoj.boardservice.domain.dto.response.NoticeMainResponseDto;
 import com.gachonoj.boardservice.domain.entity.Inquiry;
 import com.gachonoj.boardservice.domain.entity.Notice;
 import com.gachonoj.boardservice.domain.entity.Reply;
+import com.gachonoj.boardservice.feign.client.MemberServiceFeignClient;
 import com.gachonoj.boardservice.repository.InquiryRepository;
 import com.gachonoj.boardservice.repository.NoticeRepository;
 import com.gachonoj.boardservice.repository.ReplyRepository;
@@ -17,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service

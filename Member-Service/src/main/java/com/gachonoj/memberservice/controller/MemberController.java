@@ -28,19 +28,6 @@ import java.util.List;
 public class MemberController {
     private final MemberService memberService;
 
-    /*
-    * FeignClient를 이용한 회원 서비스 호출
-    * */
-
-    @GetMapping("/nickname/{memberId}")
-    public String getNicknames(@PathVariable Long memberId) {
-        return memberService.getNicknameToBoard(memberId);
-    }
-
-    /*
-    * 자체 서비스 컨트롤러
-    * */
-
     // 이메일 인증번호 전송
     @PostMapping("/email")
     public ResponseEntity<CommonResponseDto<String>> sendEmail(@RequestBody @Valid EmailRequestDto emailRequestDto) {

@@ -1,4 +1,4 @@
-package com.gachonoj.boardservice.service;
+package com.gachonoj.boardservice.feign.client;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;

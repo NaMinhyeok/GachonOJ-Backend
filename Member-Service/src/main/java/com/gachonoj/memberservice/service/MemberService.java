@@ -6,13 +6,13 @@ import com.gachonoj.memberservice.domain.dto.request.*;
 import com.gachonoj.memberservice.domain.dto.response.*;
 import com.gachonoj.memberservice.domain.entity.Member;
 //import com.gachonoj.memberservice.jwt.JwtTokenProvider;
+import com.gachonoj.memberservice.feign.client.ProblemServiceFeignClient;
+import com.gachonoj.memberservice.feign.client.SubmissionServiceFeignClient;
+import com.gachonoj.memberservice.feign.dto.response.SubmissionMemberInfoResponseDto;
 import com.gachonoj.memberservice.repository.MemberRepository;
-import io.jsonwebtoken.Jwt;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.sql.Update;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -43,20 +43,6 @@ public class MemberService {
     private final S3UploadService s3UploadService;
 
     private static final int PAGE_SIZE = 10;
-
-
-    /*
-    * 페인클라이언트를 위한 서비스
-    * */
-
-    // 닉네임 조회
-    public String getNicknameToBoard(Long memberId) {
-        return memberRepository.findByMemberId(memberId).getMemberNickname();
-    }
-
-    /*
-    * 자체 서비스
-    * */
 
     // 이메일 인증 코드
     private int authCode;
