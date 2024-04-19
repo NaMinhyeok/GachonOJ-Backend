@@ -1,5 +1,6 @@
 package com.gachonoj.problemservice.controller;
 
+import com.gachonoj.problemservice.common.codes.ErrorCode;
 import com.gachonoj.problemservice.common.response.CommonResponseDto;
 import com.gachonoj.problemservice.domain.dto.request.ExamRequestDto;
 import com.gachonoj.problemservice.domain.dto.request.ProblemRequestDto;
@@ -53,6 +54,31 @@ public class ProblemController {
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));  // 회원 ID를 헤더에서 추출
         examService.updateExam(examId, memberId, examDto);  // 서비스 레이어에 업데이트 로직 위임
         return ResponseEntity.ok(CommonResponseDto.success());  // 성공 응답
+    }
+    @DeleteMapping("/exam/{examId}")
+    public ResponseEntity<CommonResponseDto<Void>> deleteExam(@PathVariable Long examId, HttpServletRequest request) {
+        String memberIdStr = request.getHeader("X-Authorization-Id");
+        Long memberId;
+        try {
+            memberId = Long.parseLong(memberIdStr);
+        } catch (NumberFormatException e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(CommonResponseDto.fail(ErrorCode.BAD_REQUEST_ERROR, "Invalid member ID"));
+        }
+
+        try {
+            examService.deleteExam(examId, memberId);
+            return ResponseEntity.ok(CommonResponseDto.success());
+        } catch (SecurityException e) {
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body(CommonResponseDto.fail(ErrorCode.FORBIDDEN_ERROR, "Access denied"));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(CommonResponseDto.fail(ErrorCode.INTERNAL_SERVER_ERROR, "Internal server error"));
+        }
     }
     //알고리즘 문제 등록
     @PostMapping("/admin/register")

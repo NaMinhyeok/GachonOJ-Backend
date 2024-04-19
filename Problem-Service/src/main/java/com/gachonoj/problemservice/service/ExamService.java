@@ -86,6 +86,7 @@ public class ExamService {
             testRepository.save(test);  // 테스트 정보 저장
         }
     }
+
     @Transactional
     public void updateExam(Long examId, Long memberId, ExamRequestDto request) {
         // 시험 정보를 ID를 통해 찾아 업데이트
@@ -113,6 +114,13 @@ public class ExamService {
         }
     }
 
+    @Transactional
+    public void deleteExam(Long examId, Long requestingMemberId) {
+        int affectedRows = examRepository.deleteByIdAndMemberId(examId, requestingMemberId);
+        if (affectedRows == 0) {
+            throw new RuntimeException("No exam found or unauthorized to delete this exam");
+        }
+    }
     private void updateProblem(Long problemId, ProblemRequestDto problemDto) {
         Problem problem = problemRepository.findById(problemId)
                 .orElseThrow(() -> new RuntimeException("Problem not found with id: " + problemId));
@@ -140,4 +148,91 @@ public class ExamService {
 
         problemRepository.save(problem);
     }
+
+    /*@Transactional
+    public void updateExam(Long examId, ExamRequestDto request, Long memberId) {
+        // 기존 시험 정보 찾기
+        Exam exam = examRepository.findById(examId)
+                .orElseThrow(() -> new RuntimeException("Exam not found with id: " + examId));
+        // 문제 ID 목록 가져오기
+        List<Long> problemIds = questionRepository.getProblemIdByExamId(examId);
+
+        // 기존 문제 업데이트
+        for (Long problemId : problemIds) {
+            // 문제 업데이트를 위해 문제 ID로 기존 문제 찾기
+            Optional<Problem> optionalProblem = problemRepository.findById(problemId);
+            if (optionalProblem.isPresent()) {
+                Problem problem = optionalProblem.get();
+                // 요청으로 전달된 문제 정보와 비교하여 업데이트 수행
+                for (ProblemRequestDto problemDto : request.getTests()) {
+                    if (problemDto.getProblemId() != null && problemDto.getProblemId().equals(problemId)) {
+                        problem.update(
+                                problemDto.getProblemTitle(),
+                                problemDto.getProblemContents(),
+                                problemDto.getProblemInputContents(),
+                                problemDto.getProblemOutputContents(),
+                                problemDto.getProblemDiff(),
+                                ProblemClass.valueOf(problemDto.getProblemClass()),
+                                problemDto.getProblemTimeLimit(),
+                                problemDto.getProblemMemoryLimit(),
+                                ProblemStatus.valueOf(problemDto.getProblemStatus()),
+                                problemDto.getProblemPrompt()
+                        ); // 문제 정보 업데이트
+                        break; // 현재 문제 처리 완료했으므로 다음 문제로 이동
+                    }
+                }
+            }
+        }
+
+        // 새로운 문제 추가
+        for (ProblemRequestDto problemDto : request.getTests()) {
+            if (problemDto.getProblemId() == null) {
+                Problem newProblem = Problem.create(
+                        problemDto.getProblemTitle(),
+                        problemDto.getProblemContents(),
+                        problemDto.getProblemInputContents(),
+                        problemDto.getProblemOutputContents(),
+                        problemDto.getProblemDiff(),
+                        problemDto.getProblemTimeLimit(),
+                        problemDto.getProblemMemoryLimit(),
+                        problemDto.getProblemPrompt(),
+                        ProblemClass.valueOf(problemDto.getProblemClass()),
+                        ProblemStatus.valueOf(problemDto.getProblemStatus())
+                ); // 새로운 문제 생성
+                newProblem.setExam(exam);  // 문제를 시험에 연결
+
+                // 새로운 문제의 테스트케이스 추가
+                for (TestcaseRequestDto testcaseDto : problemDto.getTestcases()) {
+                    Testcase testcase = createTestcaseFromDto(testcaseDto); // 테스트케이스 생성
+                    testcase.setProblem(newProblem); // 새로운 문제에 연결
+                    newProblem.addTestcase(testcase);
+                }
+
+                problemRepository.save(newProblem); // 새로운 문제 저장
+            }
+        }
+    }
+
+    // 시험 정보를 DTO에서 엔티티로 업데이트하는 메서드
+    private void updateExamFromDto(Exam exam, ExamRequestDto request, Long memberId) {
+        exam.setExamTitle(request.getExamTitle());
+        exam.setMemberId(memberId);
+        exam.setExamMemo(request.getExamMemo());
+        exam.setExamNotice(request.getExamNotice());
+        exam.setExamStartDate(request.getExamStartDate());
+        exam.setExamEndDate(request.getExamEndDate());
+        exam.setExamDueTime(request.getExamDueTime());
+        exam.setExamStatus(request.getExamStatus());
+        exam.setExamType(request.getExamType());
+        examRepository.save(exam);
+    }
+
+    // DTO에서 엔티티로 테스트케이스 생성하는 메서드
+    private Testcase createTestcaseFromDto(TestcaseRequestDto testcaseDto) {
+        Testcase testcase = new Testcase();
+        testcase.setTestcaseInput(testcaseDto.getTestcaseInput());
+        testcase.setTestcaseOutput(testcaseDto.getTestcaseOutput());
+        testcase.setTestcaseStatus(TestcaseStatus.valueOf(testcaseDto.getTestcaseStatus()));
+        return testcase;
+    }*/
 }
