@@ -63,4 +63,10 @@ public class BoardService {
             inquiryRepository.delete(inquiry);
         }
     }
+    // 문의사항 삭제 관리자
+    @Transactional
+    public void deleteInquiryByAdmin(Long inquiryId) {
+        Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new IllegalArgumentException("해당 문의사항이 존재하지 않습니다."));
+        inquiryRepository.delete(inquiry);
+    }
 }

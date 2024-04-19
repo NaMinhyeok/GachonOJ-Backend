@@ -51,11 +51,17 @@ public class BoardController {
         boardService.updateInquiry(inquiryId,inquiryRequestDto, memberId);
         return ResponseEntity.ok(CommonResponseDto.success());
     }
-    // 문의사항 삭제 API
+    // 문의사항 삭제 사용자 API
     @DeleteMapping("/inquiry/{inquiryId}")
     public ResponseEntity<CommonResponseDto<Void>> deleteInquiry(HttpServletRequest request,@PathVariable Long inquiryId){
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
         boardService.deleteInquiryByMember(inquiryId,memberId);
+        return ResponseEntity.ok(CommonResponseDto.success());
+    }
+    // 문의사항 삭제 관리자 API
+    @DeleteMapping("/admin/inquiry/{inquiryId}")
+    public ResponseEntity<CommonResponseDto<Void>> deleteInquiryByAdmin(@PathVariable Long inquiryId){
+        boardService.deleteInquiryByAdmin(inquiryId);
         return ResponseEntity.ok(CommonResponseDto.success());
     }
 
