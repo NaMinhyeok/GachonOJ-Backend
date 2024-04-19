@@ -40,4 +40,7 @@ public class Exam {
     private Integer examDueTime;
     @OneToMany(mappedBy = "exam", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Test> tests;
+
+    @OneToMany(mappedBy = "exam", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Question> questions;
 }

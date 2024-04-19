@@ -19,8 +19,8 @@ public class Question {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "exam_id",nullable = false)
     private Exam exam;
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "problem_id",nullable = false)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "problem_id", nullable = false)
     private Problem problem;
     private Integer questionSequence;
     private Integer questionScore;
