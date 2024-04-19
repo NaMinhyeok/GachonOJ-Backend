@@ -4,12 +4,15 @@ import com.gachonoj.boardservice.common.response.CommonResponseDto;
 import com.gachonoj.boardservice.domain.dto.request.InquiryRequestDto;
 import com.gachonoj.boardservice.domain.dto.request.NoticeRequestDto;
 import com.gachonoj.boardservice.domain.dto.request.ReplyRequestDto;
+import com.gachonoj.boardservice.domain.dto.response.NoticeMainResponseDto;
 import com.gachonoj.boardservice.service.BoardService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -72,5 +75,11 @@ public class BoardController {
         return ResponseEntity.ok(CommonResponseDto.success());
     }
 
+    // 메인 대시보드 공지사항 목록 조회 최대 5개
+    @GetMapping("/notice/main")
+    public ResponseEntity<CommonResponseDto<List<NoticeMainResponseDto>>> getMainNoticeList(){
+        List<NoticeMainResponseDto> noticeList = boardService.getMainNoticeList();
+        return ResponseEntity.ok(CommonResponseDto.success(noticeList));
+    }
 }
 

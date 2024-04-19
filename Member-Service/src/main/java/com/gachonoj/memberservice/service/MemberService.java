@@ -44,6 +44,20 @@ public class MemberService {
 
     private static final int PAGE_SIZE = 10;
 
+
+    /*
+    * 페인클라이언트를 위한 서비스
+    * */
+
+    // 닉네임 조회
+    public String getNicknameToBoard(Long memberId) {
+        return memberRepository.findByMemberId(memberId).getMemberNickname();
+    }
+
+    /*
+    * 자체 서비스
+    * */
+
     // 이메일 인증 코드
     private int authCode;
     // 이메일 인증코드를 위한 난수 생성기
@@ -372,4 +386,5 @@ public class MemberService {
     public void deleteMemberByAdmin(Long memberId) {
         memberRepository.deleteById(memberId);
     }
+
 }

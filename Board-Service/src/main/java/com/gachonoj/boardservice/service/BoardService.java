@@ -3,6 +3,7 @@ package com.gachonoj.boardservice.service;
 import com.gachonoj.boardservice.domain.dto.request.InquiryRequestDto;
 import com.gachonoj.boardservice.domain.dto.request.NoticeRequestDto;
 import com.gachonoj.boardservice.domain.dto.request.ReplyRequestDto;
+import com.gachonoj.boardservice.domain.dto.response.NoticeMainResponseDto;
 import com.gachonoj.boardservice.domain.entity.Inquiry;
 import com.gachonoj.boardservice.domain.entity.Notice;
 import com.gachonoj.boardservice.domain.entity.Reply;
@@ -14,6 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -24,6 +27,7 @@ public class BoardService {
     private final NoticeRepository noticeRepository;
     private final InquiryRepository inquiryRepository;
     private final ReplyRepository replyRepository;
+    private final MemberServiceFeignClient memberServiceFeignClient;
 
     // 공지사항 작성
     @Transactional
@@ -77,5 +81,16 @@ public class BoardService {
         Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new IllegalArgumentException("해당 문의사항이 존재하지 않습니다."));
         Reply reply = new Reply(inquiry, replyRequestDto.getReplyContents());
         replyRepository.save(reply);
+    }
+    // 메인 대시보드 공지사항 목록 조회 최대 5개
+    public List<NoticeMainResponseDto> getMainNoticeList() {
+        List<Notice> noticeList = noticeRepository.findTop5ByOrderByNoticeCreatedDateDesc();
+        List<NoticeMainResponseDto> noticeMainResponseDtos = new ArrayList<>();
+        for (Notice notice : noticeList) {
+            String memberNickname = memberServiceFeignClient.getNicknames(notice.getMemberId());
+            NoticeMainResponseDto responseDto = new NoticeMainResponseDto(notice,memberNickname);
+            noticeMainResponseDtos.add(responseDto);
+        }
+        return noticeMainResponseDtos;
     }
 }
