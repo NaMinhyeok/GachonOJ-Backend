@@ -37,5 +37,9 @@ public class Inquiry {
         this.memberId = memberId;
     }
 
+    public void updateInquiry(String inquiryTitle, String inquiryContents) {
+        this.inquiryTitle = inquiryTitle;
+        this.inquiryContents = inquiryContents;
+    }
 }
 

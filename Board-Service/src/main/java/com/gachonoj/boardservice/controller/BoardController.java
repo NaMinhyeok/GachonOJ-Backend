@@ -44,6 +44,13 @@ public class BoardController {
         boardService.createInquiry(inquiryRequestDto, memberId);
         return ResponseEntity.ok(CommonResponseDto.success());
     }
+    // 문의사항 수정 API
+    @PutMapping("/inquiry/{inquiryId}")
+    public ResponseEntity<CommonResponseDto<Void>> updateInquiry(HttpServletRequest request,@PathVariable Long inquiryId,@RequestBody InquiryRequestDto inquiryRequestDto){
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        boardService.updateInquiry(inquiryId,inquiryRequestDto, memberId);
+        return ResponseEntity.ok(CommonResponseDto.success());
+    }
     // 문의사항 삭제 API
     @DeleteMapping("/inquiry/{inquiryId}")
     public ResponseEntity<CommonResponseDto<Void>> deleteInquiry(HttpServletRequest request,@PathVariable Long inquiryId){

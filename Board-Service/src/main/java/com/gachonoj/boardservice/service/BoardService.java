@@ -43,6 +43,14 @@ public class BoardService {
         Inquiry inquiry = new Inquiry(inquiryRequestDto.getInquiryTitle(), inquiryRequestDto.getInquiryContents(), memberId);
         inquiryRepository.save(inquiry);
     }
+    // 문의사항 수정
+    public void updateInquiry(Long inquiryId, InquiryRequestDto inquiryRequestDto, Long memberId) {
+        Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new IllegalArgumentException("해당 문의사항이 존재하지 않습니다."));
+        if (inquiry.getMemberId().equals(memberId)) {
+            inquiry.updateInquiry(inquiryRequestDto.getInquiryTitle(), inquiryRequestDto.getInquiryContents());
+            inquiryRepository.save(inquiry);
+        }
+    }
     // 문의사항 삭제 회원
     public void deleteInquiryByMember(Long inquiryId,Long memberId) {
         Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new IllegalArgumentException("해당 문의사항이 존재하지 않습니다."));
