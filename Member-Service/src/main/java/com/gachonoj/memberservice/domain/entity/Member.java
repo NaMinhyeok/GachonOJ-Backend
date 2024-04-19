@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.springframework.data.annotation.CreatedDate;
 
@@ -17,6 +18,7 @@ import java.util.List;
 @Entity
 @Table
 @Getter
+@Setter
 @NoArgsConstructor
 public class Member {
     @Id
@@ -43,19 +45,36 @@ public class Member {
     private MemberLang memberLang;
 
     @Builder
-    public Member(String memberEmail, String memberPassword, String memberName, String memberNumber, String memberNickname) {
+    public Member(String memberEmail, String memberPassword, String memberName, String memberNumber, String memberNickname,Role memberRole) {
         this.memberEmail = memberEmail;
         this.memberPassword = memberPassword;
         this.memberName = memberName;
         this.memberNumber = memberNumber;
-        this.memberRole = Role.ROLE_STUDENT;
+        this.memberRole = memberRole;
         this.memberNickname = memberNickname;
         this.memberRank = 1000;
         this.memberCreatedDate = LocalDateTime.now().truncatedTo(ChronoUnit.MICROS);
         this.memberLang = MemberLang.C;
     }
+    // 사용자 언어 설정
     public void updateMemberLang(MemberLangRequestDto memberLangRequestDto) {
         this.memberLang = memberLangRequestDto.getMemberLang();
     }
-
+    // 사용자 정보 수정
+    public void updateMemberInfo(String memberNickname, String memberName, String memberIntroduce, String memberImg) {
+        this.memberNickname = memberNickname;
+        this.memberName = memberName;
+        this.memberIntroduce = memberIntroduce;
+        this.memberImg = memberImg;
+    }
+    // 사용자 비밀번호 수정
+    public void updateMemberPassword(String encode) {
+        this.memberPassword = encode;
+    }
+    // 사용자 정보 수정 (관리자)
+    public void updateMemberInfo(String memberNickname, String memberName, String memberNumber){
+        this.memberNickname = memberNickname;
+        this.memberName = memberName;
+        this.memberNumber = memberNumber;
+    }
 }

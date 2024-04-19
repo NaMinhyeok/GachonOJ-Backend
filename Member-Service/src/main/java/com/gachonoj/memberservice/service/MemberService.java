@@ -2,9 +2,7 @@ package com.gachonoj.memberservice.service;
 
 import com.gachonoj.memberservice.common.codes.ErrorCode;
 import com.gachonoj.memberservice.domain.constant.Role;
-import com.gachonoj.memberservice.domain.dto.request.LoginRequestDto;
-import com.gachonoj.memberservice.domain.dto.request.MemberLangRequestDto;
-import com.gachonoj.memberservice.domain.dto.request.SignUpRequestDto;
+import com.gachonoj.memberservice.domain.dto.request.*;
 import com.gachonoj.memberservice.domain.dto.response.*;
 import com.gachonoj.memberservice.domain.entity.Member;
 //import com.gachonoj.memberservice.jwt.JwtTokenProvider;
@@ -13,6 +11,7 @@ import io.jsonwebtoken.Jwt;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.sql.Update;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,7 +23,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Objects;
 import java.util.Random;
 
@@ -39,6 +40,7 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
     private final SubmissionServiceFeignClient submissionServiceFeignClient;
     private final ProblemServiceFeignClient problemServiceFeignClient;
+    private final S3UploadService s3UploadService;
 
     private static final int PAGE_SIZE = 10;
 
@@ -109,7 +111,7 @@ public class MemberService {
     @Transactional
     public void signUp(SignUpRequestDto signUpRequestDto) {
         // 회원가입 유효성 검사
-        verifySignUp(signUpRequestDto);
+        verifySignUp(signUpRequestDto.getMemberPassword(), signUpRequestDto.getMemberPasswordConfirm(), signUpRequestDto.getMemberEmail(), signUpRequestDto.getMemberNumber());
 
         // 회원가입 로직
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -119,23 +121,26 @@ public class MemberService {
                 .memberNumber(signUpRequestDto.getMemberNumber())
                 .memberPassword(passwordEncoder.encode(signUpRequestDto.getMemberPassword()))
                 .memberNickname(signUpRequestDto.getMemberNickname())
+                .memberRole(Role.ROLE_STUDENT)
                 .build();
 
         memberRepository.save(member);
     }
     // 회원가입 유효성 검사
-    public void verifySignUp(SignUpRequestDto signUpRequestDto) {
+    public void verifySignUp(String password, String passwordConfirm, String email, String number) {
         String regExp = "^(?=.*[a-zA-Z])(?=.*[!@#$%^])(?=.*[0-9]).{8,25}$";
-        if(!signUpRequestDto.getMemberPassword().matches(regExp)) {
+        if(!password.matches(regExp)) {
             throw new IllegalArgumentException("비밀번호는 영문, 숫자, 특수문자를 포함한 8~25자여야 합니다.");
         }
-        if(!signUpRequestDto.getMemberPassword().equals(signUpRequestDto.getMemberPasswordConfirm())) {
+        if(!password.equals(passwordConfirm)) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         }
-        if(validateMemberNumber(signUpRequestDto.getMemberNumber())) {
-            throw new IllegalArgumentException("이미 가입된 학번입니다.");
+        if(number!=null){
+            if(validateMemberNumber(number)) {
+                throw new IllegalArgumentException("이미 가입된 학번입니다.");
+            }
         }
-        if(validateMemberEmail(signUpRequestDto.getMemberEmail())) {
+        if(validateMemberEmail(email)) {
             throw new IllegalArgumentException("이미 가입된 이메일입니다.");
         }
     }
@@ -166,8 +171,8 @@ public class MemberService {
         return memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException("가입되지 않은 회원입니다."));
     }
     // 닉네임 중복 확인
-    public NicknameVerificationResponseDto verifyMemberNickname(String memberNickname) {
-        return new NicknameVerificationResponseDto(!memberRepository.existsByMemberNickname(memberNickname));
+    public NicknameVerificationResponseDto verifiedMemberNickname(String memberNickname) {
+        return new NicknameVerificationResponseDto(verifyMemberNickname(memberNickname));
     }
     // 호버시 회원 정보 조회
     public HoverResponseDto getHoverInfo(Long memberId) {
@@ -266,5 +271,105 @@ public class MemberService {
             Integer memberSolved = submissionServiceFeignClient.getMemberSolved(member.getMemberId());
             return new MemberRankingResponseDto(member, memberSolved);
         });
+    }
+    // 회원정보 수정
+    @Transactional
+    public void updateMemberInfo(Long memberId, MultipartFile memberImg, MemberInfoRequestDto memberInfoRequestDto) throws IOException {
+        Member member = memberRepository.findByMemberId(memberId);
+        if(memberImg != null) {
+            // 원래 있던 이미지 삭제
+            if(member.getMemberImg() != null) {
+                s3UploadService.deleteImage(member.getMemberImg());
+            }
+            // 이미지 저장
+            String memberImgUrl = s3UploadService.saveFile(memberImg);
+            member.updateMemberInfo(memberInfoRequestDto.getMemberNickname(), memberInfoRequestDto.getMemberName(), memberInfoRequestDto.getMemberIntroduce(), memberImgUrl);
+        } else {
+            member.updateMemberInfo(memberInfoRequestDto.getMemberNickname(), memberInfoRequestDto.getMemberName(), memberInfoRequestDto.getMemberIntroduce(), member.getMemberImg());
+        }
+    }
+    // 닉네임 중복 확인 True False 반환 메소드
+    public boolean verifyMemberNickname(String memberNickname) {
+        return !memberRepository.existsByMemberNickname(memberNickname);
+    }
+    // 회원 탈퇴
+    @Transactional
+    public void deleteMember(Long memberId) {
+        memberRepository.deleteById(memberId);
+    }
+    // 비밀번호 변경
+    @Transactional
+    public void updateMemberPassword(Long memberId, UpdatePasswordRequestDto updatePasswordRequestDto) {
+        Member member = memberRepository.findByMemberId(memberId);
+        if(!validateMemberPassword(updatePasswordRequestDto.getMemberPassword(), member)) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        } else if(!updatePasswordRequestDto.getMemberNewPassword().equals(updatePasswordRequestDto.getMemberNewPasswordConfirm())) {
+            throw new IllegalArgumentException("새로운 비밀번호가 일치하지 않습니다.");
+        } else {
+            member.updateMemberPassword(passwordEncoder.encode(updatePasswordRequestDto.getMemberNewPassword()));
+        }
+    }
+    // 사용자 추가 생성
+    @Transactional
+    public void createMember(CreateMemberRequestDto createMemberRequestDto) {
+        // 회원가입 유효성 검사
+        verifySignUp(createMemberRequestDto.getMemberPassword(), createMemberRequestDto.getMemberPasswordConfirm(), createMemberRequestDto.getMemberEmail(), createMemberRequestDto.getMemberNumber());
+        Role role;
+        if(Objects.equals(createMemberRequestDto.getMemberRole(), "학생")) {
+            role = Role.ROLE_STUDENT;
+        } else if(Objects.equals(createMemberRequestDto.getMemberRole(), "교수")) {
+            role = Role.ROLE_PROFESSOR;
+        } else if(Objects.equals(createMemberRequestDto.getMemberRole(), "관리자")) {
+            role = Role.ROLE_ADMIN;
+        } else {
+            throw new IllegalArgumentException(ErrorCode.NOT_VALID_ERROR.getMessage());
+        }
+
+        // 회원가입 로직
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        Member member = Member.builder()
+                .memberEmail(createMemberRequestDto.getMemberEmail())
+                .memberName(createMemberRequestDto.getMemberName())
+                .memberNumber(createMemberRequestDto.getMemberNumber())
+                .memberPassword(passwordEncoder.encode(createMemberRequestDto.getMemberPassword()))
+                .memberNickname(createMemberRequestDto.getMemberNickname())
+                .memberRole(role)
+                .build();
+
+        memberRepository.save(member);
+    }
+    // 관리자가 사용자 정보 변경
+    @Transactional
+    public void updateMemberByAdmin(UpdateMemberRequestDto updateMemberRequestDto,Long memberId){
+        Member member = memberRepository.findByMemberId(memberId);
+        if(updateMemberRequestDto.getMemberNumber()!=null){
+            if(validateMemberNumber(updateMemberRequestDto.getMemberNumber())) {
+                throw new IllegalArgumentException("이미 가입된 학번입니다.");
+            }
+        }
+        if(verifyMemberNickname(updateMemberRequestDto.getMemberNickname())){
+            throw new IllegalArgumentException("이미 존재하는 닉네임입니다.");
+        }
+        member.updateMemberInfo(updateMemberRequestDto.getMemberName(),updateMemberRequestDto.getMemberNickname(),updateMemberRequestDto.getMemberNumber());
+    }
+    // 관리자 화면 사용자 정보변경을 위한 사용자 정보 조회
+    public MemberInfoByAdminResponseDto getMemberInfoByAdmin(Long memberId) {
+        Member member = memberRepository.findByMemberId(memberId);
+        String memberRole;
+        if(member.getMemberRole().equals(Role.ROLE_STUDENT)) {
+            memberRole = "학생";
+        } else if(member.getMemberRole().equals(Role.ROLE_PROFESSOR)) {
+            memberRole = "교수";
+        } else if(member.getMemberRole().equals(Role.ROLE_ADMIN)) {
+            memberRole = "관리자";
+        } else {
+            memberRole = "알 수 없음";
+        }
+        return new MemberInfoByAdminResponseDto(member.getMemberEmail(),member.getMemberName(),member.getMemberNumber(),member.getMemberNickname(),memberRole);
+    }
+    // 관리자가 회원 탈퇴 시키기
+    @Transactional
+    public void deleteMemberByAdmin(Long memberId) {
+        memberRepository.deleteById(memberId);
     }
 }
