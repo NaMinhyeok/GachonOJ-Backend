@@ -1,6 +1,7 @@
 package com.gachonoj.boardservice.controller;
 
 import com.gachonoj.boardservice.common.response.CommonResponseDto;
+import com.gachonoj.boardservice.domain.dto.request.InquiryRequestDto;
 import com.gachonoj.boardservice.domain.dto.request.NoticeRequestDto;
 import com.gachonoj.boardservice.service.BoardService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -36,5 +37,13 @@ public class BoardController {
         boardService.deleteNotice(noticeId);
         return ResponseEntity.ok(CommonResponseDto.success());
     }
+    // 문의사항 작성 API
+    @PostMapping("/inquiry")
+    public ResponseEntity<CommonResponseDto<Void>> createInquiry(HttpServletRequest request,@RequestBody InquiryRequestDto inquiryRequestDto){
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        boardService.createInquiry(inquiryRequestDto, memberId);
+        return ResponseEntity.ok(CommonResponseDto.success());
+    }
+
 }
 

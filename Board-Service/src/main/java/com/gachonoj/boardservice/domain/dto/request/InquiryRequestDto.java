@@ -8,8 +8,6 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class InquiryRequestDto {
-    private Long memberId;
     private String inquiryTitle;
     private String inquiryContents;
-    private String inquiryStatus; // This should be a string representation of the InquiryStatus enum
 }
