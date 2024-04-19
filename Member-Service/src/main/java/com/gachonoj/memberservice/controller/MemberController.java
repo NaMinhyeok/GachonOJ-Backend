@@ -128,4 +128,15 @@ public class MemberController {
         memberService.createMember(createMemberRequestDto);
         return ResponseEntity.ok(CommonResponseDto.success());
     }
+    // 관리자가 사용자 정보 변경
+    @PutMapping("/admin/members/{memberId}")
+    public ResponseEntity<CommonResponseDto<Void>> updateMember(@RequestBody @Valid UpdateMemberRequestDto updateMemberRequestDto,@PathVariable Long memberId) {
+        memberService.updateMemberByAdmin(updateMemberRequestDto,memberId);
+        return ResponseEntity.ok(CommonResponseDto.success());
+    }
+    // 관리자 화면 사용자 정보변경을 위한 사용자 정보 조회
+    @GetMapping("/admin/members/{memberId}")
+    public ResponseEntity<CommonResponseDto<MemberInfoByAdminResponseDto>> getMemberInfoByAdmin(@PathVariable Long memberId) {
+        return ResponseEntity.ok(CommonResponseDto.success(memberService.getMemberInfoByAdmin(memberId)));
+    }
 }

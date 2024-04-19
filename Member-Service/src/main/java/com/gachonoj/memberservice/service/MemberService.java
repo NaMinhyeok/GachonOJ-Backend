@@ -307,8 +307,6 @@ public class MemberService {
             throw new IllegalArgumentException("새로운 비밀번호가 일치하지 않습니다.");
         } else {
             member.updateMemberPassword(passwordEncoder.encode(updatePasswordRequestDto.getMemberNewPassword()));
-            log.info("새로운 비밀번호 : " + updatePasswordRequestDto.getMemberNewPassword(),"로 변경되었습니다.");
-            log.info("인코더로 인코딩된 비밀번호 : " + passwordEncoder.encode(updatePasswordRequestDto.getMemberNewPassword()));
         }
     }
     // 사용자 추가 생성
@@ -339,5 +337,34 @@ public class MemberService {
                 .build();
 
         memberRepository.save(member);
+    }
+    // 관리자가 사용자 정보 변경
+    @Transactional
+    public void updateMemberByAdmin(UpdateMemberRequestDto updateMemberRequestDto,Long memberId){
+        Member member = memberRepository.findByMemberId(memberId);
+        if(updateMemberRequestDto.getMemberNumber()!=null){
+            if(validateMemberNumber(updateMemberRequestDto.getMemberNumber())) {
+                throw new IllegalArgumentException("이미 가입된 학번입니다.");
+            }
+        }
+        if(verifyMemberNickname(updateMemberRequestDto.getMemberNickname())){
+            throw new IllegalArgumentException("이미 존재하는 닉네임입니다.");
+        }
+        member.updateMemberInfo(updateMemberRequestDto.getMemberName(),updateMemberRequestDto.getMemberNickname(),updateMemberRequestDto.getMemberNumber());
+    }
+    // 관리자 화면 사용자 정보변경을 위한 사용자 정보 조회
+    public MemberInfoByAdminResponseDto getMemberInfoByAdmin(Long memberId) {
+        Member member = memberRepository.findByMemberId(memberId);
+        String memberRole;
+        if(member.getMemberRole().equals(Role.ROLE_STUDENT)) {
+            memberRole = "학생";
+        } else if(member.getMemberRole().equals(Role.ROLE_PROFESSOR)) {
+            memberRole = "교수";
+        } else if(member.getMemberRole().equals(Role.ROLE_ADMIN)) {
+            memberRole = "관리자";
+        } else {
+            memberRole = "알 수 없음";
+        }
+        return new MemberInfoByAdminResponseDto(member.getMemberEmail(),member.getMemberName(),member.getMemberNumber(),member.getMemberNickname(),memberRole);
     }
 }

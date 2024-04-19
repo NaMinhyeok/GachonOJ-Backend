@@ -71,4 +71,10 @@ public class Member {
     public void updateMemberPassword(String encode) {
         this.memberPassword = encode;
     }
+    // 사용자 정보 수정 (관리자)
+    public void updateMemberInfo(String memberNickname, String memberName, String memberNumber){
+        this.memberNickname = memberNickname;
+        this.memberName = memberName;
+        this.memberNumber = memberNumber;
+    }
 }
