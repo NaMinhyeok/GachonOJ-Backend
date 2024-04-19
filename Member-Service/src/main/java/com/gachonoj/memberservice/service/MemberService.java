@@ -6,13 +6,13 @@ import com.gachonoj.memberservice.domain.dto.request.*;
 import com.gachonoj.memberservice.domain.dto.response.*;
 import com.gachonoj.memberservice.domain.entity.Member;
 //import com.gachonoj.memberservice.jwt.JwtTokenProvider;
+import com.gachonoj.memberservice.feign.client.ProblemServiceFeignClient;
+import com.gachonoj.memberservice.feign.client.SubmissionServiceFeignClient;
+import com.gachonoj.memberservice.feign.dto.response.SubmissionMemberInfoResponseDto;
 import com.gachonoj.memberservice.repository.MemberRepository;
-import io.jsonwebtoken.Jwt;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.sql.Update;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -372,4 +372,5 @@ public class MemberService {
     public void deleteMemberByAdmin(Long memberId) {
         memberRepository.deleteById(memberId);
     }
+
 }

@@ -26,16 +26,6 @@ import java.util.Map;
 public class ProblemController {
     private final ProblemService problemService;    // 주입된 ProblemService 의존성
     private final ExamService examService;
-    /*
-     * feign Client를 이용한 API 작성
-     * */
-    @GetMapping("/member/bookmark")
-    public Integer getBookmarkCountByMemberId(@RequestParam Long memberId) {
-        return problemService.getBookmarkCountByMemberId(memberId);
-    }
-    /*
-     * 문제 서비스 자체적으로 사용하는 API 작성
-     * */
 
     @PostMapping("/exam/register")
     public ResponseEntity<CommonResponseDto<Void>> registerExam(@RequestBody ExamRequestDto examDto, HttpServletRequest request) {

@@ -73,8 +73,4 @@ public class ProblemService {
         problemRepository.findById(problemId)
                 .ifPresent(problemRepository::delete);
     }
-    // 북마크 갯수 조회
-    public Integer getBookmarkCountByMemberId(Long memberId) {
-        return problemRepository.getBookmarkCountByMemberId(memberId);
-    }
 }

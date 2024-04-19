@@ -4,6 +4,10 @@ import com.gachonoj.boardservice.domain.entity.Notice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-public interface NoticeRepository extends JpaRepository<Notice, Long>, PagingAndSortingRepository<Notice, Long> {
-    // Additional custom methods can be defined here
+import java.util.List;
+
+public interface NoticeRepository extends JpaRepository<Notice, Long> {
+    // 메인 대시보드 공지사항 목록 조회 최대 5개
+    List<Notice> findTop5ByOrderByNoticeCreatedDateDesc();
+
 }

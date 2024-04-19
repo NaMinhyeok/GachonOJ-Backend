@@ -4,12 +4,14 @@ import com.gachonoj.boardservice.domain.constant.InquiryStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
 
 @Entity
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -26,16 +28,20 @@ public class Inquiry {
     private InquiryStatus inquiryStatus = InquiryStatus.NONE;
     @CreatedDate
     private LocalDateTime inquiryCreatedDate;
+    @LastModifiedDate
+    private LocalDateTime inquiryUpdatedDate;
+    @OneToOne(mappedBy = "inquiry", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Reply reply;
 
-    // Custom static factory method using Builder pattern
-    @Builder(builderMethodName = "create")
-    public static Inquiry create(Long memberId, String inquiryTitle, String inquiryContents) {
-        Inquiry inquiry = new Inquiry();
-        inquiry.memberId = memberId;
-        inquiry.inquiryTitle = inquiryTitle;
-        inquiry.inquiryContents = inquiryContents;
-        return inquiry;
+    public Inquiry(String inquiryTitle, String inquiryContents, Long memberId) {
+        this.inquiryTitle = inquiryTitle;
+        this.inquiryContents = inquiryContents;
+        this.memberId = memberId;
     }
 
+    public void updateInquiry(String inquiryTitle, String inquiryContents) {
+        this.inquiryTitle = inquiryTitle;
+        this.inquiryContents = inquiryContents;
+    }
 }
 
