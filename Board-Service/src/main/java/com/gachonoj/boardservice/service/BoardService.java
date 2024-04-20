@@ -93,6 +93,7 @@ public class BoardService {
         Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new IllegalArgumentException("해당 문의사항이 존재하지 않습니다."));
         Reply reply = new Reply(inquiry, replyRequestDto.getReplyContents());
         replyRepository.save(reply);
+        inquiry.updateInquiryStatus(InquiryStatus.COMPLETED);
     }
     // 메인 대시보드 공지사항 목록 조회 최대 5개
     public List<NoticeMainResponseDto> getMainNoticeList() {
