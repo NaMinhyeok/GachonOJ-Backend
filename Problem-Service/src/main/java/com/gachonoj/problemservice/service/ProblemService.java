@@ -2,16 +2,20 @@ package com.gachonoj.problemservice.service;
 
 import com.gachonoj.problemservice.domain.dto.request.ProblemRequestDto;
 import com.gachonoj.problemservice.domain.dto.response.BookmarkProblemResponseDto;
+import com.gachonoj.problemservice.domain.dto.response.ScheduledContestResponseDto;
 import com.gachonoj.problemservice.domain.dto.response.SolvedProblemResponseDto;
 import com.gachonoj.problemservice.domain.dto.response.WrongProblemResponseDto;
 import com.gachonoj.problemservice.domain.entity.Bookmark;
+import com.gachonoj.problemservice.domain.entity.Exam;
 import com.gachonoj.problemservice.domain.entity.Problem;
 import com.gachonoj.problemservice.domain.entity.Testcase;
 import com.gachonoj.problemservice.domain.constant.ProblemClass;
 import com.gachonoj.problemservice.domain.constant.ProblemStatus;
 import com.gachonoj.problemservice.domain.constant.TestcaseStatus;
+import com.gachonoj.problemservice.feign.client.MemberServiceFeignClient;
 import com.gachonoj.problemservice.feign.client.SubmissionServiceFeignClient;
 import com.gachonoj.problemservice.repository.BookmarkRepository;
+import com.gachonoj.problemservice.repository.ExamRepository;
 import com.gachonoj.problemservice.repository.ProblemRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -22,6 +26,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -29,7 +35,9 @@ import java.util.stream.Collectors;
 public class ProblemService {
     private final ProblemRepository problemRepository;
     private final BookmarkRepository bookmarkRepository;
+    private final ExamRepository examRepository;
     private final SubmissionServiceFeignClient submissionServiceFeignClient;
+
 
     private static final int PAGE_SIZE = 10;
 

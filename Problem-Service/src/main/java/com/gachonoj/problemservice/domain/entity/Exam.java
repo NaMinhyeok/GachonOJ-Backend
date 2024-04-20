@@ -27,8 +27,8 @@ public class Exam {
     @CreatedDate
     private LocalDateTime examCreatedDate;
     private LocalDateTime examUpdateDate;
-    private String examStartDate;
-    private String examEndDate;
+    private LocalDateTime examStartDate;
+    private LocalDateTime examEndDate;
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ExamStatus examStatus;

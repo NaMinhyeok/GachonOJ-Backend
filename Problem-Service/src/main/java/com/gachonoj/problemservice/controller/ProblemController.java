@@ -4,9 +4,7 @@ import com.gachonoj.problemservice.common.codes.ErrorCode;
 import com.gachonoj.problemservice.common.response.CommonResponseDto;
 import com.gachonoj.problemservice.domain.dto.request.ExamRequestDto;
 import com.gachonoj.problemservice.domain.dto.request.ProblemRequestDto;
-import com.gachonoj.problemservice.domain.dto.response.BookmarkProblemResponseDto;
-import com.gachonoj.problemservice.domain.dto.response.SolvedProblemResponseDto;
-import com.gachonoj.problemservice.domain.dto.response.WrongProblemResponseDto;
+import com.gachonoj.problemservice.domain.dto.response.*;
 import com.gachonoj.problemservice.service.ExamService;
 import com.gachonoj.problemservice.service.ProblemService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 // Lombok 어노테이션 - 코드 간결하게 작성
@@ -150,6 +149,24 @@ public class ProblemController {
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
         // 강제로 회원 ID를 받아 사용하거나, 인증 정보에서 회원 ID를 추출해야 할 경우 로직 추가
         Page<SolvedProblemResponseDto> result = problemService.getSolvedProblemList(memberId, pageNo);
+        return ResponseEntity.ok(CommonResponseDto.success(result));
+    }
+
+    // 참가 대회 예정 조회
+    @GetMapping("/exam/scheduled")
+    public ResponseEntity<CommonResponseDto<List<ScheduledContestResponseDto>>> getScheduledContests(
+            @RequestHeader("X-Authorization-Id") String authorizationId) {
+        Long memberId = Long.parseLong(authorizationId);
+        List<ScheduledContestResponseDto> result = examService.getScheduledContests(memberId);
+        return ResponseEntity.ok(CommonResponseDto.success(result));
+    }
+
+    // 지난 대회 조회
+    @GetMapping("/exam/past")
+    public ResponseEntity<CommonResponseDto<List<PastContestResponseDto>>> getPastContests(
+            @RequestHeader("X-Authorization-Id") String authorizationId) {
+        Long memberId = Long.parseLong(authorizationId);
+        List<PastContestResponseDto> result = examService.getPastContests(memberId);
         return ResponseEntity.ok(CommonResponseDto.success(result));
     }
 }
