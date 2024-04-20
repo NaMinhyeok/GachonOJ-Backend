@@ -2,6 +2,7 @@ package com.gachonoj.problemservice.service;
 
 import com.gachonoj.problemservice.domain.dto.request.ProblemRequestDto;
 import com.gachonoj.problemservice.domain.dto.response.BookmarkProblemResponseDto;
+import com.gachonoj.problemservice.domain.dto.response.WrongProblemResponseDto;
 import com.gachonoj.problemservice.domain.entity.Bookmark;
 import com.gachonoj.problemservice.domain.entity.Problem;
 import com.gachonoj.problemservice.domain.entity.Testcase;
@@ -101,7 +102,7 @@ public class ProblemService {
                 throw new IllegalArgumentException("Problem not found");
             }
             Integer correctPeople = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
-            Integer correctRate = submissionServiceFeignClient.getProblemCorrectRate(problem.getProblemId());
+            Double correctRate = submissionServiceFeignClient.getProblemCorrectRate(problem.getProblemId());
             return new BookmarkProblemResponseDto(
                     problem.getProblemTitle(),
                     problem.getProblemDiff(),
@@ -124,5 +125,29 @@ public class ProblemService {
         } else {
             throw new IllegalStateException("Bookmark already exists");
         }
+    }
+
+    @Transactional(readOnly = true)
+    public Page<WrongProblemResponseDto> getIncorrectProblemList(Long memberId, int pageNo) {
+        Pageable pageable = PageRequest.of(pageNo - 1, 10, Sort.by(Sort.Direction.DESC, "problemId"));
+
+        List<Long> problemIds = submissionServiceFeignClient.getIncorrectProblemIds(memberId);
+
+        // 페이지네이션 적용한 문제 ID 리스트 조회
+        Page<Problem> problems = problemRepository.findAllByProblemIdIn(problemIds, pageable);
+
+        return problems.map(problem -> {
+            Integer correctPeople = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
+            Double correctRate = submissionServiceFeignClient.getProblemCorrectRate(problem.getProblemId());
+            return new WrongProblemResponseDto(
+                    problem.getProblemId(),
+                    problem.getProblemTitle(),
+                    problem.getProblemDiff(),
+                    problem.getProblemClass(),
+                    correctPeople,
+                    correctRate,
+                    false // isBookmarked 필드는 사용자가 별도로 제공해야 하는 정보를 기반으로 설정합니다
+            );
+        });
     }
 }

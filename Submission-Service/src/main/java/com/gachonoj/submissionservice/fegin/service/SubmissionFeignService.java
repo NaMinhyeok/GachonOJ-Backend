@@ -1,11 +1,14 @@
 package com.gachonoj.submissionservice.fegin.service;
 
+import com.gachonoj.submissionservice.domain.entity.Submission;
 import com.gachonoj.submissionservice.fegin.dto.response.SubmissionMemberInfoResponseDto;
 import com.gachonoj.submissionservice.repository.SubmissionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Slf4j
 @Service
@@ -41,5 +44,10 @@ public class SubmissionFeignService {
         }
 
         return (double) correctSubmissions / totalSubmissions * 100.0; // 정답률 계산
+    }
+
+    //memberId로 틀린 문제 리스트 받아옴
+    public List<Long> getIncorrectProblemIdsByMemberId(Long memberId) {
+        return submissionRepository.findIncorrectProblemIdsByMemberId(memberId);
     }
 }

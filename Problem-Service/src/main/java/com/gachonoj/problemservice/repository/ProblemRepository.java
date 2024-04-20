@@ -2,6 +2,8 @@ package com.gachonoj.problemservice.repository;
 
 import com.gachonoj.problemservice.domain.entity.Problem;
 import feign.Param;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -13,4 +15,7 @@ public interface ProblemRepository extends JpaRepository<Problem,Long> {
     Integer getBookmarkCountByMemberId(Long memberId);
 
     Optional<Problem> findByProblemId(Long problemId);
+
+
+    Page<Problem> findAllByProblemIdIn(List<Long> ids, Pageable pageable);
 }

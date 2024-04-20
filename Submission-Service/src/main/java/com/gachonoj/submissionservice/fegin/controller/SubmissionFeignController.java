@@ -1,12 +1,16 @@
 package com.gachonoj.submissionservice.fegin.controller;
 
+import com.gachonoj.submissionservice.domain.entity.Submission;
 import com.gachonoj.submissionservice.fegin.dto.response.SubmissionMemberInfoResponseDto;
 import com.gachonoj.submissionservice.fegin.service.SubmissionFeignService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -36,5 +40,10 @@ public class SubmissionFeignController {
     @GetMapping("/problem/rate")
     public double getProblemCorrectRate(Long problemId) {
         return submissionFeignService.getProblemCorrectRate(problemId);
+    }
+
+    @GetMapping("problem/incorrect")
+    public List<Long> getIncorrectProblemIds(@RequestParam Long memberId) {
+        return submissionFeignService.getIncorrectProblemIdsByMemberId(memberId);
     }
 }
