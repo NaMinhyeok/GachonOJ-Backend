@@ -26,8 +26,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -375,4 +377,18 @@ public class MemberService {
         memberRepository.deleteById(memberId);
     }
 
+    // 응시자 추가를 위한 사용자 정보 조회
+    public List<MemberInfoTestResponseDto> getMemberInfoTest(String memberEmail, String memberNumber) {
+        List<Member> members;
+        if(memberEmail != null) {
+            members = memberRepository.findByMemberEmailContaining(memberEmail);
+        } else if(memberNumber != null) {
+            members = memberRepository.findByMemberNumberContaining(memberNumber);
+        } else {
+            throw new IllegalArgumentException("이메일 또는 학번을 입력해주세요.");
+        }
+        return members.stream()
+                .map(member -> new MemberInfoTestResponseDto(member.getMemberId(), member.getMemberImg(), member.getMemberName(), member.getMemberNumber(), member.getMemberEmail()))
+                .collect(Collectors.toList());
+    }
 }

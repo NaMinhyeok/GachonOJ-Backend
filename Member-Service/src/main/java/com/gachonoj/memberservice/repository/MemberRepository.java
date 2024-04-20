@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
+import java.util.List;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
@@ -27,4 +28,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Page<Member> findByMemberRole(Role role, Pageable pageable);
     // 멤버 닉네임으로 학생 회원정보 조회
     Page<Member> findByMemberNicknameContainingAndMemberRole(String search, Role role, Pageable pageable);
+    // 학번검색으로 회원정보 조회
+    List<Member> findByMemberNumberContaining(String memberNumber);
+    // 이메일검색으로 회원정보 조회
+    List<Member> findByMemberEmailContaining(String memberEmail);
 }

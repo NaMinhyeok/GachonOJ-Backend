@@ -146,4 +146,11 @@ public class MemberController {
         memberService.deleteMemberByAdmin(memberId);
         return ResponseEntity.ok(CommonResponseDto.success());
     }
+    // 응시자 정보 조회 이메일 검색, 학번 검색
+    @GetMapping("/info/test")
+    public ResponseEntity<CommonResponseDto<List<MemberInfoTestResponseDto>>> getMemberInfoTest(@RequestParam(required = false) String memberEmail,
+                                                                                           @RequestParam(required = false) String memberNumber) {
+        return ResponseEntity.ok(CommonResponseDto.success(memberService.getMemberInfoTest(memberEmail, memberNumber)));
+    }
+
 }
