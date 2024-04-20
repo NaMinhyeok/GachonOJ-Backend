@@ -124,10 +124,12 @@ public class BoardService {
             String memberNickname = memberServiceFeignClient.getNicknames(inquiry.getMemberId());
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
             String replyUpdatedDate = null;
-            if(inquiry.getInquiryStatus()== InquiryStatus.COMPLETED){
-                replyUpdatedDate = inquiry.getReply().getReplyUpdatedDate().format(formatter);
+            if(inquiry.getInquiryStatus()== InquiryStatus.COMPLETED && inquiry.getReply() != null){
+                return new InquiryAdminListResponseDto(inquiry,memberNickname,inquiry.getReply());
+            } else {
+                return new InquiryAdminListResponseDto(inquiry,memberNickname);
             }
-            return new InquiryAdminListResponseDto(inquiry, memberNickname,replyUpdatedDate);
+
         });
     }
     // 문의사항 목록 조회 사용자
