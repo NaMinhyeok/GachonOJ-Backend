@@ -263,9 +263,11 @@ public class MemberService {
         Pageable pageable = PageRequest.of(pageNo-1, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "memberRank"));
         Page<Member> memberList;
         if(search != null && !search.isEmpty()) {
-            memberList = memberRepository.findByMemberNicknameContaining(search, pageable);
+            //
+            memberList = memberRepository.findByMemberNicknameContainingAndMemberRole(search,Role.ROLE_STUDENT, pageable);
         } else {
-            memberList = memberRepository.findAll(pageable);
+            // 랭킹에 학생만 표시
+            memberList = memberRepository.findByMemberRole(Role.ROLE_STUDENT, pageable);
         }
         return memberList.map(member -> {
             Integer memberSolved = submissionServiceFeignClient.getMemberSolved(member.getMemberId());
