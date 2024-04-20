@@ -3,6 +3,7 @@ package com.gachonoj.boardservice.service;
 import com.gachonoj.boardservice.domain.dto.request.InquiryRequestDto;
 import com.gachonoj.boardservice.domain.dto.request.NoticeRequestDto;
 import com.gachonoj.boardservice.domain.dto.request.ReplyRequestDto;
+import com.gachonoj.boardservice.domain.dto.response.NoticeDetailResponseDto;
 import com.gachonoj.boardservice.domain.dto.response.NoticeListResponseDto;
 import com.gachonoj.boardservice.domain.dto.response.NoticeMainResponseDto;
 import com.gachonoj.boardservice.domain.entity.Inquiry;
@@ -109,5 +110,10 @@ public class BoardService {
             String memberNickname = memberServiceFeignClient.getNicknames(notice.getMemberId());
             return new NoticeListResponseDto(notice, memberNickname);
         });
+    }
+    // 공지사항 상세 조회
+    public NoticeDetailResponseDto getNoticeDetail(Long noticeId) {
+        Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new IllegalArgumentException("해당 공지사항이 존재하지 않습니다."));
+        return new NoticeDetailResponseDto(notice);
     }
 }

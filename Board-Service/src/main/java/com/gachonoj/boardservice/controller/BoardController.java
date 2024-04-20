@@ -4,6 +4,7 @@ import com.gachonoj.boardservice.common.response.CommonResponseDto;
 import com.gachonoj.boardservice.domain.dto.request.InquiryRequestDto;
 import com.gachonoj.boardservice.domain.dto.request.NoticeRequestDto;
 import com.gachonoj.boardservice.domain.dto.request.ReplyRequestDto;
+import com.gachonoj.boardservice.domain.dto.response.NoticeDetailResponseDto;
 import com.gachonoj.boardservice.domain.dto.response.NoticeListResponseDto;
 import com.gachonoj.boardservice.domain.dto.response.NoticeMainResponseDto;
 import com.gachonoj.boardservice.service.BoardService;
@@ -89,5 +90,12 @@ public class BoardController {
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
         return ResponseEntity.ok(CommonResponseDto.success(boardService.getNoticeList(pageNo, memberId)));
     }
+    // 공지사항 상세 조회
+    @GetMapping("/notice/{noticeId}")
+    public ResponseEntity<CommonResponseDto<NoticeDetailResponseDto>> getNoticeDetail(@PathVariable Long noticeId){
+        NoticeDetailResponseDto noticeDetail = boardService.getNoticeDetail(noticeId);
+        return ResponseEntity.ok(CommonResponseDto.success(noticeDetail));
+    }
+
 }
 
