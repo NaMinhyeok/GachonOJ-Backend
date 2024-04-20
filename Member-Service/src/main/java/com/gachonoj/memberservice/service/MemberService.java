@@ -173,7 +173,8 @@ public class MemberService {
         return memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException("가입되지 않은 회원입니다."));
     }
     // 닉네임 중복 확인
-    public NicknameVerificationResponseDto verifiedMemberNickname(String memberNickname) {
+    public NicknameVerificationResponseDto verifiedMemberNickname(MemberNicknameRequestDto memberNicknameRequestDto) {
+        String memberNickname = memberNicknameRequestDto.getMemberNickname();
         return new NicknameVerificationResponseDto(verifyMemberNickname(memberNickname));
     }
     // 호버시 회원 정보 조회
