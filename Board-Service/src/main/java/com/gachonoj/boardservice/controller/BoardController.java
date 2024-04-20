@@ -96,6 +96,11 @@ public class BoardController {
         NoticeDetailResponseDto noticeDetail = boardService.getNoticeDetail(noticeId);
         return ResponseEntity.ok(CommonResponseDto.success(noticeDetail));
     }
-
+    // 공지사항 목록 조회 관리자
+    @GetMapping("/admin/notice/list")
+    public ResponseEntity<CommonResponseDto<Page<NoticeListResponseDto>>> getNoticeListAdmin(HttpServletRequest request,@RequestParam(required = false,defaultValue = "1") int pageNo) {
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        return ResponseEntity.ok(CommonResponseDto.success(boardService.getNoticeList(pageNo,memberId)));
+    }
 }
 
