@@ -48,7 +48,7 @@ public class MemberController {
         return ResponseEntity.ok(CommonResponseDto.success());
     }
     // 닉네임 중복 확인
-    @GetMapping("/verification/nickname")
+    @PostMapping("/verification/nickname")
     public ResponseEntity<CommonResponseDto<NicknameVerificationResponseDto>> verifyMemberNickname(@RequestBody MemberNicknameRequestDto memberNicknameRequestDto) {
         return ResponseEntity.ok(CommonResponseDto.success(memberService.verifiedMemberNickname(memberNicknameRequestDto)));
     }
