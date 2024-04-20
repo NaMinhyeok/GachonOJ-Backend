@@ -67,6 +67,8 @@ public class BoardService {
         Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new IllegalArgumentException("해당 문의사항이 존재하지 않습니다."));
         if (inquiry.getMemberId().equals(memberId)) {
             inquiry.updateInquiry(inquiryRequestDto.getInquiryTitle(), inquiryRequestDto.getInquiryContents());
+        } else {
+            throw new IllegalArgumentException("해당 문의사항에 대한 권한이 없습니다.");
         }
     }
     // 문의사항 삭제 회원
@@ -75,6 +77,8 @@ public class BoardService {
         Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new IllegalArgumentException("해당 문의사항이 존재하지 않습니다."));
         if (inquiry.getMemberId().equals(memberId)) {
             inquiryRepository.delete(inquiry);
+        } else {
+            throw new IllegalArgumentException("해당 문의사항에 대한 권한이 없습니다.");
         }
     }
     // 문의사항 삭제 관리자
@@ -122,8 +126,6 @@ public class BoardService {
         Page<Inquiry> inquiryPage = inquiryRepository.findAllByOrderByInquiryCreatedDateDesc(pageable);
         return inquiryPage.map(inquiry -> {
             String memberNickname = memberServiceFeignClient.getNicknames(inquiry.getMemberId());
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
-            String replyUpdatedDate = null;
             if(inquiry.getInquiryStatus()== InquiryStatus.COMPLETED && inquiry.getReply() != null){
                 return new InquiryAdminListResponseDto(inquiry,memberNickname,inquiry.getReply());
             } else {
@@ -139,8 +141,11 @@ public class BoardService {
         return inquiryPage.map(InquiryListResponseDto::new);
     }
     // 문의사항 상세 조회 사용자
-    public InquiryDetailResponseDto getInquiryDetail(Long inquiryId) {
+    public InquiryDetailResponseDto getInquiryDetail(Long inquiryId,Long memberId) {
         Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new IllegalArgumentException("해당 문의사항이 존재하지 않습니다."));
+        if(!inquiry.getMemberId().equals(memberId)){
+            throw new IllegalArgumentException("해당 문의사항에 대한 권한이 없습니다.");
+        }
         if(inquiry.getInquiryStatus() == InquiryStatus.COMPLETED && inquiry.getReply() != null){
             return new InquiryDetailResponseDto(inquiry, inquiry.getReply());
         }
