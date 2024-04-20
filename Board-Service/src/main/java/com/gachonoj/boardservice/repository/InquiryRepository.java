@@ -8,6 +8,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface InquiryRepository extends JpaRepository<Inquiry,Long> {
-    // 문의사항 목록 조회 페이지네이션
+    // 문의사항 목록 조회 관리자 페이지네이션
     Page<Inquiry> findAllByOrderByInquiryCreatedDateDesc(Pageable pageable);
+    // 문의사항 목록 조회 사용자 페이지네이션
+    Page<Inquiry> findByMemberIdOrderByInquiryCreatedDateDesc(Long memberId, Pageable pageable);
 }

@@ -4,10 +4,7 @@ import com.gachonoj.boardservice.common.response.CommonResponseDto;
 import com.gachonoj.boardservice.domain.dto.request.InquiryRequestDto;
 import com.gachonoj.boardservice.domain.dto.request.NoticeRequestDto;
 import com.gachonoj.boardservice.domain.dto.request.ReplyRequestDto;
-import com.gachonoj.boardservice.domain.dto.response.InquiryAdminListResponseDto;
-import com.gachonoj.boardservice.domain.dto.response.NoticeDetailResponseDto;
-import com.gachonoj.boardservice.domain.dto.response.NoticeListResponseDto;
-import com.gachonoj.boardservice.domain.dto.response.NoticeMainResponseDto;
+import com.gachonoj.boardservice.domain.dto.response.*;
 import com.gachonoj.boardservice.service.BoardService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -105,6 +102,12 @@ public class BoardController {
     @GetMapping("/admin/inquiry/list")
     public ResponseEntity<CommonResponseDto<Page<InquiryAdminListResponseDto>>> getInquiryListAdmin(@RequestParam(required = false,defaultValue = "1") int pageNo) {
         return ResponseEntity.ok(CommonResponseDto.success(boardService.getInquiryListAdmin(pageNo)));
+    }
+    // 문의사항 목록 조회 사용자
+    @GetMapping("/inquiry/list")
+    public ResponseEntity<CommonResponseDto<Page<InquiryListResponseDto>>> getInquiryList(HttpServletRequest request, @RequestParam(required = false,defaultValue = "1") int pageNo) {
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        return ResponseEntity.ok(CommonResponseDto.success(boardService.getInquiryList(memberId,pageNo)));
     }
 
 }

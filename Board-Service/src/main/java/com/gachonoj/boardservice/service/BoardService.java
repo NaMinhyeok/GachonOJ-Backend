@@ -4,10 +4,7 @@ import com.gachonoj.boardservice.domain.constant.InquiryStatus;
 import com.gachonoj.boardservice.domain.dto.request.InquiryRequestDto;
 import com.gachonoj.boardservice.domain.dto.request.NoticeRequestDto;
 import com.gachonoj.boardservice.domain.dto.request.ReplyRequestDto;
-import com.gachonoj.boardservice.domain.dto.response.InquiryAdminListResponseDto;
-import com.gachonoj.boardservice.domain.dto.response.NoticeDetailResponseDto;
-import com.gachonoj.boardservice.domain.dto.response.NoticeListResponseDto;
-import com.gachonoj.boardservice.domain.dto.response.NoticeMainResponseDto;
+import com.gachonoj.boardservice.domain.dto.response.*;
 import com.gachonoj.boardservice.domain.entity.Inquiry;
 import com.gachonoj.boardservice.domain.entity.Notice;
 import com.gachonoj.boardservice.domain.entity.Reply;
@@ -20,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -132,6 +128,14 @@ public class BoardService {
                 replyUpdatedDate = inquiry.getReply().getReplyUpdatedDate().format(formatter);
             }
             return new InquiryAdminListResponseDto(inquiry, memberNickname,replyUpdatedDate);
+        });
+    }
+    // 문의사항 목록 조회 사용자
+    public Page<InquiryListResponseDto> getInquiryList(Long memberId, int pageNo) {
+        Pageable pageable = PageRequest.of(pageNo-1, PAGE_SIZE);
+        Page<Inquiry> inquiryPage = inquiryRepository.findByMemberIdOrderByInquiryCreatedDateDesc(memberId,pageable);
+        return inquiryPage.map(inquiry -> {
+            return new InquiryListResponseDto(inquiry);
         });
     }
 }
