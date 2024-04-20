@@ -146,4 +146,13 @@ public class BoardService {
         }
         return new InquiryDetailResponseDto(inquiry);
     }
+    // 문의사항 상세 조회 관리자
+    public InquiryDetailAdminResponseDto getInquiryDetailAdmin(Long inquiryId) {
+        Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new IllegalArgumentException("해당 문의사항이 존재하지 않습니다."));
+        String memberNickname = memberServiceFeignClient.getNicknames(inquiry.getMemberId());
+        if (inquiry.getInquiryStatus() == InquiryStatus.COMPLETED && inquiry.getReply() != null) {
+            return new InquiryDetailAdminResponseDto(inquiry, memberNickname, inquiry.getReply());
+        }
+        return new InquiryDetailAdminResponseDto(inquiry, memberNickname);
+    }
 }

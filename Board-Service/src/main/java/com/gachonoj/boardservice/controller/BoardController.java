@@ -115,5 +115,11 @@ public class BoardController {
         InquiryDetailResponseDto inquiryDetail = boardService.getInquiryDetail(inquiryId);
         return ResponseEntity.ok(CommonResponseDto.success(inquiryDetail));
     }
+    // 문의사항 상세 조회 관리자
+    @GetMapping("/admin/inquiry/{inquiryId}")
+    public ResponseEntity<CommonResponseDto<InquiryDetailAdminResponseDto>> getInquiryDetailAdmin(@PathVariable Long inquiryId){
+        InquiryDetailAdminResponseDto inquiryDetail = boardService.getInquiryDetailAdmin(inquiryId);
+        return ResponseEntity.ok(CommonResponseDto.success(inquiryDetail));
+    }
 }
 
