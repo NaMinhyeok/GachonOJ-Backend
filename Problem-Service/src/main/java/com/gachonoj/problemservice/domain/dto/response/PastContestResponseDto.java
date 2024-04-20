@@ -1,16 +1,18 @@
 package com.gachonoj.problemservice.domain.dto.response;
+
 import com.gachonoj.problemservice.domain.constant.ExamStatus;
 import com.gachonoj.problemservice.domain.entity.Exam;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ScheduledContestResponseDto {
+public class PastContestResponseDto {
     private Long examId;
     private String examTitle;
     private String memberNickname;
@@ -18,7 +20,7 @@ public class ScheduledContestResponseDto {
     private String examEndDate;
     private String examStatus;
 
-    public ScheduledContestResponseDto(Exam exam,String memberNickname) {
+    public PastContestResponseDto(Exam exam, String memberNickname) {
         this.examId = exam.getExamId();
         this.examTitle = exam.getExamTitle();
         this.memberNickname = memberNickname;

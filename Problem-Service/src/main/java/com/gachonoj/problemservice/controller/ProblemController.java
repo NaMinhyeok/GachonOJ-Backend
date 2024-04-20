@@ -4,10 +4,7 @@ import com.gachonoj.problemservice.common.codes.ErrorCode;
 import com.gachonoj.problemservice.common.response.CommonResponseDto;
 import com.gachonoj.problemservice.domain.dto.request.ExamRequestDto;
 import com.gachonoj.problemservice.domain.dto.request.ProblemRequestDto;
-import com.gachonoj.problemservice.domain.dto.response.BookmarkProblemResponseDto;
-import com.gachonoj.problemservice.domain.dto.response.ScheduledContestResponseDto;
-import com.gachonoj.problemservice.domain.dto.response.SolvedProblemResponseDto;
-import com.gachonoj.problemservice.domain.dto.response.WrongProblemResponseDto;
+import com.gachonoj.problemservice.domain.dto.response.*;
 import com.gachonoj.problemservice.service.ExamService;
 import com.gachonoj.problemservice.service.ProblemService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -161,6 +158,15 @@ public class ProblemController {
             @RequestHeader("X-Authorization-Id") String authorizationId) {
         Long memberId = Long.parseLong(authorizationId);
         List<ScheduledContestResponseDto> result = examService.getScheduledContests(memberId);
+        return ResponseEntity.ok(CommonResponseDto.success(result));
+    }
+
+    // 지난 대회 조회
+    @GetMapping("/exam/past")
+    public ResponseEntity<CommonResponseDto<List<PastContestResponseDto>>> getPastContests(
+            @RequestHeader("X-Authorization-Id") String authorizationId) {
+        Long memberId = Long.parseLong(authorizationId);
+        List<PastContestResponseDto> result = examService.getPastContests(memberId);
         return ResponseEntity.ok(CommonResponseDto.success(result));
     }
 }

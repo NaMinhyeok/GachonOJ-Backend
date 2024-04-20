@@ -7,6 +7,7 @@ import com.gachonoj.problemservice.domain.dto.request.CandidateListRequestDto;
 import com.gachonoj.problemservice.domain.dto.request.ExamRequestDto;
 import com.gachonoj.problemservice.domain.dto.request.TestcaseRequestDto;
 import com.gachonoj.problemservice.domain.dto.request.ProblemRequestDto;
+import com.gachonoj.problemservice.domain.dto.response.PastContestResponseDto;
 import com.gachonoj.problemservice.domain.dto.response.ScheduledContestResponseDto;
 import com.gachonoj.problemservice.domain.entity.*;
 import com.gachonoj.problemservice.feign.client.MemberServiceFeignClient;
@@ -152,6 +153,7 @@ public class ExamService {
         problemRepository.save(problem);
     }
 
+    // 참가 예정 대회 조회
     public List<ScheduledContestResponseDto> getScheduledContests(Long memberId) {
         List<Exam> exams = examRepository.findScheduledContestsByMemberId(memberId);
 
@@ -164,6 +166,17 @@ public class ExamService {
                 .collect(Collectors.toList());
     }
 
+    public List<PastContestResponseDto> getPastContests(Long memberId) {
+        List<Exam> exams = examRepository.findPastContestsByMemberId(memberId);
+
+        // DTO 변환
+        return exams.stream()
+                .map(exam -> {
+                    String memberNickname = memberServiceFeignClient.getNicknames(exam.getMemberId());
+                    return new PastContestResponseDto(exam, memberNickname);
+                })
+                .collect(Collectors.toList());
+    }
 }
     /*@Transactional
     public void updateExam(Long examId, ExamRequestDto request, Long memberId) {
