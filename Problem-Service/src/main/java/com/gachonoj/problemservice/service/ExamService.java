@@ -7,7 +7,9 @@ import com.gachonoj.problemservice.domain.dto.request.CandidateListRequestDto;
 import com.gachonoj.problemservice.domain.dto.request.ExamRequestDto;
 import com.gachonoj.problemservice.domain.dto.request.TestcaseRequestDto;
 import com.gachonoj.problemservice.domain.dto.request.ProblemRequestDto;
+import com.gachonoj.problemservice.domain.dto.response.ScheduledContestResponseDto;
 import com.gachonoj.problemservice.domain.entity.*;
+import com.gachonoj.problemservice.feign.client.MemberServiceFeignClient;
 import com.gachonoj.problemservice.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +30,7 @@ public class ExamService {
     private final ProblemRepository problemRepository;
     private final TestcaseRepository testcaseRepository;
     private final TestRepository testRepository;
+    private final MemberServiceFeignClient memberServiceFeignClient;
 
     @Transactional
     public void registerExam(ExamRequestDto request, Long memberId) {
@@ -36,8 +39,8 @@ public class ExamService {
         exam.setMemberId(memberId);
         exam.setExamMemo(request.getExamMemo());
         exam.setExamNotice(request.getExamNotice());
-        exam.setExamStartDate(request.getExamStartDate());
-        exam.setExamEndDate(request.getExamEndDate());
+        exam.setExamStartDate(LocalDateTime.parse(request.getExamStartDate()));
+        exam.setExamEndDate(LocalDateTime.parse(request.getExamEndDate()));
         exam.setExamDueTime(request.getExamDueTime());
         exam.setExamStatus(request.getExamStatus());
         exam.setExamType(request.getExamType());
@@ -98,8 +101,8 @@ public class ExamService {
         exam.setMemberId(memberId);
         exam.setExamMemo(request.getExamMemo());
         exam.setExamNotice(request.getExamNotice());
-        exam.setExamStartDate(request.getExamStartDate());
-        exam.setExamEndDate(request.getExamEndDate());
+        exam.setExamStartDate(LocalDateTime.parse(request.getExamStartDate()));
+        exam.setExamEndDate(LocalDateTime.parse(request.getExamEndDate()));
         exam.setExamDueTime(request.getExamDueTime());
         exam.setExamStatus(request.getExamStatus());
         exam.setExamType(request.getExamType());
@@ -149,6 +152,19 @@ public class ExamService {
         problemRepository.save(problem);
     }
 
+    public List<ScheduledContestResponseDto> getScheduledContests(Long memberId) {
+        List<Exam> exams = examRepository.findScheduledContestsByMemberId(memberId);
+
+        // DTO 변환
+        return exams.stream()
+                .map(exam -> {
+                    String memberNickname = memberServiceFeignClient.getNicknames(exam.getMemberId());
+                    return new ScheduledContestResponseDto(exam, memberNickname);
+                })
+                .collect(Collectors.toList());
+    }
+
+}
     /*@Transactional
     public void updateExam(Long examId, ExamRequestDto request, Long memberId) {
         // 기존 시험 정보 찾기
@@ -235,4 +251,3 @@ public class ExamService {
         testcase.setTestcaseStatus(TestcaseStatus.valueOf(testcaseDto.getTestcaseStatus()));
         return testcase;
     }*/
-}
