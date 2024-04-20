@@ -43,5 +43,9 @@ public class Inquiry {
         this.inquiryTitle = inquiryTitle;
         this.inquiryContents = inquiryContents;
     }
+
+    public void updateInquiryStatus(InquiryStatus inquiryStatus) {
+        this.inquiryStatus = inquiryStatus;
+    }
 }
 

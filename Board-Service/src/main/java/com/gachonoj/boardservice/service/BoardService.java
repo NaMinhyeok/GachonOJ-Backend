@@ -1,9 +1,10 @@
 package com.gachonoj.boardservice.service;
 
+import com.gachonoj.boardservice.domain.constant.InquiryStatus;
 import com.gachonoj.boardservice.domain.dto.request.InquiryRequestDto;
 import com.gachonoj.boardservice.domain.dto.request.NoticeRequestDto;
 import com.gachonoj.boardservice.domain.dto.request.ReplyRequestDto;
-import com.gachonoj.boardservice.domain.dto.response.NoticeMainResponseDto;
+import com.gachonoj.boardservice.domain.dto.response.*;
 import com.gachonoj.boardservice.domain.entity.Inquiry;
 import com.gachonoj.boardservice.domain.entity.Notice;
 import com.gachonoj.boardservice.domain.entity.Reply;
@@ -13,9 +14,13 @@ import com.gachonoj.boardservice.repository.NoticeRepository;
 import com.gachonoj.boardservice.repository.ReplyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +33,9 @@ public class BoardService {
     private final InquiryRepository inquiryRepository;
     private final ReplyRepository replyRepository;
     private final MemberServiceFeignClient memberServiceFeignClient;
+
+    private static final int PAGE_SIZE = 10;
+
 
     // 공지사항 작성
     @Transactional
@@ -59,6 +67,8 @@ public class BoardService {
         Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new IllegalArgumentException("해당 문의사항이 존재하지 않습니다."));
         if (inquiry.getMemberId().equals(memberId)) {
             inquiry.updateInquiry(inquiryRequestDto.getInquiryTitle(), inquiryRequestDto.getInquiryContents());
+        } else {
+            throw new IllegalArgumentException("해당 문의사항에 대한 권한이 없습니다.");
         }
     }
     // 문의사항 삭제 회원
@@ -67,6 +77,8 @@ public class BoardService {
         Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new IllegalArgumentException("해당 문의사항이 존재하지 않습니다."));
         if (inquiry.getMemberId().equals(memberId)) {
             inquiryRepository.delete(inquiry);
+        } else {
+            throw new IllegalArgumentException("해당 문의사항에 대한 권한이 없습니다.");
         }
     }
     // 문의사항 삭제 관리자
@@ -81,6 +93,7 @@ public class BoardService {
         Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new IllegalArgumentException("해당 문의사항이 존재하지 않습니다."));
         Reply reply = new Reply(inquiry, replyRequestDto.getReplyContents());
         replyRepository.save(reply);
+        inquiry.updateInquiryStatus(InquiryStatus.COMPLETED);
     }
     // 메인 대시보드 공지사항 목록 조회 최대 5개
     public List<NoticeMainResponseDto> getMainNoticeList() {
@@ -92,5 +105,59 @@ public class BoardService {
             noticeMainResponseDtos.add(responseDto);
         }
         return noticeMainResponseDtos;
+    }
+    // 공지사항 목록 조회
+    public Page<NoticeListResponseDto> getNoticeList(int pageNo) {
+        Pageable pageable = PageRequest.of(pageNo-1, PAGE_SIZE);
+        Page<Notice> noticePage = noticeRepository.findAllByOrderByNoticeCreatedDateDesc(pageable);
+        return noticePage.map(notice -> {
+            String memberNickname = memberServiceFeignClient.getNicknames(notice.getMemberId());
+            return new NoticeListResponseDto(notice, memberNickname);
+        });
+    }
+    // 공지사항 상세 조회
+    public NoticeDetailResponseDto getNoticeDetail(Long noticeId) {
+        Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new IllegalArgumentException("해당 공지사항이 존재하지 않습니다."));
+        return new NoticeDetailResponseDto(notice);
+    }
+    // 문의사항 목록 조회 관리자
+    public Page<InquiryAdminListResponseDto> getInquiryListAdmin(int pageNo) {
+        Pageable pageable = PageRequest.of(pageNo-1, PAGE_SIZE);
+        Page<Inquiry> inquiryPage = inquiryRepository.findAllByOrderByInquiryCreatedDateDesc(pageable);
+        return inquiryPage.map(inquiry -> {
+            String memberNickname = memberServiceFeignClient.getNicknames(inquiry.getMemberId());
+            if(inquiry.getInquiryStatus()== InquiryStatus.COMPLETED && inquiry.getReply() != null){
+                return new InquiryAdminListResponseDto(inquiry,memberNickname,inquiry.getReply());
+            } else {
+                return new InquiryAdminListResponseDto(inquiry,memberNickname);
+            }
+
+        });
+    }
+    // 문의사항 목록 조회 사용자
+    public Page<InquiryListResponseDto> getInquiryList(Long memberId, int pageNo) {
+        Pageable pageable = PageRequest.of(pageNo-1, PAGE_SIZE);
+        Page<Inquiry> inquiryPage = inquiryRepository.findByMemberIdOrderByInquiryCreatedDateDesc(memberId,pageable);
+        return inquiryPage.map(InquiryListResponseDto::new);
+    }
+    // 문의사항 상세 조회 사용자
+    public InquiryDetailResponseDto getInquiryDetail(Long inquiryId,Long memberId) {
+        Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new IllegalArgumentException("해당 문의사항이 존재하지 않습니다."));
+        if(!inquiry.getMemberId().equals(memberId)){
+            throw new IllegalArgumentException("해당 문의사항에 대한 권한이 없습니다.");
+        }
+        if(inquiry.getInquiryStatus() == InquiryStatus.COMPLETED && inquiry.getReply() != null){
+            return new InquiryDetailResponseDto(inquiry, inquiry.getReply());
+        }
+        return new InquiryDetailResponseDto(inquiry);
+    }
+    // 문의사항 상세 조회 관리자
+    public InquiryDetailAdminResponseDto getInquiryDetailAdmin(Long inquiryId) {
+        Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new IllegalArgumentException("해당 문의사항이 존재하지 않습니다."));
+        String memberNickname = memberServiceFeignClient.getNicknames(inquiry.getMemberId());
+        if (inquiry.getInquiryStatus() == InquiryStatus.COMPLETED && inquiry.getReply() != null) {
+            return new InquiryDetailAdminResponseDto(inquiry, memberNickname, inquiry.getReply());
+        }
+        return new InquiryDetailAdminResponseDto(inquiry, memberNickname);
     }
 }

@@ -4,11 +4,12 @@ import com.gachonoj.boardservice.common.response.CommonResponseDto;
 import com.gachonoj.boardservice.domain.dto.request.InquiryRequestDto;
 import com.gachonoj.boardservice.domain.dto.request.NoticeRequestDto;
 import com.gachonoj.boardservice.domain.dto.request.ReplyRequestDto;
-import com.gachonoj.boardservice.domain.dto.response.NoticeMainResponseDto;
+import com.gachonoj.boardservice.domain.dto.response.*;
 import com.gachonoj.boardservice.service.BoardService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -80,6 +81,46 @@ public class BoardController {
     public ResponseEntity<CommonResponseDto<List<NoticeMainResponseDto>>> getMainNoticeList(){
         List<NoticeMainResponseDto> noticeList = boardService.getMainNoticeList();
         return ResponseEntity.ok(CommonResponseDto.success(noticeList));
+    }
+    // 공지사항 목록 조회
+    @GetMapping("/notice/list")
+    public ResponseEntity<CommonResponseDto<Page<NoticeListResponseDto>>> getNoticeList(@RequestParam(required = false,defaultValue = "1") int pageNo) {
+        return ResponseEntity.ok(CommonResponseDto.success(boardService.getNoticeList(pageNo)));
+    }
+    // 공지사항 상세 조회
+    @GetMapping("/notice/{noticeId}")
+    public ResponseEntity<CommonResponseDto<NoticeDetailResponseDto>> getNoticeDetail(@PathVariable Long noticeId){
+        NoticeDetailResponseDto noticeDetail = boardService.getNoticeDetail(noticeId);
+        return ResponseEntity.ok(CommonResponseDto.success(noticeDetail));
+    }
+    // 공지사항 목록 조회 관리자
+    @GetMapping("/admin/notice/list")
+    public ResponseEntity<CommonResponseDto<Page<NoticeListResponseDto>>> getNoticeListAdmin(@RequestParam(required = false,defaultValue = "1") int pageNo) {
+        return ResponseEntity.ok(CommonResponseDto.success(boardService.getNoticeList(pageNo)));
+    }
+    // 문의사항 목록 조회 관리자
+    @GetMapping("/admin/inquiry/list")
+    public ResponseEntity<CommonResponseDto<Page<InquiryAdminListResponseDto>>> getInquiryListAdmin(@RequestParam(required = false,defaultValue = "1") int pageNo) {
+        return ResponseEntity.ok(CommonResponseDto.success(boardService.getInquiryListAdmin(pageNo)));
+    }
+    // 문의사항 목록 조회 사용자
+    @GetMapping("/inquiry/list")
+    public ResponseEntity<CommonResponseDto<Page<InquiryListResponseDto>>> getInquiryList(HttpServletRequest request, @RequestParam(required = false,defaultValue = "1") int pageNo) {
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        return ResponseEntity.ok(CommonResponseDto.success(boardService.getInquiryList(memberId,pageNo)));
+    }
+    // 문의사항 상세 조회 사용자
+    @GetMapping("/inquiry/{inquiryId}")
+    public ResponseEntity<CommonResponseDto<InquiryDetailResponseDto>> getInquiryDetail(HttpServletRequest request, @PathVariable Long inquiryId){
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        InquiryDetailResponseDto inquiryDetail = boardService.getInquiryDetail(inquiryId,memberId);
+        return ResponseEntity.ok(CommonResponseDto.success(inquiryDetail));
+    }
+    // 문의사항 상세 조회 관리자
+    @GetMapping("/admin/inquiry/{inquiryId}")
+    public ResponseEntity<CommonResponseDto<InquiryDetailAdminResponseDto>> getInquiryDetailAdmin(@PathVariable Long inquiryId){
+        InquiryDetailAdminResponseDto inquiryDetail = boardService.getInquiryDetailAdmin(inquiryId);
+        return ResponseEntity.ok(CommonResponseDto.success(inquiryDetail));
     }
 }
 
