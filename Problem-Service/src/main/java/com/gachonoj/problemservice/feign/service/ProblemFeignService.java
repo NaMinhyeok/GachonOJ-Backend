@@ -1,4 +1,4 @@
-package com.gachonoj.problemservice.fegin.service;
+package com.gachonoj.problemservice.feign.service;
 
 import com.gachonoj.problemservice.repository.ProblemRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,4 +16,6 @@ public class ProblemFeignService {
     public Integer getBookmarkCountByMemberId(Long memberId) {
         return problemRepository.getBookmarkCountByMemberId(memberId);
     }
+
+    // 정답자 수 조회
 }
