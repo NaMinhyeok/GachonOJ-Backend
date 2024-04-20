@@ -1,8 +1,10 @@
 package com.gachonoj.boardservice.service;
 
+import com.gachonoj.boardservice.domain.constant.InquiryStatus;
 import com.gachonoj.boardservice.domain.dto.request.InquiryRequestDto;
 import com.gachonoj.boardservice.domain.dto.request.NoticeRequestDto;
 import com.gachonoj.boardservice.domain.dto.request.ReplyRequestDto;
+import com.gachonoj.boardservice.domain.dto.response.InquiryAdminListResponseDto;
 import com.gachonoj.boardservice.domain.dto.response.NoticeDetailResponseDto;
 import com.gachonoj.boardservice.domain.dto.response.NoticeListResponseDto;
 import com.gachonoj.boardservice.domain.dto.response.NoticeMainResponseDto;
@@ -22,6 +24,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -115,5 +118,19 @@ public class BoardService {
     public NoticeDetailResponseDto getNoticeDetail(Long noticeId) {
         Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new IllegalArgumentException("해당 공지사항이 존재하지 않습니다."));
         return new NoticeDetailResponseDto(notice);
+    }
+    // 문의사항 목록 조회 관리자
+    public Page<InquiryAdminListResponseDto> getInquiryListAdmin(int pageNo) {
+        Pageable pageable = PageRequest.of(pageNo-1, PAGE_SIZE);
+        Page<Inquiry> inquiryPage = inquiryRepository.findAllByOrderByInquiryUpdatedDateDesc(pageable);
+        return inquiryPage.map(inquiry -> {
+            String memberNickname = memberServiceFeignClient.getNicknames(inquiry.getMemberId());
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+            String replyUpdatedDate = null;
+            if(inquiry.getInquiryStatus()== InquiryStatus.COMPLETED){
+                replyUpdatedDate = inquiry.getReply().getReplyUpdatedDate().format(formatter);
+            }
+            return new InquiryAdminListResponseDto(inquiry, memberNickname,replyUpdatedDate);
+        });
     }
 }

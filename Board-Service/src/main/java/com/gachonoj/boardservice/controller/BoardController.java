@@ -102,7 +102,10 @@ public class BoardController {
         return ResponseEntity.ok(CommonResponseDto.success(boardService.getNoticeList(pageNo)));
     }
     // 문의사항 목록 조회 관리자
-
+    @GetMapping("/admin/inquiry/list")
+    public ResponseEntity<CommonResponseDto<Page<InquiryAdminListResponseDto>>> getInquiryListAdmin(@RequestParam(required = false,defaultValue = "1") int pageNo) {
+        return ResponseEntity.ok(CommonResponseDto.success(boardService.getInquiryListAdmin(pageNo)));
+    }
 
 }
 
