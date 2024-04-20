@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class BookmarkProblemResponseDto {
+public class SolvedProblemResponseDto {
     private Long problemId;
     private String problemTitle;
     private Integer problemDiff;

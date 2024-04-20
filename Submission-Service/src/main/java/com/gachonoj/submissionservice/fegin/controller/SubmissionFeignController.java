@@ -42,8 +42,15 @@ public class SubmissionFeignController {
         return submissionFeignService.getProblemCorrectRate(problemId);
     }
 
+    // 틀린 문제 조회
     @GetMapping("problem/incorrect")
     public List<Long> getIncorrectProblemIds(@RequestParam Long memberId) {
         return submissionFeignService.getIncorrectProblemIdsByMemberId(memberId);
+    }
+
+    // 맞춘 문제 조회
+    @GetMapping("problem/correct")
+    public List<Long> getCorrectProblemIds(@RequestParam Long memberId) {
+        return submissionFeignService.getCorrectProblemIdsByMemberId(memberId);
     }
 }

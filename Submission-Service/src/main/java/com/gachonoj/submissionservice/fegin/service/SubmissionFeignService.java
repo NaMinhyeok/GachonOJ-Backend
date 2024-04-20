@@ -50,4 +50,8 @@ public class SubmissionFeignService {
     public List<Long> getIncorrectProblemIdsByMemberId(Long memberId) {
         return submissionRepository.findIncorrectProblemIdsByMemberId(memberId);
     }
+
+    public List<Long> getCorrectProblemIdsByMemberId(Long memberId) {
+        return submissionRepository.findCorrectProblemIdsByMemberId(memberId);
+    }
 }
