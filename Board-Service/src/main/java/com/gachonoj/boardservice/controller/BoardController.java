@@ -109,6 +109,11 @@ public class BoardController {
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
         return ResponseEntity.ok(CommonResponseDto.success(boardService.getInquiryList(memberId,pageNo)));
     }
-
+    // 문의사항 상세 조회 사용자
+    @GetMapping("/inquiry/{inquiryId}")
+    public ResponseEntity<CommonResponseDto<InquiryDetailResponseDto>> getInquiryDetail(@PathVariable Long inquiryId){
+        InquiryDetailResponseDto inquiryDetail = boardService.getInquiryDetail(inquiryId);
+        return ResponseEntity.ok(CommonResponseDto.success(inquiryDetail));
+    }
 }
 

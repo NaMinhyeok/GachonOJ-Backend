@@ -134,8 +134,14 @@ public class BoardService {
     public Page<InquiryListResponseDto> getInquiryList(Long memberId, int pageNo) {
         Pageable pageable = PageRequest.of(pageNo-1, PAGE_SIZE);
         Page<Inquiry> inquiryPage = inquiryRepository.findByMemberIdOrderByInquiryCreatedDateDesc(memberId,pageable);
-        return inquiryPage.map(inquiry -> {
-            return new InquiryListResponseDto(inquiry);
-        });
+        return inquiryPage.map(InquiryListResponseDto::new);
+    }
+    // 문의사항 상세 조회 사용자
+    public InquiryDetailResponseDto getInquiryDetail(Long inquiryId) {
+        Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new IllegalArgumentException("해당 문의사항이 존재하지 않습니다."));
+        if(inquiry.getInquiryStatus() == InquiryStatus.COMPLETED && inquiry.getReply() != null){
+            return new InquiryDetailResponseDto(inquiry, inquiry.getReply());
+        }
+        return new InquiryDetailResponseDto(inquiry);
     }
 }
