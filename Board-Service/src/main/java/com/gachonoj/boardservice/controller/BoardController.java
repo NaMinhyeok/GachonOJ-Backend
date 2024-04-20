@@ -4,6 +4,7 @@ import com.gachonoj.boardservice.common.response.CommonResponseDto;
 import com.gachonoj.boardservice.domain.dto.request.InquiryRequestDto;
 import com.gachonoj.boardservice.domain.dto.request.NoticeRequestDto;
 import com.gachonoj.boardservice.domain.dto.request.ReplyRequestDto;
+import com.gachonoj.boardservice.domain.dto.response.InquiryAdminListResponseDto;
 import com.gachonoj.boardservice.domain.dto.response.NoticeDetailResponseDto;
 import com.gachonoj.boardservice.domain.dto.response.NoticeListResponseDto;
 import com.gachonoj.boardservice.domain.dto.response.NoticeMainResponseDto;
@@ -86,9 +87,8 @@ public class BoardController {
     }
     // 공지사항 목록 조회
     @GetMapping("/notice/list")
-    public ResponseEntity<CommonResponseDto<Page<NoticeListResponseDto>>> getNoticeList(HttpServletRequest request,@RequestParam(required = false,defaultValue = "1") int pageNo) {
-        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
-        return ResponseEntity.ok(CommonResponseDto.success(boardService.getNoticeList(pageNo, memberId)));
+    public ResponseEntity<CommonResponseDto<Page<NoticeListResponseDto>>> getNoticeList(@RequestParam(required = false,defaultValue = "1") int pageNo) {
+        return ResponseEntity.ok(CommonResponseDto.success(boardService.getNoticeList(pageNo)));
     }
     // 공지사항 상세 조회
     @GetMapping("/notice/{noticeId}")
@@ -98,9 +98,11 @@ public class BoardController {
     }
     // 공지사항 목록 조회 관리자
     @GetMapping("/admin/notice/list")
-    public ResponseEntity<CommonResponseDto<Page<NoticeListResponseDto>>> getNoticeListAdmin(HttpServletRequest request,@RequestParam(required = false,defaultValue = "1") int pageNo) {
-        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
-        return ResponseEntity.ok(CommonResponseDto.success(boardService.getNoticeList(pageNo,memberId)));
+    public ResponseEntity<CommonResponseDto<Page<NoticeListResponseDto>>> getNoticeListAdmin(@RequestParam(required = false,defaultValue = "1") int pageNo) {
+        return ResponseEntity.ok(CommonResponseDto.success(boardService.getNoticeList(pageNo)));
     }
+    // 문의사항 목록 조회 관리자
+
+
 }
 

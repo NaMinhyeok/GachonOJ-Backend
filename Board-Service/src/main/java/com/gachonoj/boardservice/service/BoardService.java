@@ -103,7 +103,7 @@ public class BoardService {
         return noticeMainResponseDtos;
     }
     // 공지사항 목록 조회
-    public Page<NoticeListResponseDto> getNoticeList(int pageNo, Long memberId) {
+    public Page<NoticeListResponseDto> getNoticeList(int pageNo) {
         Pageable pageable = PageRequest.of(pageNo-1, PAGE_SIZE);
         Page<Notice> noticePage = noticeRepository.findAllByOrderByNoticeCreatedDateDesc(pageable);
         return noticePage.map(notice -> {
