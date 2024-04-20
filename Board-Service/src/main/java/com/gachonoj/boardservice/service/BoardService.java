@@ -123,7 +123,7 @@ public class BoardService {
     // 문의사항 목록 조회 관리자
     public Page<InquiryAdminListResponseDto> getInquiryListAdmin(int pageNo) {
         Pageable pageable = PageRequest.of(pageNo-1, PAGE_SIZE);
-        Page<Inquiry> inquiryPage = inquiryRepository.findAllByOrderByInquiryUpdatedDateDesc(pageable);
+        Page<Inquiry> inquiryPage = inquiryRepository.findAllByOrderByInquiryCreatedDateDesc(pageable);
         return inquiryPage.map(inquiry -> {
             String memberNickname = memberServiceFeignClient.getNicknames(inquiry.getMemberId());
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");

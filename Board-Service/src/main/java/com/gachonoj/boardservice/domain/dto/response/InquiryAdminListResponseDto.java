@@ -24,13 +24,13 @@ public class InquiryAdminListResponseDto {
         this.memberNickname = memberNickname;
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
         this.inquiryCreatedDate = inquiry.getInquiryUpdatedDate().format(formatter);
-        this.inquiryStatus = translateInquiryStatus(inquiry.getInquiryStatus()) + (replyUpdateDate != null ? replyUpdateDate : "");
+        this.inquiryStatus = (replyUpdateDate != null ? replyUpdateDate : "") + translateInquiryStatus(inquiry.getInquiryStatus()) ;
     }
     // ENUM To String
     public String translateInquiryStatus(InquiryStatus inquiryStatus) {
         return switch (inquiryStatus) {
             case NONE -> "대기중";
-            case COMPLETED -> "완료";
+            case COMPLETED -> "답변완료";
         };
     }
 }
