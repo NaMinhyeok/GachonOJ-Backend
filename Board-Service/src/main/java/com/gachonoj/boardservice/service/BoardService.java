@@ -3,6 +3,7 @@ package com.gachonoj.boardservice.service;
 import com.gachonoj.boardservice.domain.dto.request.InquiryRequestDto;
 import com.gachonoj.boardservice.domain.dto.request.NoticeRequestDto;
 import com.gachonoj.boardservice.domain.dto.request.ReplyRequestDto;
+import com.gachonoj.boardservice.domain.dto.response.NoticeListResponseDto;
 import com.gachonoj.boardservice.domain.dto.response.NoticeMainResponseDto;
 import com.gachonoj.boardservice.domain.entity.Inquiry;
 import com.gachonoj.boardservice.domain.entity.Notice;
@@ -13,6 +14,10 @@ import com.gachonoj.boardservice.repository.NoticeRepository;
 import com.gachonoj.boardservice.repository.ReplyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +33,9 @@ public class BoardService {
     private final InquiryRepository inquiryRepository;
     private final ReplyRepository replyRepository;
     private final MemberServiceFeignClient memberServiceFeignClient;
+
+    private static final int PAGE_SIZE = 10;
+
 
     // 공지사항 작성
     @Transactional
@@ -92,5 +100,14 @@ public class BoardService {
             noticeMainResponseDtos.add(responseDto);
         }
         return noticeMainResponseDtos;
+    }
+    // 공지사항 목록 조회
+    public Page<NoticeListResponseDto> getNoticeList(int pageNo, Long memberId) {
+        Pageable pageable = PageRequest.of(pageNo-1, PAGE_SIZE);
+        Page<Notice> noticePage = noticeRepository.findAllByOrderByNoticeCreatedDateDesc(pageable);
+        return noticePage.map(notice -> {
+            String memberNickname = memberServiceFeignClient.getNicknames(notice.getMemberId());
+            return new NoticeListResponseDto(notice, memberNickname);
+        });
     }
 }

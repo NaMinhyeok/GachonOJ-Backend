@@ -4,11 +4,13 @@ import com.gachonoj.boardservice.common.response.CommonResponseDto;
 import com.gachonoj.boardservice.domain.dto.request.InquiryRequestDto;
 import com.gachonoj.boardservice.domain.dto.request.NoticeRequestDto;
 import com.gachonoj.boardservice.domain.dto.request.ReplyRequestDto;
+import com.gachonoj.boardservice.domain.dto.response.NoticeListResponseDto;
 import com.gachonoj.boardservice.domain.dto.response.NoticeMainResponseDto;
 import com.gachonoj.boardservice.service.BoardService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -80,6 +82,12 @@ public class BoardController {
     public ResponseEntity<CommonResponseDto<List<NoticeMainResponseDto>>> getMainNoticeList(){
         List<NoticeMainResponseDto> noticeList = boardService.getMainNoticeList();
         return ResponseEntity.ok(CommonResponseDto.success(noticeList));
+    }
+    // 공지사항 목록 조회
+    @GetMapping("/notice/list")
+    public ResponseEntity<CommonResponseDto<Page<NoticeListResponseDto>>> getNoticeList(HttpServletRequest request,@RequestParam(required = false,defaultValue = "1") int pageNo) {
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        return ResponseEntity.ok(CommonResponseDto.success(boardService.getNoticeList(pageNo, memberId)));
     }
 }
 
