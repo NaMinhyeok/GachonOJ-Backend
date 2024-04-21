@@ -8,16 +8,22 @@ import com.gachonoj.problemservice.domain.dto.request.ExamRequestDto;
 import com.gachonoj.problemservice.domain.dto.request.TestcaseRequestDto;
 import com.gachonoj.problemservice.domain.dto.request.ProblemRequestDto;
 import com.gachonoj.problemservice.domain.dto.response.PastContestResponseDto;
+import com.gachonoj.problemservice.domain.dto.response.ProfessorExamListResponseDto;
 import com.gachonoj.problemservice.domain.dto.response.ScheduledContestResponseDto;
 import com.gachonoj.problemservice.domain.entity.*;
 import com.gachonoj.problemservice.feign.client.MemberServiceFeignClient;
 import com.gachonoj.problemservice.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -32,6 +38,9 @@ public class ExamService {
     private final TestcaseRepository testcaseRepository;
     private final TestRepository testRepository;
     private final MemberServiceFeignClient memberServiceFeignClient;
+
+    private static final int PAGE_SIZE = 10;
+
 
     @Transactional
     public void registerExam(ExamRequestDto request, Long memberId) {
@@ -176,6 +185,25 @@ public class ExamService {
                     return new PastContestResponseDto(exam, memberNickname);
                 })
                 .collect(Collectors.toList());
+    }
+    // 교수님 시험 목록 조회
+    public Page<ProfessorExamListResponseDto> getProfessorExamList(Long memberId, int pageNo) {
+        Pageable pageable = PageRequest.of(pageNo - 1, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "examUpdateDate"));
+        Page<Exam> exams = examRepository.findByMemberId(memberId, pageable);
+        return exams.map(exam -> {
+            String examUpdateDate = dateFormatter(exam.getExamUpdateDate());
+            String examCreatedDate = dateFormatter(exam.getExamCreatedDate());
+            String examStartDate = dateFormatter(exam.getExamStartDate());
+            return new ProfessorExamListResponseDto(exam, examUpdateDate, examCreatedDate, examStartDate);
+        });
+    }
+
+    // DateFormatter를 사용하여 날짜 형식을 변경하는 메서드
+    private String dateFormatter (LocalDateTime date) {
+        if (date == null) {
+            return "";
+        }
+        return date.format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
     }
 }
     /*@Transactional

@@ -7,7 +7,9 @@ import com.gachonoj.problemservice.domain.dto.request.ProblemRequestDto;
 import com.gachonoj.problemservice.domain.dto.response.*;
 import com.gachonoj.problemservice.service.ExamService;
 import com.gachonoj.problemservice.service.ProblemService;
+import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -184,6 +186,14 @@ public class ProblemController {
     @GetMapping("/problem/recommend")
     public ResponseEntity<CommonResponseDto<List<RecommendProblemResponseDto>>> getRecommendProblems() {
         List<RecommendProblemResponseDto> result = problemService.getRecommenedProblemList();
+        return ResponseEntity.ok(CommonResponseDto.success(result));
+    }
+    // 교수님 시험 목록 조회
+    @GetMapping("/exam/professor/list")
+    public ResponseEntity<CommonResponseDto<Page<ProfessorExamListResponseDto>>> getProfessorExamList(@RequestParam(required = false,defaultValue = "1") int pageNo,
+                                                                                                      HttpServletRequest request) {
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        Page<ProfessorExamListResponseDto> result = examService.getProfessorExamList(memberId, pageNo);
         return ResponseEntity.ok(CommonResponseDto.success(result));
     }
 }

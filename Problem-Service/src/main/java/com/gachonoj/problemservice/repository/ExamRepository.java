@@ -20,4 +20,6 @@ public interface ExamRepository extends JpaRepository<Exam,Long> {
 
     @Query("SELECT e FROM Exam e WHERE e.memberId = :memberId AND e.examType = com.gachonoj.problemservice.domain.constant.ExamType.CONTEST AND e.examStartDate < CURRENT_TIMESTAMP")
     List<Exam> findPastContestsByMemberId(Long memberId);
+    // 회원 ID로 시험 목록 조회
+    Page<Exam> findByMemberId(Long memberId, Pageable pageable);
 }

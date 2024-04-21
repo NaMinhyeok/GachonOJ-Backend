@@ -1,12 +1,28 @@
 package com.gachonoj.problemservice.domain.constant;
 
+import lombok.Getter;
+
+@Getter
 public enum ExamStatus {
     //작성 중
-    WRITING,
+    WRITING("작성 중"),
     // 예약
-    RESERVATION,
+    RESERVATION("예약"),
     // 진행 중
-    ONGOING,
+    ONGOING("진행 중"),
     // 종료
-    TERMINATED
+    TERMINATED("종료");
+
+    private final String label;
+    ExamStatus(String label) {
+        this.label = label;
+    }
+    public static ExamStatus fromLabel(String status) {
+        for (ExamStatus examStatus : ExamStatus.values()) {
+            if (examStatus.getLabel().equals(status)) {
+                return examStatus;
+            }
+        }
+        return null;
+    }
 }
