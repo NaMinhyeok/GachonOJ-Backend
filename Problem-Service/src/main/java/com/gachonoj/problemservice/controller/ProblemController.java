@@ -205,8 +205,9 @@ public class ProblemController {
     }
     // 관리자 문제 목록 조회
     @GetMapping("/admin/problems/list")
-    public ResponseEntity<CommonResponseDto<Page<ProblemListByAdminResponseDto>>> getProblemListByAdmin(@RequestParam(required = false,defaultValue = "1") int pageNo){
-        Page<ProblemListByAdminResponseDto> result = problemService.getProblemListByAdmin(pageNo);
+    public ResponseEntity<CommonResponseDto<Page<ProblemListByAdminResponseDto>>> getProblemListByAdmin(@RequestParam(required = false,defaultValue = "1") int pageNo,
+                                                                                                        @RequestParam(required = false) String search) {
+        Page<ProblemListByAdminResponseDto> result = problemService.getProblemListByAdmin(pageNo,search);
         return ResponseEntity.ok(CommonResponseDto.success(result));
     }
     // 사용자 문제 목록 조회

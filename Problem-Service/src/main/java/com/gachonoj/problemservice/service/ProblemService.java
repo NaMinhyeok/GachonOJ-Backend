@@ -267,10 +267,15 @@ public class ProblemService {
     }
     // 관리자 문제 목록 조회
     @Transactional(readOnly = true)
-    public Page<ProblemListByAdminResponseDto> getProblemListByAdmin(int pageNo) {
+    public Page<ProblemListByAdminResponseDto> getProblemListByAdmin(int pageNo,String search) {
         Pageable pageable = PageRequest.of(pageNo - 1, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "problemId"));
-        Page<Problem> problems = problemRepository.findAll(pageable);
+        Page<Problem> problems;
+        if(search != null){
+            problems = problemRepository.findByProblemTitleContaining(search, pageable);
+        } else{
+            problems = problemRepository.findAll(pageable);
 
+        }
         return problems.map(problem -> {
             Integer correctPeople = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
             Integer correctSumbit = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
