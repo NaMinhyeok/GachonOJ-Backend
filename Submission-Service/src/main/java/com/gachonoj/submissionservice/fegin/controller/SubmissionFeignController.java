@@ -53,4 +53,9 @@ public class SubmissionFeignController {
     public List<Long> getCorrectProblemIds(@RequestParam Long memberId) {
         return submissionFeignService.getCorrectProblemIdsByMemberId(memberId);
     }
+    // 총 제출 수 조회
+    @GetMapping("/problem/submitcount")
+    public Integer getProblemSubmitCount(Long problemId) {
+        return submissionFeignService.getProblemSubmitCount(problemId);
+    }
 }

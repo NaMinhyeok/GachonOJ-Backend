@@ -54,4 +54,8 @@ public class SubmissionFeignService {
     public List<Long> getCorrectProblemIdsByMemberId(Long memberId) {
         return submissionRepository.findCorrectProblemIdsByMemberId(memberId);
     }
+    // problemId로 총 제출 수 조회
+    public Integer getProblemSubmitCount(Long problemId) {
+        return submissionRepository.countTotalSubmissionsByProblemId(problemId);
+    }
 }

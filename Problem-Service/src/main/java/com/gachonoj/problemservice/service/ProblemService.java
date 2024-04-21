@@ -22,6 +22,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -235,8 +237,31 @@ public class ProblemService {
         });
     }
     // 추천 알고리즘 문제 조회
+    @Transactional(readOnly = true)
     public List<RecommendProblemResponseDto> getRecommenedProblemList() {
         List<Problem> problem = problemRepository.findTop6ByOrderByProblemCreatedDateDesc();
         return problem.stream().map(RecommendProblemResponseDto::new).collect(Collectors.toList());
+    }
+    // 관리자 문제 목록 조회
+    @Transactional(readOnly = true)
+    public Page<ProblemListByAdminResponseDto> getProblemListByAdmin(int pageNo) {
+        Pageable pageable = PageRequest.of(pageNo - 1, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "problemId"));
+        Page<Problem> problems = problemRepository.findAll(pageable);
+
+        return problems.map(problem -> {
+            Integer correctPeople = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
+            Integer correctSumbit = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
+            Integer sumbitCount = submissionServiceFeignClient.getProblemSubmitCount(problem.getProblemId());
+            String problemCreatedDate = dateFormatter(problem.getProblemCreatedDate());
+            String problemStatus = problem.getProblemStatus().getLabel();
+            return new ProblemListByAdminResponseDto(problem, correctPeople, correctSumbit, sumbitCount, problemCreatedDate,problemStatus);
+        });
+    }
+    // DateFormatter를 사용하여 날짜 형식을 변경하는 메서드
+    private String dateFormatter (LocalDateTime date) {
+        if (date == null) {
+            return null;
+        }
+        return date.format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
     }
 }
