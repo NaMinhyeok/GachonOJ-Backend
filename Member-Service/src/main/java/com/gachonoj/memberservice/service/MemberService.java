@@ -26,8 +26,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -171,7 +173,8 @@ public class MemberService {
         return memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException("가입되지 않은 회원입니다."));
     }
     // 닉네임 중복 확인
-    public NicknameVerificationResponseDto verifiedMemberNickname(String memberNickname) {
+    public NicknameVerificationResponseDto verifiedMemberNickname(MemberNicknameRequestDto memberNicknameRequestDto) {
+        String memberNickname = memberNicknameRequestDto.getMemberNickname();
         return new NicknameVerificationResponseDto(verifyMemberNickname(memberNickname));
     }
     // 호버시 회원 정보 조회
@@ -263,9 +266,11 @@ public class MemberService {
         Pageable pageable = PageRequest.of(pageNo-1, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "memberRank"));
         Page<Member> memberList;
         if(search != null && !search.isEmpty()) {
-            memberList = memberRepository.findByMemberNicknameContaining(search, pageable);
+            //
+            memberList = memberRepository.findByMemberNicknameContainingAndMemberRole(search,Role.ROLE_STUDENT, pageable);
         } else {
-            memberList = memberRepository.findAll(pageable);
+            // 랭킹에 학생만 표시
+            memberList = memberRepository.findByMemberRole(Role.ROLE_STUDENT, pageable);
         }
         return memberList.map(member -> {
             Integer memberSolved = submissionServiceFeignClient.getMemberSolved(member.getMemberId());
@@ -373,4 +378,18 @@ public class MemberService {
         memberRepository.deleteById(memberId);
     }
 
+    // 응시자 추가를 위한 사용자 정보 조회
+    public List<MemberInfoTestResponseDto> getMemberInfoTest(String memberEmail, String memberNumber) {
+        List<Member> members;
+        if(memberEmail != null) {
+            members = memberRepository.findByMemberEmailContaining(memberEmail);
+        } else if(memberNumber != null) {
+            members = memberRepository.findByMemberNumberContaining(memberNumber);
+        } else {
+            throw new IllegalArgumentException("이메일 또는 학번을 입력해주세요.");
+        }
+        return members.stream()
+                .map(member -> new MemberInfoTestResponseDto(member.getMemberId(), member.getMemberImg(), member.getMemberName(), member.getMemberNumber(), member.getMemberEmail()))
+                .collect(Collectors.toList());
+    }
 }

@@ -1,5 +1,6 @@
 package com.gachonoj.memberservice.jwt;
 
+import com.gachonoj.memberservice.domain.constant.Role;
 import com.gachonoj.memberservice.domain.entity.Member;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -36,6 +37,16 @@ public class CustomUserDetails implements UserDetails {
     }
     public String getMemberImg() {
         return member.getMemberImg();
+    }
+    public String getMemberRole() {
+        if(member.getMemberRole().equals(Role.ROLE_STUDENT)) {
+            return "학생";
+        } else if(member.getMemberRole().equals(Role.ROLE_PROFESSOR)) {
+            return "교수";
+        } else {
+            return "관리자";
+        }
+
     }
     @Override
     public boolean isAccountNonExpired() {

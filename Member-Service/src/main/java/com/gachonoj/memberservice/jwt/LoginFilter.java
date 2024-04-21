@@ -53,9 +53,9 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
         CustomUserDetails customUserDetails = (CustomUserDetails) authResult.getPrincipal();
-        String username = customUserDetails.getUsername();
         Long memberId = customUserDetails.getMemberId();
         String memberImg = customUserDetails.getMemberImg();
+        String memberRole = customUserDetails.getMemberRole();
 
         Collection<? extends GrantedAuthority> authorities = authResult.getAuthorities();
         Iterator<? extends GrantedAuthority> iterator = authorities.iterator();
@@ -67,7 +67,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         redisService.setDataExpire(Long.toString(memberId),refreshToken,jwtUtil.getRefreshTokenExpireTime());
 
-        LoginResponseDto loginResponseDto = new LoginResponseDto(memberImg); // 여기에 필요한 데이터를 설정하세요.
+        LoginResponseDto loginResponseDto = new LoginResponseDto(memberImg,memberRole); // 여기에 필요한 데이터를 설정하세요.
         CommonResponseDto<LoginResponseDto> commonResponseDto = CommonResponseDto.success(loginResponseDto);
 
         ObjectMapper mapper = new ObjectMapper();

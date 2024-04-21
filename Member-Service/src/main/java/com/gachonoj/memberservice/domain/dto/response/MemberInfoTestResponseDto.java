@@ -5,9 +5,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
-@NoArgsConstructor
 @AllArgsConstructor
-public class LoginResponseDto {
+@NoArgsConstructor
+public class MemberInfoTestResponseDto {
+    private Long memberId;
     private String memberImg;
-    private String memberRole;
+    private String memberName;
+    private String memberNumber;
+    private String memberEmail;
 }

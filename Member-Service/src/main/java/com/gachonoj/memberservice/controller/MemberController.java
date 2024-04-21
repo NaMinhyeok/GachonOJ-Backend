@@ -48,9 +48,9 @@ public class MemberController {
         return ResponseEntity.ok(CommonResponseDto.success());
     }
     // 닉네임 중복 확인
-    @GetMapping("/verification/{memberNickname}")
-    public ResponseEntity<CommonResponseDto<NicknameVerificationResponseDto>> verifyMemberNickname(@PathVariable String memberNickname) {
-        return ResponseEntity.ok(CommonResponseDto.success(memberService.verifiedMemberNickname(memberNickname)));
+    @PostMapping("/verification/nickname")
+    public ResponseEntity<CommonResponseDto<NicknameVerificationResponseDto>> verifyMemberNickname(@RequestBody MemberNicknameRequestDto memberNicknameRequestDto) {
+        return ResponseEntity.ok(CommonResponseDto.success(memberService.verifiedMemberNickname(memberNicknameRequestDto)));
     }
     // 호버 창 정보 조회
     @GetMapping("/hover")
@@ -145,5 +145,11 @@ public class MemberController {
     public ResponseEntity<CommonResponseDto<Void>> deleteMemberByAdmin(@PathVariable Long memberId) {
         memberService.deleteMemberByAdmin(memberId);
         return ResponseEntity.ok(CommonResponseDto.success());
+    }
+    // 응시자 정보 조회 이메일 검색, 학번 검색
+    @GetMapping("/info/test")
+    public ResponseEntity<CommonResponseDto<List<MemberInfoTestResponseDto>>> getMemberInfoTest(@RequestParam(required = false) String memberEmail,
+                                                                                           @RequestParam(required = false) String memberNumber) {
+        return ResponseEntity.ok(CommonResponseDto.success(memberService.getMemberInfoTest(memberEmail, memberNumber)));
     }
 }
