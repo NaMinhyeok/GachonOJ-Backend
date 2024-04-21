@@ -19,10 +19,12 @@ public interface ProblemRepository extends JpaRepository<Problem,Long> {
 
 
     Page<Problem> findAllByProblemIdIn(List<Long> ids, Pageable pageable);
-
+    // 문제 제목으로 검색
     Page<Problem> findByProblemTitleContaining(String search, Pageable pageable);
-
+    // 문제 분류별 조회
     Page<Problem> findByProblemClass(ProblemClass problemClass, Pageable pageable);
-
+    // 난이도별 문제 조회
     Page<Problem> findByProblemDiff(int i, Pageable pageable);
+    // 추천 문제 조회 6개
+    List<Problem> findTop6ByOrderByProblemCreatedDateDesc();
 }

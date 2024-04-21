@@ -234,4 +234,9 @@ public class ProblemService {
             return new ProblemListResponseDto(problem, correctPeople, correctRate);
         });
     }
+    // 추천 알고리즘 문제 조회
+    public List<RecommendProblemResponseDto> getRecommenedProblemList() {
+        List<Problem> problem = problemRepository.findTop6ByOrderByProblemCreatedDateDesc();
+        return problem.stream().map(RecommendProblemResponseDto::new).collect(Collectors.toList());
+    }
 }

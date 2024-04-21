@@ -180,5 +180,10 @@ public class ProblemController {
         Page<ProblemListResponseDto> result = problemService.getProblemList(pageNo, search, classType, diff, sortType);
         return ResponseEntity.ok(CommonResponseDto.success(result));
     }
-
+    // 추천 알고리즘 문제 조회
+    @GetMapping("/problem/recommend")
+    public ResponseEntity<CommonResponseDto<List<RecommendProblemResponseDto>>> getRecommendProblems() {
+        List<RecommendProblemResponseDto> result = problemService.getRecommenedProblemList();
+        return ResponseEntity.ok(CommonResponseDto.success(result));
+    }
 }
