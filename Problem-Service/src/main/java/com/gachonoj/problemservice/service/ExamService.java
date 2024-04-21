@@ -189,28 +189,50 @@ public class ExamService {
     }
 
     // 참가 예정 대회 조회
-    public List<ScheduledContestResponseDto> getScheduledContests(Long memberId) {
-        List<Exam> exams = examRepository.findScheduledContestsByMemberId(memberId);
-
-        // DTO 변환
-        return exams.stream()
-                .map(exam -> {
-                    String memberNickname = memberServiceFeignClient.getNicknames(exam.getMemberId());
-                    return new ScheduledContestResponseDto(exam, memberNickname);
-                })
-                .collect(Collectors.toList());
+    public List<ScheduledContestResponseDto> getScheduledContests(Long memberId,String type) {
+        ExamType examType = ExamType.fromLabel(type);
+        if (examType == ExamType.CONTEST) {
+            List<Exam> exams = examRepository.findScheduledContestsByMemberId(memberId);
+            return exams.stream()
+                    .map(exam -> {
+                        String memberNickname = memberServiceFeignClient.getNicknames(exam.getMemberId());
+                        return new ScheduledContestResponseDto(exam, memberNickname);
+                    })
+                    .collect(Collectors.toList());
+        } else if (examType == ExamType.EXAM) {
+            List<Exam> exams = examRepository.findScheduledExamByMemberId(memberId);
+            return exams.stream()
+                    .map(exam -> {
+                        String memberNickname = memberServiceFeignClient.getNicknames(exam.getMemberId());
+                        return new ScheduledContestResponseDto(exam, memberNickname);
+                    })
+                    .collect(Collectors.toList());
+        } else {
+            throw new IllegalArgumentException("Invalid exam type: " + type);
+        }
     }
-
-    public List<PastContestResponseDto> getPastContests(Long memberId) {
-        List<Exam> exams = examRepository.findPastContestsByMemberId(memberId);
-
-        // DTO 변환
-        return exams.stream()
-                .map(exam -> {
-                    String memberNickname = memberServiceFeignClient.getNicknames(exam.getMemberId());
-                    return new PastContestResponseDto(exam, memberNickname);
-                })
-                .collect(Collectors.toList());
+    // 지난 대회 & 시험 목록 조회
+    public List<PastContestResponseDto> getPastContests(Long memberId, String type) {
+        ExamType examType = ExamType.fromLabel(type);
+        if (examType == ExamType.CONTEST) {
+            List<Exam> exams = examRepository.findPastContestsByMemberId(memberId);
+            return exams.stream()
+                    .map(exam -> {
+                        String memberNickname = memberServiceFeignClient.getNicknames(exam.getMemberId());
+                        return new PastContestResponseDto(exam, memberNickname);
+                    })
+                    .collect(Collectors.toList());
+        } else if (examType == ExamType.EXAM) {
+            List<Exam> exams = examRepository.findPastExamByMemberId(memberId);
+            return exams.stream()
+                    .map(exam -> {
+                        String memberNickname = memberServiceFeignClient.getNicknames(exam.getMemberId());
+                        return new PastContestResponseDto(exam, memberNickname);
+                    })
+                    .collect(Collectors.toList());
+        } else {
+            throw new IllegalArgumentException("Invalid exam type: " + type);
+        }
     }
     // 교수님 시험 목록 조회
     public Page<ProfessorExamListResponseDto> getProfessorExamList(Long memberId, int pageNo) {
