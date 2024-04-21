@@ -1,5 +1,6 @@
 package com.gachonoj.problemservice.service;
 
+import com.gachonoj.problemservice.domain.constant.ExamStatus;
 import com.gachonoj.problemservice.domain.constant.ProblemClass;
 import com.gachonoj.problemservice.domain.constant.ProblemStatus;
 import com.gachonoj.problemservice.domain.constant.TestcaseStatus;
@@ -19,6 +20,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +44,32 @@ public class ExamService {
 
     private static final int PAGE_SIZE = 10;
 
+    // 스케쥴링으로 시험 상태 변경
+    @Scheduled(cron = "0 */5 * * * *") // 매 5분마다 실행
+    @Transactional
+    @Async
+    public void updateExamStatusBasesdOnCurrentTime() {
+        List<Exam> exams = examRepository.findAll();
+        LocalDateTime now = LocalDateTime.now();
+        //TODO: RESERVATION 과 WIRITING을 구분해야함
+//      예약중이랑 작성중이랑 차이가 확실해지면 그거에 따라서 변경할 수 있게 해야 할 듯 지금은 시간에 따라서만 하게 되면 다 예약 중으로 됨
+//        for(Exam exam : exams) {
+//            if (exam.getExamStartDate().isAfter(now)) {
+//                exam.setExamStatus(ExamStatus.RESERVATION);
+//            } else if (exam.getExamStartDate().isBefore(now) && exam.getExamEndDate().isAfter(now)) {
+//                exam.setExamStatus(ExamStatus.ONGOING);
+//            } else if (exam.getExamEndDate().isBefore(now)) {
+//                exam.setExamStatus(ExamStatus.TERMINATED);
+//            }
+//        }
+        for(Exam exam : exams) {
+            if (exam.getExamStartDate().isBefore(now) && exam.getExamEndDate().isAfter(now)) {
+                exam.setExamStatus(ExamStatus.ONGOING);
+            } else if (exam.getExamEndDate().isBefore(now)) {
+                exam.setExamStatus(ExamStatus.TERMINATED);
+            }
+        }
+    }
 
     @Transactional
     public void registerExam(ExamRequestDto request, Long memberId) {
