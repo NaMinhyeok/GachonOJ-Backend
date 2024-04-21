@@ -120,14 +120,14 @@ public class ProblemController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/bookmark/list")
-    public ResponseEntity<CommonResponseDto<Page<BookmarkProblemResponseDto>>> getBookmarkProblemList(
-            @RequestParam(defaultValue = "1") int pageNo, HttpServletRequest request) {
-        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
-        // 강제로 회원 ID를 받아 사용하거나, 인증 정보에서 회원 ID를 추출해야 할 경우 로직 추가
-        Page<BookmarkProblemResponseDto> result = problemService.getBookmarkProblemList(memberId, pageNo);
-        return ResponseEntity.ok(CommonResponseDto.success(result));
-    }
+//    @GetMapping("/bookmark/list")
+//    public ResponseEntity<CommonResponseDto<Page<BookmarkProblemResponseDto>>> getBookmarkProblemList(
+//            @RequestParam(defaultValue = "1") int pageNo, HttpServletRequest request) {
+//        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+//        // 강제로 회원 ID를 받아 사용하거나, 인증 정보에서 회원 ID를 추출해야 할 경우 로직 추가
+//        Page<BookmarkProblemResponseDto> result = problemService.getBookmarkProblemList(memberId, pageNo);
+//        return ResponseEntity.ok(CommonResponseDto.success(result));
+//    }
 
     @PostMapping("/bookmark/{problemId}")
     public ResponseEntity<CommonResponseDto<Void>> addBookmark(@PathVariable Long problemId, HttpServletRequest request){
@@ -136,23 +136,23 @@ public class ProblemController {
         return ResponseEntity.ok(CommonResponseDto.success());
     }
 
-    @GetMapping("/challenging/list")
-    public ResponseEntity<CommonResponseDto<Page<WrongProblemResponseDto>>> getIncorrectProblemList(
-            @RequestParam(defaultValue = "1") int pageNo, HttpServletRequest request) {
-        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
-        // 강제로 회원 ID를 받아 사용하거나, 인증 정보에서 회원 ID를 추출해야 할 경우 로직 추가
-        Page<WrongProblemResponseDto> result = problemService.getIncorrectProblemList(memberId, pageNo);
-        return ResponseEntity.ok(CommonResponseDto.success(result));
-    }
+//    @GetMapping("/challenging/list")
+//    public ResponseEntity<CommonResponseDto<Page<WrongProblemResponseDto>>> getIncorrectProblemList(
+//            @RequestParam(defaultValue = "1") int pageNo, HttpServletRequest request) {
+//        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+//        // 강제로 회원 ID를 받아 사용하거나, 인증 정보에서 회원 ID를 추출해야 할 경우 로직 추가
+//        Page<WrongProblemResponseDto> result = problemService.getIncorrectProblemList(memberId, pageNo);
+//        return ResponseEntity.ok(CommonResponseDto.success(result));
+//    }
 
-    @GetMapping("/solved/list")
-    public ResponseEntity<CommonResponseDto<Page<SolvedProblemResponseDto>>> getSolvedProblemList(
-            @RequestParam(defaultValue = "1") int pageNo, HttpServletRequest request) {
-        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
-        // 강제로 회원 ID를 받아 사용하거나, 인증 정보에서 회원 ID를 추출해야 할 경우 로직 추가
-        Page<SolvedProblemResponseDto> result = problemService.getSolvedProblemList(memberId, pageNo);
-        return ResponseEntity.ok(CommonResponseDto.success(result));
-    }
+//    @GetMapping("/solved/list")
+//    public ResponseEntity<CommonResponseDto<Page<SolvedProblemResponseDto>>> getSolvedProblemList(
+//            @RequestParam(defaultValue = "1") int pageNo, HttpServletRequest request) {
+//        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+//        // 강제로 회원 ID를 받아 사용하거나, 인증 정보에서 회원 ID를 추출해야 할 경우 로직 추가
+//        Page<SolvedProblemResponseDto> result = problemService.getSolvedProblemList(memberId, pageNo);
+//        return ResponseEntity.ok(CommonResponseDto.success(result));
+//    }
 
     // 참가 대회&시험 예정 조회
     @GetMapping("/exam/scheduled")
@@ -207,6 +207,19 @@ public class ProblemController {
     @GetMapping("/admin/problems/list")
     public ResponseEntity<CommonResponseDto<Page<ProblemListByAdminResponseDto>>> getProblemListByAdmin(@RequestParam(required = false,defaultValue = "1") int pageNo){
         Page<ProblemListByAdminResponseDto> result = problemService.getProblemListByAdmin(pageNo);
+        return ResponseEntity.ok(CommonResponseDto.success(result));
+    }
+    // 사용자 문제 목록 조회
+    @GetMapping("/problems/list/member")
+    public ResponseEntity<CommonResponseDto<Page<ProblemListResponseDto>>> getProblemListByMember(@RequestParam(required = false,defaultValue = "1") int pageNo,
+                                                                                                  @RequestParam String type,
+                                                                                                  @RequestParam(required = false) String search,
+                                                                                                  @RequestParam(required = false) String classType,
+                                                                                                  @RequestParam(required = false) Integer diff,
+                                                                                                  @RequestParam(required = false) String sortType,
+                                                                                                  HttpServletRequest request) {
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        Page<ProblemListResponseDto> result = problemService.getProblemListByMember(type,pageNo, search, classType, diff, sortType, memberId);
         return ResponseEntity.ok(CommonResponseDto.success(result));
     }
 }
