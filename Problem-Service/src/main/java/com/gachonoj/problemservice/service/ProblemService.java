@@ -1,10 +1,7 @@
 package com.gachonoj.problemservice.service;
 
 import com.gachonoj.problemservice.domain.dto.request.ProblemRequestDto;
-import com.gachonoj.problemservice.domain.dto.response.BookmarkProblemResponseDto;
-import com.gachonoj.problemservice.domain.dto.response.ScheduledContestResponseDto;
-import com.gachonoj.problemservice.domain.dto.response.SolvedProblemResponseDto;
-import com.gachonoj.problemservice.domain.dto.response.WrongProblemResponseDto;
+import com.gachonoj.problemservice.domain.dto.response.*;
 import com.gachonoj.problemservice.domain.entity.Bookmark;
 import com.gachonoj.problemservice.domain.entity.Exam;
 import com.gachonoj.problemservice.domain.entity.Problem;
@@ -182,6 +179,59 @@ public class ProblemService {
                     correctRate,
                     false // isBookmarked 필드는 사용자가 별도로 제공해야 하는 정보를 기반으로 설정합니다
             );
+        });
+    }
+    // 문제 목록 조회
+    @Transactional(readOnly = true)
+    public Page<ProblemListResponseDto> getProblemList(int pageNo, String search, String classType,Integer diff, String sortType) {
+        Pageable pageable = PageRequest.of(pageNo - 1, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "problemId"));
+        if(search!= null) {
+            Page<Problem> problems = problemRepository.findByProblemTitleContaining(search, pageable);
+            return problems.map(problem -> {
+                Integer correctPeople = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
+                Double correctRate = submissionServiceFeignClient.getProblemCorrectRate(problem.getProblemId());
+                return new ProblemListResponseDto(problem, correctPeople, correctRate);
+            });
+        } else if (classType != null) {
+            ProblemClass problemClass = ProblemClass.fromLabel(classType);
+            Page<Problem> problems = problemRepository.findByProblemClass(problemClass, pageable);
+
+            return problems.map(problem -> {
+                Integer correctPeople = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
+                Double correctRate = submissionServiceFeignClient.getProblemCorrectRate(problem.getProblemId());
+                return new ProblemListResponseDto(problem, correctPeople, correctRate);
+            });
+        } else if (diff != null) {
+            Page<Problem> problems = problemRepository.findByProblemDiff(diff, pageable);
+            return problems.map(problem -> {
+                Integer correctPeople = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
+                Double correctRate = submissionServiceFeignClient.getProblemCorrectRate(problem.getProblemId());
+                return new ProblemListResponseDto(problem, correctPeople, correctRate);
+            });
+        } else if (sortType != null) {
+            if (sortType.equals("DESC")) {
+                pageable = PageRequest.of(pageNo - 1, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "problemDiff"));
+                Page<Problem> problems = problemRepository.findAll(pageable);
+                return problems.map(problem -> {
+                    Integer correctPeople = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
+                    Double correctRate = submissionServiceFeignClient.getProblemCorrectRate(problem.getProblemId());
+                    return new ProblemListResponseDto(problem, correctPeople, correctRate);
+                });
+            } else if(sortType.equals("ASC")) {
+                pageable = PageRequest.of(pageNo - 1, PAGE_SIZE, Sort.by(Sort.Direction.ASC, "problemDiff"));
+                Page<Problem> problems = problemRepository.findAll(pageable);
+                return problems.map(problem -> {
+                    Integer correctPeople = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
+                    Double correctRate = submissionServiceFeignClient.getProblemCorrectRate(problem.getProblemId());
+                    return new ProblemListResponseDto(problem, correctPeople, correctRate);
+                });
+            }
+        }
+        Page<Problem> problems = problemRepository.findAll(pageable);
+        return problems.map(problem -> {
+            Integer correctPeople = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
+            Double correctRate = submissionServiceFeignClient.getProblemCorrectRate(problem.getProblemId());
+            return new ProblemListResponseDto(problem, correctPeople, correctRate);
         });
     }
 }

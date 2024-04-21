@@ -1,5 +1,6 @@
 package com.gachonoj.problemservice.repository;
 
+import com.gachonoj.problemservice.domain.constant.ProblemClass;
 import com.gachonoj.problemservice.domain.entity.Problem;
 import feign.Param;
 import org.springframework.data.domain.Page;
@@ -18,4 +19,10 @@ public interface ProblemRepository extends JpaRepository<Problem,Long> {
 
 
     Page<Problem> findAllByProblemIdIn(List<Long> ids, Pageable pageable);
+
+    Page<Problem> findByProblemTitleContaining(String search, Pageable pageable);
+
+    Page<Problem> findByProblemClass(ProblemClass problemClass, Pageable pageable);
+
+    Page<Problem> findByProblemDiff(int i, Pageable pageable);
 }

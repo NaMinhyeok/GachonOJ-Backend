@@ -169,4 +169,16 @@ public class ProblemController {
         List<PastContestResponseDto> result = examService.getPastContests(memberId);
         return ResponseEntity.ok(CommonResponseDto.success(result));
     }
+
+    // 문제 목록 조회
+    @GetMapping("/problems/list")
+    public ResponseEntity<CommonResponseDto<Page<ProblemListResponseDto>>> getProblemList(@RequestParam(required = false,defaultValue = "1") int pageNo,
+                                                                                          @RequestParam(required = false) String search,
+                                                                                          @RequestParam(required = false) String classType,
+                                                                                          @RequestParam(required = false) Integer diff,
+                                                                                          @RequestParam(required = false) String sortType) {
+        Page<ProblemListResponseDto> result = problemService.getProblemList(pageNo, search, classType, diff, sortType);
+        return ResponseEntity.ok(CommonResponseDto.success(result));
+    }
+
 }
