@@ -1,13 +1,10 @@
 package com.gachonoj.problemservice.service;
 
-import com.gachonoj.problemservice.domain.constant.ExamStatus;
-import com.gachonoj.problemservice.domain.constant.ProblemClass;
-import com.gachonoj.problemservice.domain.constant.ProblemStatus;
-import com.gachonoj.problemservice.domain.constant.TestcaseStatus;
-import com.gachonoj.problemservice.domain.dto.request.CandidateListRequestDto;
+import com.gachonoj.problemservice.domain.constant.*;
 import com.gachonoj.problemservice.domain.dto.request.ExamRequestDto;
 import com.gachonoj.problemservice.domain.dto.request.TestcaseRequestDto;
 import com.gachonoj.problemservice.domain.dto.request.ProblemRequestDto;
+import com.gachonoj.problemservice.domain.dto.response.ExamOrContestListResponseDto;
 import com.gachonoj.problemservice.domain.dto.response.PastContestResponseDto;
 import com.gachonoj.problemservice.domain.dto.response.ProfessorExamListResponseDto;
 import com.gachonoj.problemservice.domain.dto.response.ScheduledContestResponseDto;
@@ -226,11 +223,24 @@ public class ExamService {
             return new ProfessorExamListResponseDto(exam, examUpdateDate, examCreatedDate, examStartDate);
         });
     }
+    // 관리자 시험 또는 대회 목록 조회
+    public Page<ExamOrContestListResponseDto> getExamOrContestList(int pageNo, String type) {
+        Pageable pageable = PageRequest.of(pageNo - 1, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "examId"));
+        ExamType examType = ExamType.fromLabel(type);
+
+        Page<Exam> exams = examRepository.findByExamType(examType, pageable);
+        return exams.map(exam -> {
+            String memberNickname = memberServiceFeignClient.getNicknames(exam.getMemberId());
+            String examUpdateDate = dateFormatter(exam.getExamUpdateDate());
+            String examCreatedDate = dateFormatter(exam.getExamCreatedDate());
+            return new ExamOrContestListResponseDto(exam, examUpdateDate, examCreatedDate,memberNickname);
+        });
+    }
 
     // DateFormatter를 사용하여 날짜 형식을 변경하는 메서드
     private String dateFormatter (LocalDateTime date) {
         if (date == null) {
-            return "";
+            return null;
         }
         return date.format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
     }

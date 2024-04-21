@@ -196,4 +196,11 @@ public class ProblemController {
         Page<ProfessorExamListResponseDto> result = examService.getProfessorExamList(memberId, pageNo);
         return ResponseEntity.ok(CommonResponseDto.success(result));
     }
+    // 관리자 시험 또는 대회 목록 조회
+    @GetMapping("/admin/exam/list")
+    public ResponseEntity<CommonResponseDto<Page<ExamOrContestListResponseDto>>> getExamOrContestList(@RequestParam(required = false,defaultValue = "1") int pageNo,
+                                                                                                      @RequestParam String type) {
+        Page<ExamOrContestListResponseDto> result = examService.getExamOrContestList(pageNo,type);
+        return ResponseEntity.ok(CommonResponseDto.success(result));
+    }
 }
