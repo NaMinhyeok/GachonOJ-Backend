@@ -63,7 +63,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String role = auth.getAuthority();
 
         String accessToken = jwtUtil.createAccessJwt(role,memberId);
-        String refreshToken = jwtUtil.createRefreshJwt(memberId);
+        String refreshToken = jwtUtil.createRefreshJwt(role,memberId);
 
         redisService.setDataExpire(Long.toString(memberId),refreshToken,jwtUtil.getRefreshTokenExpireTime());
 
@@ -78,6 +78,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String json = mapper.writeValueAsString(commonResponseDto);
 
         response.addHeader("Authorization", "Bearer " + accessToken);
+        response.addHeader("Refresh-Token", "Bearer" + refreshToken);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(json);
