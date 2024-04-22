@@ -153,7 +153,7 @@ public class MemberController {
         return ResponseEntity.ok(CommonResponseDto.success(memberService.getMemberInfoTest(memberEmail, memberNumber)));
     }
     //로그아웃 구현
-    @GetMapping("/logout")
+    @PostMapping("/logout")
     public ResponseEntity<CommonResponseDto<Void>> logout(HttpServletRequest request) {
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
         memberService.logout(memberId);
