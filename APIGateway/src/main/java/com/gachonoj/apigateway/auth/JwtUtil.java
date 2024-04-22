@@ -42,7 +42,7 @@ public class JwtUtil {
             return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
         } catch (ExpiredJwtException e) {
             // 토큰이 만료된 경우
-            return true;
+            throw new ExpiredJwtException(null, null, "Token is expired", e);
         } catch (MalformedJwtException e) {
             // 토큰이 잘못된 형식인 경우
             throw new IllegalArgumentException("Invalid token format");
