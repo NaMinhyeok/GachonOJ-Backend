@@ -3,6 +3,7 @@ package com.gachonoj.apigateway.auth;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Component
+@Getter
 @Slf4j
 public class JwtUtil {
     private final Long accessTokenExpireTime;

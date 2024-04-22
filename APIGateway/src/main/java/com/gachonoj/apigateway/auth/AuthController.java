@@ -17,7 +17,7 @@ public class AuthController {
         this.authService = authService;
     }
     @PostMapping("/refresh")
-    public ResponseEntity<?> refresh(@RequestBody String refreshToken){
-        return authService.refresh(refreshToken);
+    public ResponseEntity<?> refresh(@RequestBody RefreshRequestDto refreshRequestDto){
+        return authService.refresh(refreshRequestDto);
     }
 }

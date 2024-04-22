@@ -78,7 +78,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String json = mapper.writeValueAsString(commonResponseDto);
 
         response.addHeader("Authorization", "Bearer " + accessToken);
-        response.addHeader("Refresh-Token", refreshToken);
+        response.addHeader("Refresh-Token", "Bearer" + refreshToken);
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(json);
