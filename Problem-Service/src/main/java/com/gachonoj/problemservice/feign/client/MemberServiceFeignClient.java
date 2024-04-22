@@ -11,7 +11,7 @@ public interface MemberServiceFeignClient{
     // memberId로 푼 문제 수 조회
     @GetMapping(value = "/submission/member/solved")
     Integer getMemberSolved(@RequestParam("memberId") Long memberId);
-
+    // 닉네임 조회
     @GetMapping("/member/nickname/{memberId}")
     String getNicknames(@PathVariable Long memberId);
 }
