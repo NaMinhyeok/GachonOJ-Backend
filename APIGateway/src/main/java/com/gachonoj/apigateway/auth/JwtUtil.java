@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
-import java.security.SignatureException;
 import java.util.Date;
 
 @Component
@@ -37,9 +36,9 @@ public class JwtUtil {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("memberId", Long.class);
     }
 
-    public Boolean isExpired(String token) {
+    public void isExpired(String token) {
         try {
-            return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
+            Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration();
         } catch (ExpiredJwtException e) {
             // 토큰이 만료된 경우
             throw new ExpiredJwtException(null, null, "Token is expired", e);
@@ -52,7 +51,23 @@ public class JwtUtil {
         }
     }
     public Boolean isRefreshTokenExpired(String token) {
-        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
+        log.info(token);
+        log.info("리프레시토큰 만료됐는지 확인하는 곳 token : " + token);
+        if (token == null || token.isEmpty()) {
+            throw new IllegalArgumentException("Token cannot be null or empty");
+        }
+        try {
+            return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().getExpiration().before(new Date());
+        } catch (ExpiredJwtException e) {
+            // 토큰이 만료된 경우
+            return true;
+        } catch (MalformedJwtException e) {
+            // 토큰이 잘못된 형식인 경우
+            throw new IllegalArgumentException("Invalid token format", e);
+        } catch (Exception e) {
+            // 그 외의 예외
+            throw new RuntimeException("An error occurred while checking the token", e);
+        }
     }
 
     public String createAccessJwt(String role, Long memberId) {
@@ -66,11 +81,12 @@ public class JwtUtil {
                 .signWith(secretKey)
                 .compact();
     }
-    public String createRefreshJwt(Long memberId) {
+    public String createRefreshJwt(String role, Long memberId) {
 
         return Jwts.builder()
                 .setHeaderParam("type", "refresh")
                 .claim("memberId",memberId)
+                .claim("role", role)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + refreshTokenExpireTime))
                 .signWith(secretKey)

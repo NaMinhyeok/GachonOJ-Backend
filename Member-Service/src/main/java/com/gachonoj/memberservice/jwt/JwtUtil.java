@@ -52,11 +52,12 @@ public class JwtUtil {
                 .signWith(secretKey)
                 .compact();
     }
-    public String createRefreshJwt(Long memberId) {
+    public String createRefreshJwt(String role,Long memberId) {
 
         return Jwts.builder()
                 .setHeaderParam("type", "refresh")
                 .claim("memberId",memberId)
+                .claim("role", role)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + refreshTokenExpireTime))
                 .signWith(secretKey)

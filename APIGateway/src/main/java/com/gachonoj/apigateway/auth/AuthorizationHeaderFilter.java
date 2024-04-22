@@ -2,7 +2,9 @@ package com.gachonoj.apigateway.auth;
 
 import com.netflix.discovery.converters.Auto;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,12 +26,10 @@ import java.util.Objects;
 public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactory<AuthorizationHeaderFilter.Config> {
 
     private final JwtUtil jwtUtil;
-    private final RedisService redisService;
 
-    public AuthorizationHeaderFilter(JwtUtil jwtUtil, RedisService redisService) {
+    public AuthorizationHeaderFilter(JwtUtil jwtUtil) {
         super(Config.class);
         this.jwtUtil = jwtUtil;
-        this.redisService = redisService;
     }
     public static class Config {
     }
@@ -39,28 +39,12 @@ public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactory<Auth
         return ((exchange, chain) -> {
             ServerHttpRequest request = exchange.getRequest();
             String path = request.getURI().getPath();
-            log.info("path: " + path);
             if(!request.getHeaders().containsKey("Authorization")){
                 return onError(exchange, "No Authorization header", HttpStatus.UNAUTHORIZED);
             }
             String accessToken = getTokenFromHeader(request);
             try{
-                // 액세스 토큰이 만료 되었는지 확인
-                if(jwtUtil.isExpired(accessToken)){
-                    // 만료 되었을 경우 리프레시 토큰을 통해서 액세스 토큰 재발급
-                    // 리프레시 토큰을 가져오기 위해 액세스토큰의 멤버아이디를 추출 후 redis에서 리프레시 토큰을 가져옴 왜냐하면 key값이 멤버아이디 이기 때문에
-                    String refreshToken = redisService.getData(jwtUtil.getMemberId(accessToken).toString());
-                    // 가져온 리프레시토큰이랑 액세스토큰의 멤버아이디가 같은지 확인 후 같으면 액세스토큰 재발급
-                    if(Objects.isNull(refreshToken)){
-                        return onError(exchange, "RefreshToken is expired, So please 로그인 다시", HttpStatus.UNAUTHORIZED);
-                    } else if(Objects.equals(jwtUtil.getMemberId(refreshToken), jwtUtil.getMemberId(accessToken))){
-                        accessToken = jwtUtil.createAccessJwt(jwtUtil.getRole(accessToken), jwtUtil.getMemberId(accessToken));
-                    } else if(!Objects.equals(jwtUtil.getMemberId(refreshToken), jwtUtil.getMemberId(accessToken))){
-                        return onError(exchange, "토큰 정보가 일치하지 않습니다.", HttpStatus.UNAUTHORIZED);
-                    } else{
-                        return onError(exchange, "Token is expired", HttpStatus.UNAUTHORIZED);
-                    }
-                }
+                jwtUtil.isExpired(accessToken);
                 Long memberId = jwtUtil.getMemberId(accessToken);
                 String role = jwtUtil.getRole(accessToken);
                 if(isAdminPath(path) && !role.equals("ROLE_ADMIN")){
@@ -68,7 +52,13 @@ public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactory<Auth
                 }
                 ServerHttpRequest modifiedRequest = request.mutate().header("X-Authorization-Id", String.valueOf(memberId)).build();
                 return chain.filter(exchange.mutate().request(modifiedRequest).build());
-            }catch(Exception e){
+            } catch (ExpiredJwtException e){
+                return onError(exchange, "Token is expired", HttpStatus.FORBIDDEN);
+            } catch (IllegalArgumentException e){
+                return onError(exchange, "Invalid token format", HttpStatus.UNAUTHORIZED);
+            } catch (RuntimeException e){
+                return onError(exchange, "An error occurred while checking the token", HttpStatus.UNAUTHORIZED);
+            } catch(Exception e){
                 System.out.println("Exception occurred while parsing JWT: " + e.getMessage());
                 return chain.filter(exchange);
             }
