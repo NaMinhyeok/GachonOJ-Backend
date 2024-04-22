@@ -49,7 +49,7 @@ public class MemberController {
     }
     // 닉네임 중복 확인
     @PostMapping("/verification/nickname")
-    public ResponseEntity<CommonResponseDto<NicknameVerificationResponseDto>> verifyMemberNickname(@RequestBody MemberNicknameRequestDto memberNicknameRequestDto) {
+    public ResponseEntity<CommonResponseDto<NicknameVerificationResponseDto>> verifyMemberNickname(@RequestBody @Valid MemberNicknameRequestDto memberNicknameRequestDto) {
         return ResponseEntity.ok(CommonResponseDto.success(memberService.verifiedMemberNickname(memberNicknameRequestDto)));
     }
     // 호버 창 정보 조회
@@ -73,7 +73,7 @@ public class MemberController {
     }
     //사용자 선호 언어 변경
     @PutMapping("/lang")
-    public ResponseEntity<CommonResponseDto<Void>> updateMemberLang(HttpServletRequest request, @RequestBody MemberLangRequestDto memberLangRequestDto) {
+    public ResponseEntity<CommonResponseDto<Void>> updateMemberLang(HttpServletRequest request, @RequestBody @Valid MemberLangRequestDto memberLangRequestDto) {
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
         memberService.updateMemberLang(memberId,memberLangRequestDto);
         return ResponseEntity.ok(CommonResponseDto.success());
@@ -104,7 +104,7 @@ public class MemberController {
     }
     // 사용자 정보 수정
     @PutMapping("/info")
-    public ResponseEntity<CommonResponseDto<Void>> updateMemberInfo(HttpServletRequest request, @RequestPart(required = false, name = "img") MultipartFile memberImg, @RequestPart(name = "info") MemberInfoRequestDto memberInfoRequestDto) throws IOException {
+    public ResponseEntity<CommonResponseDto<Void>> updateMemberInfo(HttpServletRequest request, @RequestPart(required = false, name = "img") MultipartFile memberImg, @RequestPart(name = "info") @Valid MemberInfoRequestDto memberInfoRequestDto) throws IOException {
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
         memberService.updateMemberInfo(memberId, memberImg, memberInfoRequestDto);
         return ResponseEntity.ok(CommonResponseDto.success());
