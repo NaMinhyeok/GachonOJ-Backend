@@ -7,6 +7,7 @@ import com.gachonoj.boardservice.domain.dto.request.ReplyRequestDto;
 import com.gachonoj.boardservice.domain.dto.response.*;
 import com.gachonoj.boardservice.service.BoardService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -24,14 +25,14 @@ public class BoardController {
 
     //공지사항 생성 API
     @PostMapping("/admin/notice")
-    public ResponseEntity<CommonResponseDto<Void>> createNotice(HttpServletRequest request,@RequestBody NoticeRequestDto noticeRequestDto){
+    public ResponseEntity<CommonResponseDto<Void>> createNotice(HttpServletRequest request,@RequestBody @Valid NoticeRequestDto noticeRequestDto){
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
         boardService.createNotice(noticeRequestDto, memberId);
         return ResponseEntity.ok(CommonResponseDto.success());
     }
     // 공지사항 수정 API
     @PutMapping("/admin/notice/{noticeId}")
-    public ResponseEntity<CommonResponseDto<Void>> updateNotice(HttpServletRequest request,@PathVariable Long noticeId,@RequestBody NoticeRequestDto noticeRequestDto){
+    public ResponseEntity<CommonResponseDto<Void>> updateNotice(HttpServletRequest request,@PathVariable Long noticeId,@RequestBody @Valid NoticeRequestDto noticeRequestDto){
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
         boardService.updateNotice(noticeId,noticeRequestDto, memberId);
         return ResponseEntity.ok(CommonResponseDto.success());
@@ -44,14 +45,14 @@ public class BoardController {
     }
     // 문의사항 작성 API
     @PostMapping("/inquiry")
-    public ResponseEntity<CommonResponseDto<Void>> createInquiry(HttpServletRequest request,@RequestBody InquiryRequestDto inquiryRequestDto){
+    public ResponseEntity<CommonResponseDto<Void>> createInquiry(HttpServletRequest request,@RequestBody @Valid InquiryRequestDto inquiryRequestDto){
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
         boardService.createInquiry(inquiryRequestDto, memberId);
         return ResponseEntity.ok(CommonResponseDto.success());
     }
     // 문의사항 수정 API
     @PutMapping("/inquiry/{inquiryId}")
-    public ResponseEntity<CommonResponseDto<Void>> updateInquiry(HttpServletRequest request,@PathVariable Long inquiryId,@RequestBody InquiryRequestDto inquiryRequestDto){
+    public ResponseEntity<CommonResponseDto<Void>> updateInquiry(HttpServletRequest request,@PathVariable Long inquiryId,@RequestBody @Valid InquiryRequestDto inquiryRequestDto){
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
         boardService.updateInquiry(inquiryId,inquiryRequestDto, memberId);
         return ResponseEntity.ok(CommonResponseDto.success());
@@ -71,7 +72,7 @@ public class BoardController {
     }
     // 문의사항 답변 API
     @PostMapping("/admin/inquiry/{inquiryId}/reply")
-    public ResponseEntity<CommonResponseDto<Void>> createReply(@PathVariable Long inquiryId, @RequestBody ReplyRequestDto replyRequestDto){
+    public ResponseEntity<CommonResponseDto<Void>> createReply(@PathVariable Long inquiryId, @RequestBody @Valid ReplyRequestDto replyRequestDto){
         boardService.createReply(inquiryId,replyRequestDto);
         return ResponseEntity.ok(CommonResponseDto.success());
     }

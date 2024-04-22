@@ -1,5 +1,6 @@
 package com.gachonoj.memberservice.domain.dto.response;
 
+import com.gachonoj.memberservice.domain.constant.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,5 +10,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class LoginResponseDto {
     private String memberImg;
-    private String memberRole;
+    private Role memberRole;
+
+    public LoginResponseDto(String memberImg, String memberRole) {
+        this.memberImg = memberImg;
+        this.memberRole = Role.fromLabel(memberRole);
+    }
 }

@@ -1,5 +1,6 @@
 package com.gachonoj.boardservice.domain.dto.request;
 
+import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -8,5 +9,6 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class ReplyRequestDto {
+    @NotBlank
     private String replyContents;
 }
