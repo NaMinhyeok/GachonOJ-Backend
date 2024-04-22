@@ -392,4 +392,9 @@ public class MemberService {
                 .map(member -> new MemberInfoTestResponseDto(member.getMemberId(), member.getMemberImg(), member.getMemberName(), member.getMemberNumber(), member.getMemberEmail()))
                 .collect(Collectors.toList());
     }
+    // 로그아웃
+    @Transactional
+    public void logout(Long memberId) {
+        redisService.deleteData(memberId.toString());
+    }
 }
