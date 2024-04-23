@@ -285,6 +285,22 @@ public class ProblemService {
             return new ProblemListByAdminResponseDto(problem, correctPeople, correctSumbit, sumbitCount, problemCreatedDate,problemStatus);
         });
     }
+    //문제 응시 화면 문제 상세 조회
+    @Transactional(readOnly = true)
+    public ProblemDetailResponseDto getProblemDetail(Long problemId) {
+        Problem problem = problemRepository.findById(problemId)
+                .orElseThrow(() -> new IllegalArgumentException("Problem not found with id: " + problemId));
+        List<Testcase> visibleTestcases = problem.getTestcases().stream()
+                .filter(testcase -> testcase.getTestcaseStatus() == TestcaseStatus.VISIBLE)
+                .toList();
+        List<String> testcaseInputs = visibleTestcases.stream()
+                .map(Testcase::getTestcaseInput)
+                .collect(Collectors.toList());
+        List<String> testcaseOutputs = visibleTestcases.stream()
+                .map(Testcase::getTestcaseOutput)
+                .collect(Collectors.toList());
+        return new ProblemDetailResponseDto(problem, testcaseInputs, testcaseOutputs);
+    }
     // DateFormatter를 사용하여 날짜 형식을 변경하는 메서드
     private String dateFormatter (LocalDateTime date) {
         if (date == null) {

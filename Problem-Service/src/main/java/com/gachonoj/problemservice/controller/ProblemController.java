@@ -223,4 +223,10 @@ public class ProblemController {
         Page<ProblemListResponseDto> result = problemService.getProblemListByMember(type,pageNo, search, classType, diff, sortType, memberId);
         return ResponseEntity.ok(CommonResponseDto.success(result));
     }
+    // 문제 응시 화면 문제 상세 조회
+    @GetMapping("/problems/{problemId}")
+    public ResponseEntity<CommonResponseDto<ProblemDetailResponseDto>> getProblemDetail(@PathVariable Long problemId) {
+        ProblemDetailResponseDto result = problemService.getProblemDetail(problemId);
+        return ResponseEntity.ok(CommonResponseDto.success(result));
+    }
 }
