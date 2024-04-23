@@ -20,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -118,7 +119,9 @@ public class BoardService {
     // 공지사항 상세 조회
     public NoticeDetailResponseDto getNoticeDetail(Long noticeId) {
         Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new IllegalArgumentException("해당 공지사항이 존재하지 않습니다."));
-        return new NoticeDetailResponseDto(notice);
+        String createdDate = dateFormatter(notice.getNoticeUpdatedDate());
+        String memberNickname = memberServiceFeignClient.getNicknames(notice.getMemberId());
+        return new NoticeDetailResponseDto(notice,createdDate,memberNickname);
     }
     // 문의사항 목록 조회 관리자
     public Page<InquiryAdminListResponseDto> getInquiryListAdmin(int pageNo) {
@@ -159,5 +162,10 @@ public class BoardService {
             return new InquiryDetailAdminResponseDto(inquiry, memberNickname, inquiry.getReply());
         }
         return new InquiryDetailAdminResponseDto(inquiry, memberNickname);
+    }
+    // 시간 포맷 변경
+    private String dateFormatter(LocalDateTime time){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
+        return time.format(formatter);
     }
 }
