@@ -18,21 +18,17 @@ public class InquiryDetailResponseDto {
     private String inquiryCreatedDate;
     private String replyContent;
 
-    public InquiryDetailResponseDto(Inquiry inquiry, Reply reply) {
+    public InquiryDetailResponseDto(Inquiry inquiry,String inquiryCreatedDate, Reply reply) {
         this.inquiryTitle = inquiry.getInquiryTitle();
         this.inquiryContent = inquiry.getInquiryContents();
-        this.inquiryCreatedDate = DateFormat(inquiry.getInquiryCreatedDate());
+        this.inquiryCreatedDate = inquiryCreatedDate;
         this.replyContent = reply.getReplyContents();
     }
 
-    public InquiryDetailResponseDto(Inquiry inquiry) {
+    public InquiryDetailResponseDto(Inquiry inquiry,String inquiryCreatedDate) {
         this.inquiryTitle = inquiry.getInquiryTitle();
         this.inquiryContent = inquiry.getInquiryContents();
-        this.inquiryCreatedDate = DateFormat(inquiry.getInquiryCreatedDate());
+        this.inquiryCreatedDate = inquiryCreatedDate;
         this.replyContent = null;
-    }
-    public String DateFormat(LocalDateTime date) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
-        return date.format(formatter);
     }
 }

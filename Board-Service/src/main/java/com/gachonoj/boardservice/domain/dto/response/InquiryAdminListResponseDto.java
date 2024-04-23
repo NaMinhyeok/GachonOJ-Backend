@@ -20,40 +20,20 @@ public class InquiryAdminListResponseDto {
     private String inquiryCreatedDate;
     private String inquiryStatus;
 
-    public InquiryAdminListResponseDto(Inquiry inquiry, String memberNickname, String replyUpdateDate) {
+    public InquiryAdminListResponseDto(Inquiry inquiry, String memberNickname, String inquiryCreatedDate, String replyUpdateDate) {
         this.inquiryId = inquiry.getInquiryId();
         this.inquiryTitle = inquiry.getInquiryTitle();
         this.memberNickname = memberNickname;
-        this.inquiryCreatedDate = DateFormat(inquiry.getInquiryCreatedDate());
-        this.inquiryStatus = (replyUpdateDate != null ? replyUpdateDate : "") + translateInquiryStatus(inquiry.getInquiryStatus());
+        this.inquiryCreatedDate = inquiryCreatedDate;
+        this.inquiryStatus = replyUpdateDate + " " + inquiry.getInquiryStatus().getLabel();
     }
 
-    public InquiryAdminListResponseDto(Inquiry inquiry, String memberNickname) {
+    public InquiryAdminListResponseDto(Inquiry inquiry, String memberNickname, String inquiryCreatedDate) {
         this.inquiryId = inquiry.getInquiryId();
         this.inquiryTitle = inquiry.getInquiryTitle();
         this.memberNickname = memberNickname;
-        this.inquiryCreatedDate = DateFormat(inquiry.getInquiryCreatedDate());
+        this.inquiryCreatedDate = inquiryCreatedDate;
         this.inquiryStatus = null;
     }
-
-    public InquiryAdminListResponseDto(Inquiry inquiry, String memberNickname, Reply reply) {
-        this.inquiryId = inquiry.getInquiryId();
-        this.inquiryTitle = inquiry.getInquiryTitle();
-        this.memberNickname = memberNickname;
-        this.inquiryCreatedDate = DateFormat(inquiry.getInquiryCreatedDate());
-        this.inquiryStatus =  DateFormat(reply.getReplyUpdatedDate()) + translateInquiryStatus(inquiry.getInquiryStatus());
-    }
-
-    // ENUM To String
-    public String translateInquiryStatus(InquiryStatus inquiryStatus) {
-        return switch (inquiryStatus) {
-            case NONE -> "대기중";
-            case COMPLETED -> "답변완료";
-        };
-    }
-    // 날짜 포맷
-    public String DateFormat(LocalDateTime date) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
-        return date.format(formatter);
-    }
 }
+

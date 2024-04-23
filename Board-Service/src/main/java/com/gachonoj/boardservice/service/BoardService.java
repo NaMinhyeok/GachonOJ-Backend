@@ -102,7 +102,8 @@ public class BoardService {
         List<NoticeMainResponseDto> noticeMainResponseDtos = new ArrayList<>();
         for (Notice notice : noticeList) {
             String memberNickname = memberServiceFeignClient.getNicknames(notice.getMemberId());
-            NoticeMainResponseDto responseDto = new NoticeMainResponseDto(notice,memberNickname);
+            String createdDate = dateFormatter(notice.getNoticeUpdatedDate());
+            NoticeMainResponseDto responseDto = new NoticeMainResponseDto(notice,createdDate, memberNickname);
             noticeMainResponseDtos.add(responseDto);
         }
         return noticeMainResponseDtos;
@@ -113,7 +114,8 @@ public class BoardService {
         Page<Notice> noticePage = noticeRepository.findAllByOrderByNoticeCreatedDateDesc(pageable);
         return noticePage.map(notice -> {
             String memberNickname = memberServiceFeignClient.getNicknames(notice.getMemberId());
-            return new NoticeListResponseDto(notice, memberNickname);
+            String createdDate = dateFormatter(notice.getNoticeUpdatedDate());
+            return new NoticeListResponseDto(notice, createdDate, memberNickname);
         });
     }
     // 공지사항 상세 조회
@@ -129,10 +131,12 @@ public class BoardService {
         Page<Inquiry> inquiryPage = inquiryRepository.findAllByOrderByInquiryCreatedDateDesc(pageable);
         return inquiryPage.map(inquiry -> {
             String memberNickname = memberServiceFeignClient.getNicknames(inquiry.getMemberId());
+            String createdDate = dateFormatter(inquiry.getInquiryCreatedDate());
             if(inquiry.getInquiryStatus()== InquiryStatus.COMPLETED && inquiry.getReply() != null){
-                return new InquiryAdminListResponseDto(inquiry,memberNickname,inquiry.getReply());
+                String replyUpdateDate = dateFormatter(inquiry.getReply().getReplyUpdatedDate());
+                return new InquiryAdminListResponseDto(inquiry,memberNickname,createdDate,replyUpdateDate);
             } else {
-                return new InquiryAdminListResponseDto(inquiry,memberNickname);
+                return new InquiryAdminListResponseDto(inquiry,memberNickname,createdDate);
             }
 
         });
@@ -141,27 +145,32 @@ public class BoardService {
     public Page<InquiryListResponseDto> getInquiryList(Long memberId, int pageNo) {
         Pageable pageable = PageRequest.of(pageNo-1, PAGE_SIZE);
         Page<Inquiry> inquiryPage = inquiryRepository.findByMemberIdOrderByInquiryCreatedDateDesc(memberId,pageable);
-        return inquiryPage.map(InquiryListResponseDto::new);
+        return inquiryPage.map(inquiry -> {
+            String createdDate = dateFormatter(inquiry.getInquiryCreatedDate());
+            return new InquiryListResponseDto(inquiry,createdDate);
+        });
     }
     // 문의사항 상세 조회 사용자
     public InquiryDetailResponseDto getInquiryDetail(Long inquiryId,Long memberId) {
         Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new IllegalArgumentException("해당 문의사항이 존재하지 않습니다."));
+        String inquiryCreatedDate = dateFormatter(inquiry.getInquiryCreatedDate());
         if(!inquiry.getMemberId().equals(memberId)){
             throw new IllegalArgumentException("해당 문의사항에 대한 권한이 없습니다.");
         }
         if(inquiry.getInquiryStatus() == InquiryStatus.COMPLETED && inquiry.getReply() != null){
-            return new InquiryDetailResponseDto(inquiry, inquiry.getReply());
+            return new InquiryDetailResponseDto(inquiry,inquiryCreatedDate, inquiry.getReply());
         }
-        return new InquiryDetailResponseDto(inquiry);
+        return new InquiryDetailResponseDto(inquiry,inquiryCreatedDate);
     }
     // 문의사항 상세 조회 관리자
     public InquiryDetailAdminResponseDto getInquiryDetailAdmin(Long inquiryId) {
         Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new IllegalArgumentException("해당 문의사항이 존재하지 않습니다."));
         String memberNickname = memberServiceFeignClient.getNicknames(inquiry.getMemberId());
+        String inquiryCreatedDate = dateFormatter(inquiry.getInquiryCreatedDate());
         if (inquiry.getInquiryStatus() == InquiryStatus.COMPLETED && inquiry.getReply() != null) {
-            return new InquiryDetailAdminResponseDto(inquiry, memberNickname, inquiry.getReply());
+            return new InquiryDetailAdminResponseDto(inquiry, memberNickname, inquiryCreatedDate, inquiry.getReply());
         }
-        return new InquiryDetailAdminResponseDto(inquiry, memberNickname);
+        return new InquiryDetailAdminResponseDto(inquiry, memberNickname,inquiryCreatedDate);
     }
     // 시간 포맷 변경
     private String dateFormatter(LocalDateTime time){
