@@ -11,5 +11,7 @@ import java.util.List;
 
 public interface BookmarkRepository extends JpaRepository<Bookmark,Long> {
     Page<Bookmark> findByMemberId(Long memberId, Pageable pageable);
+    // 회원아이디로 북마크 문제 조회
+    List<Bookmark> findByMemberId(Long memberId);
     boolean existsByMemberIdAndProblemProblemId(Long memberId, Long problemId);
 }

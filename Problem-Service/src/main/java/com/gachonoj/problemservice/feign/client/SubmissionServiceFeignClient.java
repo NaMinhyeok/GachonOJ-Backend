@@ -14,10 +14,13 @@ public interface SubmissionServiceFeignClient {
     // problemId로 정답률 조회
     @GetMapping(value = "/submission/problem/rate")
     Double getProblemCorrectRate(@RequestParam("problemId") Long problemId);
+    // 총 제출 수 조회
+    @GetMapping(value = "/submission/problem/submitcount")
+    Integer getProblemSubmitCount(@RequestParam("problemId") Long problemId);
     // memberId로 틀린 문제 조회
     @GetMapping("/submission/problem/incorrect")
     List<Long> getIncorrectProblemIds(@RequestParam Long memberId);
-
+    // memberId로 맞춘 문제 조회
     @GetMapping("/submission/problem/correct")
     List<Long> getCorrectProblemIds(@RequestParam Long memberId);
 }
