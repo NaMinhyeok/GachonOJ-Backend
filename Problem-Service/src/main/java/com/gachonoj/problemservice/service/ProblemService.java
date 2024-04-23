@@ -189,15 +189,75 @@ public class ProblemService {
     // 사용자 문제 목록 조회
     @Transactional(readOnly = true)
     public Page<ProblemListResponseDto> getProblemListByMember(String type, int pageNo, String search, String classType,Integer diff,String sortType,Long memberId) {
-        Pageable pageable = PageRequest.of(pageNo - 1, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "problemId"));
+        Sort sort = Sort.by(Sort.Direction.DESC, "problemId"); // 기본 정렬 설정
+        if (sortType != null && !sortType.isEmpty()) {
+            String[] parts = sortType.split("_");
+            if (parts.length == 2) {
+                Sort.Direction dir = "asc".equals(parts[1]) ? Sort.Direction.ASC : Sort.Direction.DESC;
+                sort = Sort.by(dir, parts[0]);
+            }
+        }
+        Pageable pageable = PageRequest.of(pageNo - 1, PAGE_SIZE, sort);
         return switch (type) {
-            case "bookmark" -> getBookmarkProblemList(memberId, pageable);
-            case "solved" -> getSolvedProblemList(memberId, pageable);
-            case "wrong" -> getWrongProblemList(memberId, pageable);
+            case "bookmark" -> getBookmarkProblemList(memberId, pageable, classType, diff);
+            case "solved" -> getSolvedProblemList(memberId, pageable, classType, diff);
+            case "wrong" -> getWrongProblemList(memberId, pageable, classType, diff);
             default -> throw new IllegalArgumentException("Invalid type: " + type);
         };
     }
+
     // 북마크 문제 조회 메서드
+    private Page<ProblemListResponseDto> getBookmarkProblemList(Long memberId, Pageable pageable, String classType, Integer diff) {
+        List<Long> problemIds = bookmarkRepository.findByMemberId(memberId).stream()
+                .map(bookmark -> bookmark.getProblem().getProblemId())
+                .collect(Collectors.toList());
+
+        return problemRepository.findByProblemIdInAndClassTypeAndDifficulty(problemIds, classType, diff, pageable)
+                .map(problem -> {
+                    Integer correctPeople = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
+                    Double correctRate = submissionServiceFeignClient.getProblemCorrectRate(problem.getProblemId());
+                    return new ProblemListResponseDto(
+                            problem,
+                            correctPeople,
+                            correctRate
+                    );
+                });
+    }
+    // 맞춘 문제 조회 메서드
+    private Page<ProblemListResponseDto> getSolvedProblemList(Long memberId, Pageable pageable, String classType, Integer diff) {
+        // 사용자가 정답을 맞춘 문제 ID 목록을 가져옵니다.
+        List<Long> problemIds = submissionServiceFeignClient.getCorrectProblemIds(memberId);
+
+        // 문제 ID 목록과 분류, 난이도를 기반으로 필터링하며 문제 목록을 조회합니다.
+        return problemRepository.findByProblemIdInAndClassTypeAndDifficulty(problemIds, classType, diff, pageable)
+                .map(problem -> {
+                    Integer correctPeople = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
+                    Double correctRate = submissionServiceFeignClient.getProblemCorrectRate(problem.getProblemId());
+                    return new ProblemListResponseDto(
+                            problem,
+                            correctPeople,
+                            correctRate
+                    );
+                });
+    }
+    // 틀린 문제 조회 메서드
+    private Page<ProblemListResponseDto> getWrongProblemList(Long memberId, Pageable pageable, String classType, Integer diff) {
+        // 사용자가 정답을 맞춘 문제 ID 목록을 가져옵니다.
+        List<Long> problemIds = submissionServiceFeignClient.getIncorrectProblemIds(memberId);
+
+        // 문제 ID 목록과 분류, 난이도를 기반으로 필터링하며 문제 목록을 조회합니다.
+        return problemRepository.findByProblemIdInAndClassTypeAndDifficulty(problemIds, classType, diff, pageable)
+                .map(problem -> {
+                    Integer correctPeople = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
+                    Double correctRate = submissionServiceFeignClient.getProblemCorrectRate(problem.getProblemId());
+                    return new ProblemListResponseDto(
+                            problem,
+                            correctPeople,
+                            correctRate
+                    );
+                });
+    }
+/*    // 북마크 문제 조회 메서드
     private Page<ProblemListResponseDto> getBookmarkProblemList(Long memberId, Pageable pageable) {
         List<Long> problemIds = bookmarkRepository.findByMemberId(memberId).stream()
                 .map(bookmark -> bookmark.getProblem().getProblemId())
@@ -215,6 +275,7 @@ public class ProblemService {
         List<Long> problemIds = submissionServiceFeignClient.getIncorrectProblemIds(memberId);
         return getProblemListResponseDtoPage(problemIds, pageable);
     }
+ */
     // 문제 목록 조회 메서드
     private Page<ProblemListResponseDto> getProblemListResponseDtoPage(List<Long> problemIds, Pageable pageable) {
         Page<Problem> problems = problemRepository.findAllByProblemIdIn(problemIds, pageable);
@@ -278,11 +339,11 @@ public class ProblemService {
         }
         return problems.map(problem -> {
             Integer correctPeople = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
-            Integer correctSumbit = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
-            Integer sumbitCount = submissionServiceFeignClient.getProblemSubmitCount(problem.getProblemId());
+            Integer correctSubmit = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
+            Integer submitCount = submissionServiceFeignClient.getProblemSubmitCount(problem.getProblemId());
             String problemCreatedDate = dateFormatter(problem.getProblemCreatedDate());
             String problemStatus = problem.getProblemStatus().getLabel();
-            return new ProblemListByAdminResponseDto(problem, correctPeople, correctSumbit, sumbitCount, problemCreatedDate,problemStatus);
+            return new ProblemListByAdminResponseDto(problem, correctPeople, correctSubmit, submitCount, problemCreatedDate,problemStatus);
         });
     }
     //문제 응시 화면 문제 상세 조회

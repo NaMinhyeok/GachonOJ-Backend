@@ -20,7 +20,7 @@ public interface SubmissionServiceFeignClient {
     // memberId로 틀린 문제 조회
     @GetMapping("/submission/problem/incorrect")
     List<Long> getIncorrectProblemIds(@RequestParam Long memberId);
-
+    // memberId로 맞춘 문제 조회
     @GetMapping("/submission/problem/correct")
     List<Long> getCorrectProblemIds(@RequestParam Long memberId);
 }

@@ -32,6 +32,7 @@ public class ProblemController {
     private final ProblemService problemService;    // 주입된 ProblemService 의존성
     private final ExamService examService;
 
+    // 시험 등록
     @PostMapping("/exam/register")
     public ResponseEntity<CommonResponseDto<Void>> registerExam(@RequestBody ExamRequestDto examDto, HttpServletRequest request) {
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
@@ -39,6 +40,7 @@ public class ProblemController {
         return ResponseEntity.ok(CommonResponseDto.success());
     }
 
+    // 시험 수정
     @PutMapping("/exam/{examId}")
     public ResponseEntity<CommonResponseDto<Void>> updateExam(
             @PathVariable Long examId,  // 시험 ID는 URL 매개변수로 받는다
@@ -49,6 +51,8 @@ public class ProblemController {
         examService.updateExam(examId, memberId, examDto);  // 서비스 레이어에 업데이트 로직 위임
         return ResponseEntity.ok(CommonResponseDto.success());  // 성공 응답
     }
+
+    // 시험 삭제
     @DeleteMapping("/exam/{examId}")
     public ResponseEntity<CommonResponseDto<Void>> deleteExam(@PathVariable Long examId, HttpServletRequest request) {
         String memberIdStr = request.getHeader("X-Authorization-Id");
@@ -74,7 +78,7 @@ public class ProblemController {
                     .body(CommonResponseDto.fail(ErrorCode.INTERNAL_SERVER_ERROR, "Internal server error"));
         }
     }
-    //알고리즘 문제 등록
+    // 알고리즘 문제 등록
     @PostMapping("/admin/register")
     public ResponseEntity<Map<String, Object>> registerProblem(@RequestBody ProblemRequestDto problemRequestDto) {
         // ProblemService를 호출하여 요청 DTO에 기반하여 문제 등록
@@ -129,6 +133,7 @@ public class ProblemController {
 //        return ResponseEntity.ok(CommonResponseDto.success(result));
 //    }
 
+    // 북마크 등록
     @PostMapping("/bookmark/{problemId}")
     public ResponseEntity<CommonResponseDto<Void>> addBookmark(@PathVariable Long problemId, HttpServletRequest request){
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
