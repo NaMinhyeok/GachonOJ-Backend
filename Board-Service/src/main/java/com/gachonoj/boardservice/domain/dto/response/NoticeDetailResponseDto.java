@@ -11,15 +11,16 @@ import java.time.format.DateTimeFormatter;
 @AllArgsConstructor
 @NoArgsConstructor
 public class NoticeDetailResponseDto {
+    private String memberNickname;
     private String noticeTitle;
     private String noticeContent;
     private String noticeCreatedDate;
 
-    public NoticeDetailResponseDto(Notice notice) {
+    public NoticeDetailResponseDto(Notice notice,String createdDate,String memberNickname) {
         this.noticeTitle = notice.getNoticeTitle();
         this.noticeContent = notice.getNoticeContents();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
-        this.noticeCreatedDate = notice.getNoticeUpdatedDate().format(formatter);
+        this.noticeCreatedDate = createdDate;
+        this.memberNickname = memberNickname;
     }
 }
 

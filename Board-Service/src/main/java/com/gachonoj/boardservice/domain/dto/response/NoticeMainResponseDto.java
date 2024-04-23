@@ -16,10 +16,9 @@ public class NoticeMainResponseDto {
     private String memberNickname;
     private String noticeCreatedDate;
 
-    public NoticeMainResponseDto(Notice notice,String memberNickname) {
+    public NoticeMainResponseDto(Notice notice,String noticeCreatedDate, String memberNickname) {
         this.noticeTitle = notice.getNoticeTitle();
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
-        this.noticeCreatedDate = notice.getNoticeUpdatedDate().format(formatter);
+        this.noticeCreatedDate = noticeCreatedDate;
         this.memberNickname = memberNickname;
     }
 }
