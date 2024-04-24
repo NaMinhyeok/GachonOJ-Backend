@@ -15,6 +15,7 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Comparator;
 
 @Slf4j
 @Service
@@ -61,14 +62,19 @@ public class SubmissionService {
 //    }
     public String executeCode(ExecuteTestRequestDto executeTestRequestDto) {
         Process process = null;
-        Path filePath = Paths.get("/home/Main.java");
+        Path dirPath = Paths.get("/home/temp");
+        Path javaFilePath = dirPath.resolve("Main.java");
         try {
+            // 디렉토리 생성
+            Files.createDirectory(dirPath);
+            log.info("Directory created");
+
             // 코드를 파일로 저장
-            Files.write(filePath, executeTestRequestDto.getCode().getBytes());
+            Files.write(javaFilePath, executeTestRequestDto.getCode().getBytes());
             log.info("Code saved");
 
             // 컴파일
-            int compileExit = new ProcessExecutor().command("javac", filePath.toString())
+            int compileExit = new ProcessExecutor().command("javac", javaFilePath.toString())
                     .redirectOutput(new LogOutputStream() {
                         @Override
                         protected void processLine(String line) {
@@ -78,7 +84,7 @@ public class SubmissionService {
             log.info("Code compiled with exit code " + compileExit);
 
             // 실행
-            process = new ProcessExecutor().command("java", "-cp", "/home", "Main")
+            process = new ProcessExecutor().command("java", "-cp", dirPath.toString(), "Main")
                     .start().getProcess();
             log.info("Code executed");
 
@@ -89,6 +95,7 @@ public class SubmissionService {
             while ((line = reader.readLine()) != null) {
                 output.append(line).append("\n");
             }
+            log.info("Code output: " + output.toString());
 
             return output.toString();
         } catch (Exception e) {
@@ -101,12 +108,15 @@ public class SubmissionService {
                 log.info("Process destroyed");
             }
 
-            // 파일 삭제
+            // 디렉토리 삭제
             try {
-                Files.deleteIfExists(filePath);
-                log.info("File deleted");
+                Files.walk(dirPath)
+                        .sorted(Comparator.reverseOrder())
+                        .map(Path::toFile)
+                        .forEach(File::delete);
+                log.info("Directory deleted");
             } catch (Exception e) {
-                log.info("Failed to delete file: " + e.getMessage());
+                log.info("Failed to delete directory: " + e.getMessage());
             }
         }
     }
