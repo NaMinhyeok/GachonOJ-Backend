@@ -1,12 +1,12 @@
 package com.gachonoj.problemservice.feign.controller;
 
+import com.gachonoj.problemservice.feign.dto.response.SubmissionProblemTestCaseResponseDto;
 import com.gachonoj.problemservice.feign.service.ProblemFeignService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -20,5 +20,10 @@ public class ProblemFeignController {
     @GetMapping("/member/bookmark")
     public Integer getBookmarkCountByMemberId(@RequestParam Long memberId) {
         return problemFeignService.getBookmarkCountByMemberId(memberId);
+    }
+    // 테스트케이스 조회
+    @GetMapping("/{problemId}/testcase")
+    public List<SubmissionProblemTestCaseResponseDto> getTestCases(@PathVariable Long problemId) {
+        return problemFeignService.getTestCases(problemId);
     }
 }
