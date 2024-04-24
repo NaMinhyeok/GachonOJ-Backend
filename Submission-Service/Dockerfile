@@ -1,14 +1,10 @@
-FROM openjdk:17
+FROM ubuntu:20.04
 
 # Install Python, Node.js and gcc
 RUN apt-get update && \
-    apt-get install -y python3 python3-pip nodejs npm gcc g++ \
+    apt-get install -y openjdk-17-jdk python3 python3-pip nodejs npm gcc g++ \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
-    && ln -s /usr/bin/python3 /usr/bin/python \
-    && ln -s /usr/bin/pip3 /usr/bin/pip \
-    && ln -s /usr/bin/nodejs /usr/bin/node \
-    && ln -s /usr/bin/npm /usr/bin/npm
 
 
 ARG JAR_FILE=build/libs/*.jar
