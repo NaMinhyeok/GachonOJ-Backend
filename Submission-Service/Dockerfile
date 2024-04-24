@@ -1,5 +1,8 @@
 FROM ubuntu:20.04
 
+# Set environment variable to disable interactive prompts
+ENV DEBIAN_FRONTEND=noninteractive
+
 # Install Python, Node.js and gcc
 RUN apt-get update && \
     apt-get install -y openjdk-17-jdk python3 python3-pip nodejs npm gcc g++ \
