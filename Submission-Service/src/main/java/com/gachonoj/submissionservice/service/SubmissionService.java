@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -22,16 +23,20 @@ public class SubmissionService {
             // 코드를 파일로 저장
             Files.write(Paths.get("/home/Main.java"), executeTestRequestDto.getCode().getBytes());
             log.info("Code saved");
+
             // 컴파일
             ProcessBuilder compileProcessBuilder = new ProcessBuilder("javac", "Main.java");
+            compileProcessBuilder.directory(new File("/home")); // 작업 디렉토리 설정
             Process compileProcess = compileProcessBuilder.start();
             compileProcess.waitFor();
             log.info("Code compiled");
+
             // 실행
             ProcessBuilder runProcessBuilder = new ProcessBuilder("java", "Main");
+            runProcessBuilder.directory(new File("/home")); // 작업 디렉토리 설정
             Process runProcess = runProcessBuilder.start();
             log.info("Code executed");
-            // 결과 가져오기
+
             // 결과 가져오기
             BufferedReader stdInput = new BufferedReader(new InputStreamReader(runProcess.getInputStream()));
             BufferedReader stdError = new BufferedReader(new InputStreamReader(runProcess.getErrorStream()));
