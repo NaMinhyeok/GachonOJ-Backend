@@ -32,14 +32,19 @@ public class SubmissionService {
             Process runProcess = runProcessBuilder.start();
             log.info("Code executed");
             // 결과 가져오기
-            BufferedReader reader = new BufferedReader(new InputStreamReader(runProcess.getInputStream()));
+            // 결과 가져오기
+            BufferedReader stdInput = new BufferedReader(new InputStreamReader(runProcess.getInputStream()));
+            BufferedReader stdError = new BufferedReader(new InputStreamReader(runProcess.getErrorStream()));
+
             StringBuilder output = new StringBuilder();
             String line;
-            while ((line = reader.readLine()) != null) {
+            while ((line = stdInput.readLine()) != null) {
+                output.append(line).append("\n");
+            }
+            while ((line = stdError.readLine()) != null) {
                 output.append(line).append("\n");
             }
             log.info("Code output: " + output.toString());
-
             return output.toString();
         } catch (Exception e) {
             log.info("Error: " + e.getMessage());
