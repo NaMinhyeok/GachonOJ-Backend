@@ -1,5 +1,6 @@
 package com.gachonoj.submissionservice.service;
 
+import com.gachonoj.submissionservice.domain.dto.request.ExecuteTestRequestDto;
 import com.gachonoj.submissionservice.repository.SubmissionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,10 +17,10 @@ import java.nio.file.Paths;
 @RequiredArgsConstructor
 public class SubmissionService {
     // 코드 실행
-    public String executeCode(String code) {
+    public String executeCode(ExecuteTestRequestDto executeTestRequestDto) {
         try {
             // 코드를 파일로 저장
-            Files.write(Paths.get("/home/main.java"), code.getBytes());
+            Files.write(Paths.get("/home/main.java"), executeTestRequestDto.getCode().getBytes());
 
             // 컴파일
             ProcessBuilder compileProcessBuilder = new ProcessBuilder("javac", "main.java");
