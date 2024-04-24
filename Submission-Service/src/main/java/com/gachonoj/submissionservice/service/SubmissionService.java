@@ -9,9 +9,7 @@ import org.springframework.stereotype.Service;
 import org.zeroturnaround.exec.ProcessExecutor;
 import org.zeroturnaround.exec.stream.LogOutputStream;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -21,121 +19,65 @@ import java.util.Comparator;
 @Service
 @RequiredArgsConstructor
 public class SubmissionService {
+    private static final String input = "5\n" +
+                                        "2 4 -10 4 -9";
     // 코드 실행
-//    public String executeCode(ExecuteTestRequestDto executeTestRequestDto) {
-//        try {
-//            // 코드를 파일로 저장
-//            Files.write(Paths.get("/home/Main.java"), executeTestRequestDto.getCode().getBytes());
-//            log.info("Code saved");
-//
-//            // 컴파일
-//            ProcessBuilder compileProcessBuilder = new ProcessBuilder("javac", "Main.java");
-//            compileProcessBuilder.directory(new File("/home")); // 작업 디렉토리 설정
-//            Process compileProcess = compileProcessBuilder.start();
-//            compileProcess.waitFor();
-//            log.info("Code compiled");
-//
-//            // 실행
-//            ProcessBuilder runProcessBuilder = new ProcessBuilder("java", "Main");
-//            runProcessBuilder.directory(new File("/home")); // 작업 디렉토리 설정
-//            Process runProcess = runProcessBuilder.start();
-//            log.info("Code executed");
-//
-//            // 결과 가져오기
-//            BufferedReader stdInput = new BufferedReader(new InputStreamReader(runProcess.getInputStream()));
-//            BufferedReader stdError = new BufferedReader(new InputStreamReader(runProcess.getErrorStream()));
-//
-//            StringBuilder output = new StringBuilder();
-//            String line;
-//            while ((line = stdInput.readLine()) != null) {
-//                output.append(line).append("\n");
-//            }
-//            while ((line = stdError.readLine()) != null) {
-//                output.append(line).append("\n");
-//            }
-//            log.info("Code output: " + output.toString());
-//            return output.toString();
-//        } catch (Exception e) {
-//            log.info("Error: " + e.getMessage());
-//            return "Error: " + e.getMessage();
-//        }
-//    }
     public String executeCode(ExecuteTestRequestDto executeTestRequestDto) {
-        Process process = null;
-        Path dirPath = Paths.get("/home/temp");
-        Path javaFilePath = dirPath.resolve("Main.java");
-        StringBuilder output = new StringBuilder();
         try {
-            // 디렉토리 생성
-            Files.createDirectory(dirPath);
+            // /home/exec 디렉토리 생성
+            Path execDir = Paths.get("/home/exec");
+            Files.createDirectories(execDir);
             log.info("Directory created");
 
-            // 코드를 파일로 저장
-            Files.write(javaFilePath, executeTestRequestDto.getCode().getBytes());
+            // /home/exec 디렉토리에 Main.java 파일 저장
+            Path filePath = Paths.get(execDir.toString(), "Main.java");
+            Files.write(filePath, executeTestRequestDto.getCode().getBytes());
             log.info("Code saved");
 
             // 컴파일
-            int compileExit = new ProcessExecutor().command("javac", javaFilePath.toString())
-                    .redirectOutput(new LogOutputStream() {
-                        @Override
-                        protected void processLine(String line) {
-                            log.info(line);
-                            output.append(line).append("\n");
-                        }
-                    })
-                    .redirectError(new LogOutputStream() {
-                        @Override
-                        protected void processLine(String line) {
-                            log.info(line);
-                            output.append(line).append("\n");
-                        }
-                    })
-                    .execute().getExitValue();
-            log.info("Code compiled with exit code " + compileExit);
+            ProcessBuilder compileProcessBuilder = new ProcessBuilder("javac", "Main.java");
+            compileProcessBuilder.directory(new File(execDir.toString())); // 작업 디렉토리 설정
+            Process compileProcess = compileProcessBuilder.start();
+            compileProcess.waitFor();
+            log.info("Code compiled");
 
             // 실행
-            process = new ProcessExecutor().command("java", "-cp", dirPath.toString(), "Main")
-                    .redirectOutput(new LogOutputStream() {
-                        @Override
-                        protected void processLine(String line) {
-                            log.info(line);
-                            output.append(line).append("\n");
-                        }
-                    })
-                    .redirectError(new LogOutputStream() {
-                        @Override
-                        protected void processLine(String line) {
-                            log.info(line);
-                            output.append(line).append("\n");
-                        }
-                    })
-                    .start().getProcess();
+            ProcessBuilder runProcessBuilder = new ProcessBuilder("java", "Main");
+            runProcessBuilder.directory(new File(execDir.toString())); // 작업 디렉토리 설정
+            Process runProcess = runProcessBuilder.start();
             log.info("Code executed");
 
+            // 입력 제공
+            BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(runProcess.getOutputStream()));
+            writer.write(input);
+            writer.flush();
+            writer.close();
+
+            // 결과 가져오기
+            BufferedReader stdInput = new BufferedReader(new InputStreamReader(runProcess.getInputStream()));
+            BufferedReader stdError = new BufferedReader(new InputStreamReader(runProcess.getErrorStream()));
+
+            StringBuilder output = new StringBuilder();
+            String line;
+            while ((line = stdInput.readLine()) != null) {
+                output.append(line).append("\n");
+            }
+            while ((line = stdError.readLine()) != null) {
+                output.append(line).append("\n");
+            }
             log.info("Code output: " + output.toString());
+
+            // /home/exec 디렉토리 삭제
+            Files.walk(execDir)
+                    .sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(File::delete);
+            log.info("Directory deleted");
 
             return output.toString();
         } catch (Exception e) {
             log.info("Error: " + e.getMessage());
             return "Error: " + e.getMessage();
-        } finally {
-            // 프로세스 종료
-            if (process != null) {
-                process.destroy();
-                log.info("Process destroyed");
-            }
-
-            // 디렉토리 삭제
-            try {
-                Files.walk(dirPath)
-                        .sorted(Comparator.reverseOrder())
-                        .map(Path::toFile)
-                        .forEach(File::delete);
-                log.info("Directory deleted");
-            } catch (Exception e) {
-                log.info("Failed to delete directory: " + e.getMessage());
-            }
         }
     }
-
 }
