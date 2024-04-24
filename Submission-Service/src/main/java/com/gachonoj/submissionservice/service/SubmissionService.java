@@ -20,15 +20,15 @@ public class SubmissionService {
     public String executeCode(ExecuteTestRequestDto executeTestRequestDto) {
         try {
             // 코드를 파일로 저장
-            Files.write(Paths.get("/home/main.java"), executeTestRequestDto.getCode().getBytes());
+            Files.write(Paths.get("/home/Main.java"), executeTestRequestDto.getCode().getBytes());
             log.info("Code saved");
             // 컴파일
-            ProcessBuilder compileProcessBuilder = new ProcessBuilder("javac", "main.java");
+            ProcessBuilder compileProcessBuilder = new ProcessBuilder("javac", "Main.java");
             Process compileProcess = compileProcessBuilder.start();
             compileProcess.waitFor();
             log.info("Code compiled");
             // 실행
-            ProcessBuilder runProcessBuilder = new ProcessBuilder("java", "main");
+            ProcessBuilder runProcessBuilder = new ProcessBuilder("java", "Main");
             Process runProcess = runProcessBuilder.start();
             log.info("Code executed");
             // 결과 가져오기
