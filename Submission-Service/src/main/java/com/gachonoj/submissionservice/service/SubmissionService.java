@@ -64,6 +64,7 @@ public class SubmissionService {
         Process process = null;
         Path dirPath = Paths.get("/home/temp");
         Path javaFilePath = dirPath.resolve("Main.java");
+        StringBuilder output = new StringBuilder();
         try {
             // 디렉토리 생성
             Files.createDirectory(dirPath);
@@ -79,22 +80,38 @@ public class SubmissionService {
                         @Override
                         protected void processLine(String line) {
                             log.info(line);
+                            output.append(line).append("\n");
                         }
-                    }).execute().getExitValue();
+                    })
+                    .redirectError(new LogOutputStream() {
+                        @Override
+                        protected void processLine(String line) {
+                            log.info(line);
+                            output.append(line).append("\n");
+                        }
+                    })
+                    .execute().getExitValue();
             log.info("Code compiled with exit code " + compileExit);
 
             // 실행
             process = new ProcessExecutor().command("java", "-cp", dirPath.toString(), "Main")
+                    .redirectOutput(new LogOutputStream() {
+                        @Override
+                        protected void processLine(String line) {
+                            log.info(line);
+                            output.append(line).append("\n");
+                        }
+                    })
+                    .redirectError(new LogOutputStream() {
+                        @Override
+                        protected void processLine(String line) {
+                            log.info(line);
+                            output.append(line).append("\n");
+                        }
+                    })
                     .start().getProcess();
             log.info("Code executed");
 
-            // 결과 가져오기
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            StringBuilder output = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-                output.append(line).append("\n");
-            }
             log.info("Code output: " + output.toString());
 
             return output.toString();
