@@ -11,4 +11,6 @@ import lombok.NoArgsConstructor;
 public class ExecuteTestRequestDto {
     @NotBlank
     private String code;
+    @NotBlank
+    private String language;
 }
