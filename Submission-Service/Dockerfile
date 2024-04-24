@@ -1,7 +1,4 @@
-FROM ubuntu:20.04
-
-# Set environment variable to disable interactive prompts
-ENV DEBIAN_FRONTEND=noninteractive
+FROM debian:bullseye-slim
 
 # Install Python, Node.js and gcc
 RUN apt-get update && \
@@ -12,4 +9,4 @@ RUN apt-get update && \
 
 ARG JAR_FILE=build/libs/*.jar
 COPY ${JAR_FILE} app.jar
-#ENTRYPOINT ["java","-jar","/app.jar"]
+ENTRYPOINT ["java","-jar","/app.jar"]
