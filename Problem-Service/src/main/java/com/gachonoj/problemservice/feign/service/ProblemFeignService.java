@@ -27,7 +27,7 @@ public class ProblemFeignService {
 
     // 문제의 테스트케이스 조회
     public List<SubmissionProblemTestCaseResponseDto> getTestCases(Long problemId) {
-        List<Testcase> testcases = testcaseRepository.findByProblemId(problemId);
+        List<Testcase> testcases = testcaseRepository.findByProblemProblemId(problemId);
         return testcases.stream()
                 .map(testcase -> new SubmissionProblemTestCaseResponseDto(testcase.getTestcaseInput(), testcase.getTestcaseOutput()))
                 .toList();
