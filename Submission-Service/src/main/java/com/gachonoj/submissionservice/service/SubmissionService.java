@@ -21,16 +21,16 @@ public class SubmissionService {
         try {
             // 코드를 파일로 저장
             Files.write(Paths.get("/home/main.java"), executeTestRequestDto.getCode().getBytes());
-
+            log.info("Code saved");
             // 컴파일
             ProcessBuilder compileProcessBuilder = new ProcessBuilder("javac", "main.java");
             Process compileProcess = compileProcessBuilder.start();
             compileProcess.waitFor();
-
+            log.info("Code compiled");
             // 실행
             ProcessBuilder runProcessBuilder = new ProcessBuilder("java", "main");
             Process runProcess = runProcessBuilder.start();
-
+            log.info("Code executed");
             // 결과 가져오기
             BufferedReader reader = new BufferedReader(new InputStreamReader(runProcess.getInputStream()));
             StringBuilder output = new StringBuilder();
@@ -38,9 +38,11 @@ public class SubmissionService {
             while ((line = reader.readLine()) != null) {
                 output.append(line).append("\n");
             }
+            log.info("Code output: " + output.toString());
 
             return output.toString();
         } catch (Exception e) {
+            log.info("Error: " + e.getMessage());
             return "Error: " + e.getMessage();
         }
     }
