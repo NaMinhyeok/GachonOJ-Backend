@@ -292,14 +292,12 @@ public class ProblemService {
     @Transactional(readOnly = true)
     public Page<ProblemListResponseDto> getProblemList(int pageNo, String search, String classType, Integer diff, String sortType) {
         Pageable pageable = PageRequest.of(pageNo - 1, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "problemId"));
-
-        switch (sortType) {
-            case "DESC":
-                pageable = PageRequest.of(pageNo - 1, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "problemDiff"));
-                break;
-            case "ASC":
-                pageable = PageRequest.of(pageNo - 1, PAGE_SIZE, Sort.by(Sort.Direction.ASC, "problemDiff"));
-                break;
+        if(sortType != null){
+            pageable = switch (sortType) {
+                case "DESC" -> PageRequest.of(pageNo - 1, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "problemDiff"));
+                case "ASC" -> PageRequest.of(pageNo - 1, PAGE_SIZE, Sort.by(Sort.Direction.ASC, "problemDiff"));
+                default -> pageable;
+            };
         }
 
         Page<Problem> problems;
