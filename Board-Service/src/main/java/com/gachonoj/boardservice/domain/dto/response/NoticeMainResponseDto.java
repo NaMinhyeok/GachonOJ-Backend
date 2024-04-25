@@ -12,11 +12,13 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class NoticeMainResponseDto {
+    private Long noticeId;
     private String noticeTitle;
     private String memberNickname;
     private String noticeCreatedDate;
 
     public NoticeMainResponseDto(Notice notice,String noticeCreatedDate, String memberNickname) {
+        this.noticeId = notice.getNoticeId();
         this.noticeTitle = notice.getNoticeTitle();
         this.noticeCreatedDate = noticeCreatedDate;
         this.memberNickname = memberNickname;
