@@ -128,8 +128,10 @@ public class SubmissionService {
                 log.info("Code output: " + i + "번째" + outputResult.toString());
                 // 정답인지 확인
                 if(outputList.get(i).equals(outputResult.toString())){
+                    log.info("output: " + outputList.get(i) + "정답: " + outputResult.toString());
                     result.add("정답");
                 }else{
+                    log.info("output: " + outputList.get(i) + "오답: " + outputResult.toString());
                     result.add("오답");
                 }
                 result.add(outputResult.toString());
