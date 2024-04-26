@@ -188,7 +188,7 @@ public class ProblemService {
     //TODO : 검색, 분류, 난이도, 정렬 기능 추가
     // 사용자 문제 목록 조회
     @Transactional(readOnly = true)
-    public Page<ProblemListResponseDto> getProblemListByMember(String type, int pageNo, String search, String classType,Integer diff,String sortType,Long memberId) {
+    public Page<ProblemListResponseDto> getProblemListByMember(String type, int pageNo, String search, String classType, Integer diff, String sortType, Long memberId) {
         Sort sort = Sort.by(Sort.Direction.DESC, "problemId"); // 기본 정렬 설정
         if (sortType != null && !sortType.isEmpty()) {
             String[] parts = sortType.split("_");
@@ -199,14 +199,14 @@ public class ProblemService {
         }
         Pageable pageable = PageRequest.of(pageNo - 1, PAGE_SIZE, sort);
         return switch (type) {
-            case "bookmark" -> getBookmarkProblemList(memberId, pageable, classType, diff);
-            case "solved" -> getSolvedProblemList(memberId, pageable, classType, diff);
-            case "wrong" -> getWrongProblemList(memberId, pageable, classType, diff);
+            case "bookmark" -> getBookmarkProblemList(memberId, pageable);
+            case "solved" -> getSolvedProblemList(memberId, pageable);
+            case "wrong" -> getWrongProblemList(memberId, pageable);
             default -> throw new IllegalArgumentException("Invalid type: " + type);
         };
     }
 
-    // 북마크 문제 조회 메서드
+/*    // 북마크 문제 조회 메서드
     private Page<ProblemListResponseDto> getBookmarkProblemList(Long memberId, Pageable pageable, String classType, Integer diff) {
         List<Long> problemIds = bookmarkRepository.findByMemberId(memberId).stream()
                 .map(bookmark -> bookmark.getProblem().getProblemId())
@@ -256,8 +256,9 @@ public class ProblemService {
                             correctRate
                     );
                 });
-    }
-/*    // 북마크 문제 조회 메서드
+    } */
+
+    // 북마크 문제 조회 메서드
     private Page<ProblemListResponseDto> getBookmarkProblemList(Long memberId, Pageable pageable) {
         List<Long> problemIds = bookmarkRepository.findByMemberId(memberId).stream()
                 .map(bookmark -> bookmark.getProblem().getProblemId())
@@ -275,7 +276,7 @@ public class ProblemService {
         List<Long> problemIds = submissionServiceFeignClient.getIncorrectProblemIds(memberId);
         return getProblemListResponseDtoPage(problemIds, pageable);
     }
- */
+
     // 문제 목록 조회 메서드
     private Page<ProblemListResponseDto> getProblemListResponseDtoPage(List<Long> problemIds, Pageable pageable) {
         Page<Problem> problems = problemRepository.findAllByProblemIdIn(problemIds, pageable);
