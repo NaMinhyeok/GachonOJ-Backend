@@ -1,11 +1,13 @@
 package com.gachonoj.submissionservice.service;
 
 import com.gachonoj.submissionservice.domain.dto.request.ExecuteTestRequestDto;
+import com.gachonoj.submissionservice.domain.dto.response.ExecuteRsultResponseDto;
 import com.gachonoj.submissionservice.fegin.client.ProblemServiceFeignClient;
 import com.gachonoj.submissionservice.fegin.dto.response.SubmissionProblemTestCaseResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -22,19 +24,24 @@ public class SubmissionService {
     private final ProblemServiceFeignClient problemServiceFeignClient;
 
     // 문제 채점 실행
-    public Void executeCodeByProblemId(ExecuteTestRequestDto executeTestRequestDto,Long problemId) {
+    @Transactional
+    public List<ExecuteRsultResponseDto> executeCodeByProblemId(ExecuteTestRequestDto executeTestRequestDto,Long problemId) {
         List<String> input = problemServiceFeignClient.getTestCases(problemId).stream()
                 .map(SubmissionProblemTestCaseResponseDto::getInput)
                 .toList();
         List<String> output = problemServiceFeignClient.getTestCases(problemId).stream()
                 .map(SubmissionProblemTestCaseResponseDto::getOutput)
                 .toList();
-        List<String> result = executeCode(executeTestRequestDto, input);
-
-        return null;
+        List<String> result = executeCode(executeTestRequestDto, input,output);
+        List<ExecuteRsultResponseDto> response = new ArrayList<>();
+        for (String s : result) {
+            response.add(new ExecuteRsultResponseDto(s));
+        }
+        return response;
     }
     // 코드 실행
-    public List<String> executeCode(ExecuteTestRequestDto executeTestRequestDto, List<String> inputList) {
+    @Transactional
+    public List<String> executeCode(ExecuteTestRequestDto executeTestRequestDto, List<String> inputList,List<String> outputList) {
         try {
             List<String> result = new ArrayList<>();
             // /home/exec 디렉토리 생성
@@ -74,6 +81,8 @@ public class SubmissionService {
                             throw new IllegalArgumentException("Unsupported language: " + executeTestRequestDto.getLanguage());
                 };
                 runProcessBuilder.directory(new File(execDir.toString())); // 작업 디렉토리 설정
+
+                long startTime = System.nanoTime(); // 시작 시간
                 Process runProcess = runProcessBuilder.start();
                 log.info("Code executed");
 
@@ -92,10 +101,29 @@ public class SubmissionService {
                 while ((line = stdInput.readLine()) != null) {
                     outputResult.append(line).append("\n");
                 }
+                StringBuilder errorResult = new StringBuilder();
                 while ((line = stdError.readLine()) != null) {
-                    outputResult.append(line).append("\n");
+                    errorResult.append(line).append("\n");
                 }
+
+                // 에러가 발생한 경우 에러 메시지를 result에 저장하고 반복문을 중단합니다.
+                if (errorResult.length() > 0) {
+                    log.info("Code error: " + i + "번째" + errorResult.toString());
+                    result.add(errorResult.toString());
+                    break;
+                }
+
+                long endTime = System.nanoTime(); // 종료 시간
+                long timeElapsed = endTime - startTime; // 소요시간
+                log.info("Execution time in nanoseconds: " + timeElapsed);
+                log.info("Execution time in milliseconds: " + timeElapsed / 1000000);
                 log.info("Code output: " + i + "번째" + outputResult.toString());
+                // 정답인지 확인
+                if(outputList.get(i).equals(outputResult.toString())){
+                    result.add("정답");
+                }else{
+                    result.add("오답");
+                }
                 result.add(outputResult.toString());
             }
 
