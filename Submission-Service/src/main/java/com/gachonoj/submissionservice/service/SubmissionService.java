@@ -98,8 +98,16 @@ public class SubmissionService {
 
                 StringBuilder outputResult = new StringBuilder();
                 String line;
+                List<String> lines = new ArrayList<>();
                 while ((line = stdInput.readLine()) != null) {
-                    outputResult.append(line).append("\n");
+                    lines.add(line);
+                }
+
+                for (int j = 0; j < lines.size(); j++) {
+                    outputResult.append(lines.get(j));
+                    if (j < lines.size() - 1) {
+                        outputResult.append("\n");
+                    }
                 }
                 StringBuilder errorResult = new StringBuilder();
                 while ((line = stdError.readLine()) != null) {
