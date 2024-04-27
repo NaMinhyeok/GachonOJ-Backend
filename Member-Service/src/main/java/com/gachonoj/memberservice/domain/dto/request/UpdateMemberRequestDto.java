@@ -10,4 +10,6 @@ public class UpdateMemberRequestDto {
     @NotBlank
     private String memberName;
     private String memberNumber;
+    @NotBlank
+    private String memberRole;
 }

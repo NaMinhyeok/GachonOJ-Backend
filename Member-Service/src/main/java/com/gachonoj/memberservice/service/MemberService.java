@@ -347,30 +347,13 @@ public class MemberService {
     @Transactional
     public void updateMemberByAdmin(UpdateMemberRequestDto updateMemberRequestDto,Long memberId){
         Member member = memberRepository.findByMemberId(memberId);
-        if(updateMemberRequestDto.getMemberNumber()!=null){
-            if(validateMemberNumber(updateMemberRequestDto.getMemberNumber())) {
-                throw new IllegalArgumentException("이미 가입된 학번입니다.");
-            }
-        }
-        if(verifyMemberNickname(updateMemberRequestDto.getMemberNickname())){
-            throw new IllegalArgumentException("이미 존재하는 닉네임입니다.");
-        }
-        member.updateMemberInfo(updateMemberRequestDto.getMemberName(),updateMemberRequestDto.getMemberNickname(),updateMemberRequestDto.getMemberNumber());
+        Role role = Role.fromLabel(updateMemberRequestDto.getMemberRole());
+        member.updateMemberInfo(updateMemberRequestDto.getMemberName(),updateMemberRequestDto.getMemberNickname(),updateMemberRequestDto.getMemberNumber(),role);
     }
     // 관리자 화면 사용자 정보변경을 위한 사용자 정보 조회
     public MemberInfoByAdminResponseDto getMemberInfoByAdmin(Long memberId) {
         Member member = memberRepository.findByMemberId(memberId);
-        String memberRole;
-        if(member.getMemberRole().equals(Role.ROLE_STUDENT)) {
-            memberRole = "학생";
-        } else if(member.getMemberRole().equals(Role.ROLE_PROFESSOR)) {
-            memberRole = "교수";
-        } else if(member.getMemberRole().equals(Role.ROLE_ADMIN)) {
-            memberRole = "관리자";
-        } else {
-            memberRole = "알 수 없음";
-        }
-        return new MemberInfoByAdminResponseDto(member.getMemberEmail(),member.getMemberName(),member.getMemberNumber(),member.getMemberNickname(),memberRole);
+        return new MemberInfoByAdminResponseDto(member.getMemberEmail(),member.getMemberName(),member.getMemberNumber(),member.getMemberNickname(),member.getMemberRole().getLabel());
     }
     // 관리자가 회원 탈퇴 시키기
     @Transactional
