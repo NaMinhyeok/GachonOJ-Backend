@@ -347,30 +347,13 @@ public class MemberService {
     @Transactional
     public void updateMemberByAdmin(UpdateMemberRequestDto updateMemberRequestDto,Long memberId){
         Member member = memberRepository.findByMemberId(memberId);
-        if(updateMemberRequestDto.getMemberNumber()!=null){
-            if(validateMemberNumber(updateMemberRequestDto.getMemberNumber())) {
-                throw new IllegalArgumentException("이미 가입된 학번입니다.");
-            }
-        }
-        if(verifyMemberNickname(updateMemberRequestDto.getMemberNickname())){
-            throw new IllegalArgumentException("이미 존재하는 닉네임입니다.");
-        }
-        member.updateMemberInfo(updateMemberRequestDto.getMemberName(),updateMemberRequestDto.getMemberNickname(),updateMemberRequestDto.getMemberNumber());
+        Role role = Role.fromLabel(updateMemberRequestDto.getMemberRole());
+        member.updateMemberInfo(updateMemberRequestDto.getMemberName(),updateMemberRequestDto.getMemberNickname(),updateMemberRequestDto.getMemberNumber(),role);
     }
     // 관리자 화면 사용자 정보변경을 위한 사용자 정보 조회
     public MemberInfoByAdminResponseDto getMemberInfoByAdmin(Long memberId) {
         Member member = memberRepository.findByMemberId(memberId);
-        String memberRole;
-        if(member.getMemberRole().equals(Role.ROLE_STUDENT)) {
-            memberRole = "학생";
-        } else if(member.getMemberRole().equals(Role.ROLE_PROFESSOR)) {
-            memberRole = "교수";
-        } else if(member.getMemberRole().equals(Role.ROLE_ADMIN)) {
-            memberRole = "관리자";
-        } else {
-            memberRole = "알 수 없음";
-        }
-        return new MemberInfoByAdminResponseDto(member.getMemberEmail(),member.getMemberName(),member.getMemberNumber(),member.getMemberNickname(),memberRole);
+        return new MemberInfoByAdminResponseDto(member.getMemberEmail(),member.getMemberName(),member.getMemberNumber(),member.getMemberNickname(),member.getMemberRole().getLabel());
     }
     // 관리자가 회원 탈퇴 시키기
     @Transactional
@@ -396,5 +379,32 @@ public class MemberService {
     @Transactional
     public void logout(Long memberId) {
         redisService.deleteData(memberId.toString());
+    }
+    // 회원 정보 조회 문제 화면에서
+    public MemberInfoProblemResponseDto getMemberInfoProblem(Long memberId) {
+        Member member = memberRepository.findByMemberId(memberId);
+        Integer rating = calculateRating(memberId);
+        Integer needRating = calculateNeedRating(member.getMemberRank());
+        return new MemberInfoProblemResponseDto(member.getMemberNickname(), member.getMemberIntroduce(), member.getMemberImg(),rating,member.getMemberRank(),needRating);
+    }
+    // 레이팅을 올리기 위한 필요한 점수 계산
+    public Integer calculateNeedRating(Integer memberRank) {
+        if(memberRank < 1000) {
+            return 1000;
+        } else if(memberRank < 1200) {
+            return 1200-memberRank;
+        } else if(memberRank < 1400) {
+            return 1400-memberRank;
+        } else if(memberRank < 1600) {
+            return 1600-memberRank;
+        } else if(memberRank < 1900) {
+            return 1900-memberRank;
+        } else if(memberRank < 2200) {
+            return 2200-memberRank;
+        } else if(memberRank < 2500) {
+            return 2500-memberRank;
+        } else {
+            return 3000-memberRank;
+        }
     }
 }
