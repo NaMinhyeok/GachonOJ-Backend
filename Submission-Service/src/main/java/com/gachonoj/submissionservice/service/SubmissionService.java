@@ -115,7 +115,7 @@ public class SubmissionService {
                 // 에러가 발생한 경우 에러 메시지를 result에 저장하고 반복문을 중단합니다.
                 if (errorResult.length() > 0) {
                     log.info("Code error: " + i + "번째" + errorResult.toString());
-                    result.put(errorResult.toString(),"오답");
+                    result.put(errorResult.toString(),"에러");
                     break;
                 }
 
