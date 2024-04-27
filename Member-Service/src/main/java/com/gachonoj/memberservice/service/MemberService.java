@@ -380,4 +380,31 @@ public class MemberService {
     public void logout(Long memberId) {
         redisService.deleteData(memberId.toString());
     }
+    // 회원 정보 조회 문제 화면에서
+    public MemberInfoProblemResponseDto getMemberInfoProblem(Long memberId) {
+        Member member = memberRepository.findByMemberId(memberId);
+        Integer rating = calculateRating(memberId);
+        Integer needRating = calculateNeedRating(member.getMemberRank());
+        return new MemberInfoProblemResponseDto(member.getMemberNickname(), member.getMemberIntroduce(), member.getMemberImg(),rating,member.getMemberRank(),needRating);
+    }
+    // 레이팅을 올리기 위한 필요한 점수 계산
+    public Integer calculateNeedRating(Integer memberRank) {
+        if(memberRank < 1000) {
+            return 1000;
+        } else if(memberRank < 1200) {
+            return 1200-memberRank;
+        } else if(memberRank < 1400) {
+            return 1400-memberRank;
+        } else if(memberRank < 1600) {
+            return 1600-memberRank;
+        } else if(memberRank < 1900) {
+            return 1900-memberRank;
+        } else if(memberRank < 2200) {
+            return 2200-memberRank;
+        } else if(memberRank < 2500) {
+            return 2500-memberRank;
+        } else {
+            return 3000-memberRank;
+        }
+    }
 }
