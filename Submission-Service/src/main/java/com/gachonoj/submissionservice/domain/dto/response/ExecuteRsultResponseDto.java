@@ -8,5 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ExecuteRsultResponseDto {
+    private String output;
     private String result;
 }

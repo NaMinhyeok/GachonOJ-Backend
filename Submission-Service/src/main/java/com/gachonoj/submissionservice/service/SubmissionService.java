@@ -13,9 +13,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -32,18 +30,18 @@ public class SubmissionService {
         List<String> output = problemServiceFeignClient.getTestCases(problemId).stream()
                 .map(SubmissionProblemTestCaseResponseDto::getOutput)
                 .toList();
-        List<String> result = executeCode(executeTestRequestDto, input,output);
+        Map<String,String> result = executeCode(executeTestRequestDto, input,output);
         List<ExecuteRsultResponseDto> response = new ArrayList<>();
-        for (String s : result) {
-            response.add(new ExecuteRsultResponseDto(s));
+        for (Map.Entry<String, String> entry : result.entrySet()) {
+            response.add(new ExecuteRsultResponseDto(entry.getKey(),entry.getValue()));
         }
         return response;
     }
     // 코드 실행
     @Transactional
-    public List<String> executeCode(ExecuteTestRequestDto executeTestRequestDto, List<String> inputList,List<String> outputList) {
+    public Map<String,String> executeCode(ExecuteTestRequestDto executeTestRequestDto, List<String> inputList, List<String> outputList) {
         try {
-            List<String> result = new ArrayList<>();
+            Map<String,String> result = new HashMap<>();
             // /home/exec 디렉토리 생성
             Path execDir = Paths.get("/home/exec");
             Files.createDirectories(execDir);
@@ -117,7 +115,7 @@ public class SubmissionService {
                 // 에러가 발생한 경우 에러 메시지를 result에 저장하고 반복문을 중단합니다.
                 if (errorResult.length() > 0) {
                     log.info("Code error: " + i + "번째" + errorResult.toString());
-                    result.add(errorResult.toString());
+                    result.put(errorResult.toString(),"오답");
                     break;
                 }
 
@@ -129,12 +127,11 @@ public class SubmissionService {
                 // 정답인지 확인
                 if(outputList.get(i).equals(outputResult.toString())){
                     log.info("output: " + outputList.get(i) + "정답: " + outputResult.toString());
-                    result.add("정답");
+                    result.put(outputResult.toString(),"정답");
                 }else{
                     log.info("output: " + outputList.get(i) + "오답: " + outputResult.toString());
-                    result.add("오답");
+                    result.put(outputResult.toString(),"오답");
                 }
-                result.add(outputResult.toString());
             }
 
             // /home/exec 디렉토리 삭제
@@ -147,8 +144,8 @@ public class SubmissionService {
             return result;
         } catch (Exception e) {
             log.info("Error: " + e.getMessage());
-            List<String> result = new ArrayList<>();
-            result.add("Error: " + e.getMessage());
+            Map<String, String> result = new HashMap<>();
+            result.put(e.getMessage(), "Error");
             return result;
         }
     }
