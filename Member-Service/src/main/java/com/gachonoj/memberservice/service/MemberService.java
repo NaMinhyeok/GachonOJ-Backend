@@ -315,20 +315,12 @@ public class MemberService {
         }
     }
     // 사용자 추가 생성
+    // TODO : Role이 Student로 계속 들어가는 오류 수정
     @Transactional
     public void createMember(CreateMemberRequestDto createMemberRequestDto) {
         // 회원가입 유효성 검사
         verifySignUp(createMemberRequestDto.getMemberPassword(), createMemberRequestDto.getMemberPasswordConfirm(), createMemberRequestDto.getMemberEmail(), createMemberRequestDto.getMemberNumber());
-        Role role;
-        if(Objects.equals(createMemberRequestDto.getMemberRole(), "학생")) {
-            role = Role.ROLE_STUDENT;
-        } else if(Objects.equals(createMemberRequestDto.getMemberRole(), "교수")) {
-            role = Role.ROLE_PROFESSOR;
-        } else if(Objects.equals(createMemberRequestDto.getMemberRole(), "관리자")) {
-            role = Role.ROLE_ADMIN;
-        } else {
-            throw new IllegalArgumentException(ErrorCode.NOT_VALID_ERROR.getMessage());
-        }
+        Role memberRole = Role.fromLabel(createMemberRequestDto.getMemberRole());
 
         // 회원가입 로직
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -338,7 +330,7 @@ public class MemberService {
                 .memberNumber(createMemberRequestDto.getMemberNumber())
                 .memberPassword(passwordEncoder.encode(createMemberRequestDto.getMemberPassword()))
                 .memberNickname(createMemberRequestDto.getMemberNickname())
-                .memberRole(role)
+                .memberRole(memberRole)
                 .build();
 
         memberRepository.save(member);
