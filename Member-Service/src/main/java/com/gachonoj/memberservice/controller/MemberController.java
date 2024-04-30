@@ -159,4 +159,10 @@ public class MemberController {
         memberService.logout(memberId);
         return ResponseEntity.ok(CommonResponseDto.success());
     }
+    // 사용자 점수 조회
+    @GetMapping("/info/problem")
+    public ResponseEntity<CommonResponseDto<MemberInfoProblemResponseDto>> getMemberInfoProblem(HttpServletRequest request) {
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        return ResponseEntity.ok(CommonResponseDto.success(memberService.getMemberInfoProblem(memberId)));
+    }
 }
