@@ -36,7 +36,6 @@ import java.util.stream.Collectors;
 public class ProblemService {
     private final ProblemRepository problemRepository;
     private final BookmarkRepository bookmarkRepository;
-    private final ExamRepository examRepository;
     private final SubmissionServiceFeignClient submissionServiceFeignClient;
 
 
@@ -136,6 +135,17 @@ public class ProblemService {
         } else {
             throw new IllegalStateException("Bookmark already exists");
         }
+    }
+
+    // 북마크 삭제 기능 구현
+    @Transactional
+    public void removeBookmark(Long memberId, Long problemId) {
+        // 북마크가 존재하는지 확인
+        Bookmark bookmark = bookmarkRepository.findByMemberIdAndProblemProblemId(memberId, problemId)
+                .orElseThrow(() -> new IllegalArgumentException("Bookmark not found with memberId: " + memberId + " and problemId: " + problemId));
+
+        // 북마크 삭제
+        bookmarkRepository.delete(bookmark);
     }
 
 //    @Transactional(readOnly = true)
@@ -279,7 +289,7 @@ public class ProblemService {
 
     // 문제 목록 조회 메서드
     private Page<ProblemListResponseDto> getProblemListResponseDtoPage(List<Long> problemIds, Pageable pageable) {
-        Page<Problem> problems = problemRepository.findAllByProblemIdIn(problemIds, pageable);
+            Page<Problem> problems = problemRepository.findAllByProblemIdIn(problemIds, pageable);
         return problems.map(this::createProblemListResponseDto);
     }
     // DTO 생성 메서드

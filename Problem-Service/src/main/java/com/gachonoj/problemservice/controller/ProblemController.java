@@ -141,6 +141,14 @@ public class ProblemController {
         return ResponseEntity.ok(CommonResponseDto.success());
     }
 
+    // 북마크 삭제
+    @DeleteMapping("/bookmark/{problemId}")
+    public ResponseEntity<CommonResponseDto<Void>> removeBookmark(@PathVariable Long problemId, HttpServletRequest request) {
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        problemService.removeBookmark(memberId, problemId);
+        return ResponseEntity.ok(CommonResponseDto.success());
+    }
+
 //    @GetMapping("/challenging/list")
 //    public ResponseEntity<CommonResponseDto<Page<WrongProblemResponseDto>>> getIncorrectProblemList(
 //            @RequestParam(defaultValue = "1") int pageNo, HttpServletRequest request) {
