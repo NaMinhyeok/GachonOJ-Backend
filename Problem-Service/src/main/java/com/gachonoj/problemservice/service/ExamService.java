@@ -4,6 +4,7 @@ import com.gachonoj.problemservice.domain.constant.*;
 import com.gachonoj.problemservice.domain.dto.request.ExamRequestDto;
 import com.gachonoj.problemservice.domain.dto.request.TestcaseRequestDto;
 import com.gachonoj.problemservice.domain.dto.request.ProblemRequestDto;
+import com.gachonoj.problemservice.domain.dto.request.QuestionRequestDto;
 import com.gachonoj.problemservice.domain.dto.response.ExamOrContestListResponseDto;
 import com.gachonoj.problemservice.domain.dto.response.PastContestResponseDto;
 import com.gachonoj.problemservice.domain.dto.response.ProfessorExamListResponseDto;
@@ -68,6 +69,7 @@ public class ExamService {
         }
     }
 
+    // 시험 문제 등록
     @Transactional
     public void registerExam(ExamRequestDto request, Long memberId) {
         Exam exam = new Exam();  // 실제 엔티티 클래스
@@ -113,8 +115,8 @@ public class ExamService {
             Question question = new Question();
             question.setExam(exam);
             question.setProblem(problem);
+            question.setQuestionScore(problemRequestDto.getQuestionScore());
             question.setQuestionSequence(questionSequence++);
-            question.setQuestionScore(10); // 점수는 예시값입니다, 실제 값으로 대체 필요
             questionRepository.save(question);
         }
         // 각 후보자에 대한 테스트 엔터티 생성 및 저장
