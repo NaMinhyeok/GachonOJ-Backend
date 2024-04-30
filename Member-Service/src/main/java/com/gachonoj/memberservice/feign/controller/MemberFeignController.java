@@ -1,12 +1,10 @@
 package com.gachonoj.memberservice.feign.controller;
 
+import com.gachonoj.memberservice.feign.dto.response.SubmissionMemberRankInfoResponseDto;
 import com.gachonoj.memberservice.feign.service.MemberFeignService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -20,5 +18,14 @@ public class MemberFeignController {
     public String getNicknames(@PathVariable Long memberId) {
         return memberFeignService.getNicknameToBoard(memberId);
     }
-
+    // 사용자의 memberRank 조회
+    @GetMapping("/{memberId}/rank")
+    public SubmissionMemberRankInfoResponseDto getMemberRank(@PathVariable Long memberId) {
+        return memberFeignService.getMemberRank(memberId);
+    }
+    // 사용자의 memberRank 갱신
+    @PostMapping("/{memberId}/rank")
+    public void updateMemberRank(@PathVariable Long memberId, @RequestBody Integer newRank) {
+        memberFeignService.updateMemberRank(memberId, newRank);
+    }
 }

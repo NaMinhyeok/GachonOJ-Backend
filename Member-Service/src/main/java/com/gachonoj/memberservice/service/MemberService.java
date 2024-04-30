@@ -180,13 +180,13 @@ public class MemberService {
     // 호버시 회원 정보 조회
     public HoverResponseDto getHoverInfo(Long memberId) {
         Member member = memberRepository.findByMemberId(memberId);
-        Integer rating = calculateRating(memberId);
+        Integer rating = calculateRating(member.getMemberRank());
         return new HoverResponseDto(member.getMemberEmail(), member.getMemberNickname(), rating);
     }
     // 사용자 정보 조회 ( 사용자 정보 수정 화면에서 정보 조회)
     public MemberInfoResponseDto getMemberInfo(Long memberId) {
         Member member = memberRepository.findByMemberId(memberId);
-        Integer rating = calculateRating(memberId);
+        Integer rating = calculateRating(member.getMemberRank());
         return new MemberInfoResponseDto(member.getMemberEmail(), member.getMemberName(), member.getMemberNumber(), member.getMemberIntroduce(), member.getMemberNickname(), member.getMemberImg(), rating);
     }
     // 사용자 본인 정보 수정
@@ -204,25 +204,24 @@ public class MemberService {
     // 대회 페이지 사용자 정보 조회
     public MemberInfoExamResponseDto getMemberInfoExam(Long memberId) {
         Member member = memberRepository.findByMemberId(memberId);
-        Integer rating = calculateRating(memberId);
+        Integer rating = calculateRating(member.getMemberRank());
         return new MemberInfoExamResponseDto(member.getMemberNickname(), rating, member.getMemberName(), member.getMemberNumber());
     }
     // rating 계산
-    public Integer calculateRating(Long memberId) {
-        Member member = memberRepository.findByMemberId(memberId);
-        if(member.getMemberRank() < 1000) {
+    public Integer calculateRating(Integer rank) {
+        if(rank < 1000) {
             return 0;
-        } else if(member.getMemberRank() < 1200) {
+        } else if(rank < 1200) {
             return 1;
-        } else if(member.getMemberRank() < 1400) {
+        } else if(rank < 1400) {
             return 2;
-        } else if(member.getMemberRank() < 1600) {
+        } else if(rank < 1600) {
             return 3;
-        } else if(member.getMemberRank() < 1900) {
+        } else if(rank < 1900) {
             return 4;
-        } else if(member.getMemberRank() < 2200) {
+        } else if(rank < 2200) {
             return 5;
-        } else if(member.getMemberRank() < 2500) {
+        } else if(rank < 2500) {
             return 6;
         } else {
             return 7;
@@ -235,7 +234,7 @@ public class MemberService {
             SubmissionMemberInfoResponseDto submissionMemberInfoResponseDto = submissionServiceFeignClient.getMemberInfoBySubmission(memberId);
             Integer bookmarkProblemCount = problemServiceFeignClient.getBookmarkCountByMemberId(memberId);
             Member member = memberRepository.findByMemberId(memberId);
-            Integer rating = calculateRating(memberId);
+            Integer rating = calculateRating(member.getMemberRank());
             return new MemberInfoRankingResponseDto(member.getMemberNickname(),rating,submissionMemberInfoResponseDto.getSolvedProblemCount(), submissionMemberInfoResponseDto.getTryProblemCount(),bookmarkProblemCount);
         } catch (Exception e) {
             log.error(ErrorCode.OTHER_SERVICE_CONNECTION_FAILURE.getMessage());
@@ -396,5 +395,25 @@ public class MemberService {
     @Transactional
     public void logout(Long memberId) {
         redisService.deleteData(memberId.toString());
+    }
+    // 레이팅을 올리기 위한 필요한 점수 계산
+    public Integer calculateNeedRating(Integer memberRank) {
+        if(memberRank < 1000) {
+            return 1000;
+        } else if(memberRank < 1200) {
+            return 1200-memberRank;
+        } else if(memberRank < 1400) {
+            return 1400-memberRank;
+        } else if(memberRank < 1600) {
+            return 1600-memberRank;
+        } else if(memberRank < 1900) {
+            return 1900-memberRank;
+        } else if(memberRank < 2200) {
+            return 2200-memberRank;
+        } else if(memberRank < 2500) {
+            return 2500-memberRank;
+        } else {
+            return 3000-memberRank;
+        }
     }
 }

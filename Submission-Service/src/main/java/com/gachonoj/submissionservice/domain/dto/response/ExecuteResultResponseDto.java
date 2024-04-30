@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ExecuteRsultResponseDto {
+public class ExecuteResultResponseDto {
     private String output;
     private String result;
 }
