@@ -2,6 +2,7 @@ package com.gachonoj.problemservice.service;
 
 import com.gachonoj.problemservice.domain.constant.*;
 import com.gachonoj.problemservice.domain.dto.request.ExamRequestDto;
+import com.gachonoj.problemservice.domain.dto.request.QuestionRequestDto;
 import com.gachonoj.problemservice.domain.dto.request.TestcaseRequestDto;
 import com.gachonoj.problemservice.domain.dto.request.ProblemRequestDto;
 import com.gachonoj.problemservice.domain.dto.response.ExamOrContestListResponseDto;
@@ -59,6 +60,7 @@ public class ExamService {
 //                exam.setExamStatus(ExamStatus.TERMINATED);
 //            }
 //        }
+
         for(Exam exam : exams) {
             if (exam.getExamStartDate().isBefore(now) && exam.getExamEndDate().isAfter(now)) {
                 exam.setExamStatus(ExamStatus.ONGOING);
@@ -114,7 +116,11 @@ public class ExamService {
             Question question = new Question();
             question.setExam(exam);
             question.setProblem(problem);
-            question.setQuestionScore(problemRequestDto.getQuestionScore());
+            Integer questionScore = problemRequestDto.getQuestionScore();
+            if (questionScore == null) {
+                questionScore = 10;  // 기본 점수로 10 설정
+            }
+            question.setQuestionScore(questionScore);
             question.setQuestionSequence(questionSequence++);
             questionRepository.save(question);
         }
@@ -143,6 +149,11 @@ public class ExamService {
         existingExam.setExamType(request.getExamType());
         examRepository.save(existingExam);
 
+        // Update questions linked to the exam
+        updateQuestions(existingExam, request.getTests());
+
+        // Update candidate tests
+        updateCandidateTests(existingExam, request.getCandidateList());
         // 문제 업데이트 로직
         for (ProblemRequestDto problemRequestDto : request.getTests()) {
             Problem problem;
@@ -174,42 +185,63 @@ public class ExamService {
 
             problemRepository.save(problem);
         }
-
     }
 
+    private void updateQuestions(Exam exam, List<ProblemRequestDto> problemRequestDtos) {
+        Set<Long> problemIds = problemRequestDtos.stream()
+                .map(ProblemRequestDto::getProblemId)
+                .collect(Collectors.toSet());
+
+        List<Question> existingQuestions = questionRepository.findByExamExamId(exam.getExamId());
+        Map<Long, Question> questionMap = existingQuestions.stream()
+                .collect(Collectors.toMap(q -> q.getProblem().getProblemId(), q -> q));
+
+        for (ProblemRequestDto dto : problemRequestDtos) {
+            Question question = questionMap.getOrDefault(dto.getProblemId(), new Question());
+            question.setExam(exam);
+            Problem problem = problemRepository.findById(dto.getProblemId())
+                    .orElseThrow(() -> new IllegalArgumentException("Problem not found with id: " + dto.getProblemId()));
+            question.setProblem(problem);
+            question.setQuestionScore(dto.getQuestionScore() != null ? dto.getQuestionScore() : 10);
+            question.setQuestionSequence(1);  // 예시: 문제 순서가 따로 제공되지 않으므로 기본값 설정
+            questionRepository.save(question);
+        }
+
+        // Remove old questions not in the updated list
+        for (Question q : existingQuestions) {
+            if (!problemIds.contains(q.getProblem().getProblemId())) {
+                questionRepository.delete(q);
+            }
+        }
+    }
+
+    private void updateCandidateTests(Exam exam, List<Long> candidateIds) {
+        List<Test> existingTests = testRepository.findByExamExamId(exam.getExamId());
+        Set<Long> existingTestMemberIds = existingTests.stream()
+                .map(Test::getMemberId)
+                .collect(Collectors.toSet());
+
+        // Add new candidate tests
+        candidateIds.stream()
+                .filter(id -> !existingTestMemberIds.contains(id))
+                .forEach(id -> {
+                    Test newTest = new Test();
+                    newTest.setExam(exam);
+                    newTest.setMemberId(id);
+                    testRepository.save(newTest);
+                });
+
+        // Remove tests for candidates not listed anymore
+        existingTests.stream()
+                .filter(test -> !candidateIds.contains(test.getMemberId()))
+                .forEach(testRepository::delete);
+    }
     @Transactional
     public void deleteExam(Long examId, Long requestingMemberId) {
         int affectedRows = examRepository.deleteByIdAndMemberId(examId, requestingMemberId);
         if (affectedRows == 0) {
             throw new RuntimeException("No exam found or unauthorized to delete this exam");
         }
-    }
-    private void updateProblem(Long problemId, ProblemRequestDto problemDto) {
-        Problem problem = problemRepository.findById(problemId)
-                .orElseThrow(() -> new RuntimeException("Problem not found with id: " + problemId));
-
-        // 문제 정보 업데이트
-        problem.setProblemTitle(problemDto.getProblemTitle());
-        problem.setProblemContents(problemDto.getProblemContents());
-        problem.setProblemClass(ProblemClass.valueOf(problemDto.getProblemClass()));
-        problem.setProblemTimeLimit(problemDto.getProblemTimeLimit());
-        problem.setProblemMemoryLimit(problemDto.getProblemMemoryLimit());
-        problem.setProblemStatus(ProblemStatus.valueOf(problemDto.getProblemStatus()));
-        problem.setProblemPrompt(problemDto.getProblemPrompt());
-        problem.setProblemUpdatedDate(LocalDateTime.now());
-
-        // 기존 테스트케이스를 삭제하고 새로 추가
-        problem.getTestcases().clear();
-        for (TestcaseRequestDto testcaseDto : problemDto.getTestcases()) {
-            Testcase testcase = new Testcase();
-            testcase.setTestcaseInput(testcaseDto.getTestcaseInput());
-            testcase.setTestcaseOutput(testcaseDto.getTestcaseOutput());
-            testcase.setTestcaseStatus(TestcaseStatus.valueOf(testcaseDto.getTestcaseStatus()));
-            testcase.setProblem(problem);
-            problem.getTestcases().add(testcase);
-        }
-
-        problemRepository.save(problem);
     }
 
     // 참가 예정 대회 조회
