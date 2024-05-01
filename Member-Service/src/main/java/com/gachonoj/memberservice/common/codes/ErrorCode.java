@@ -75,7 +75,7 @@ public enum ErrorCode {
      * ******************************* Custom Error CodeList ***************************************
      */
     // Login Fail
-    FAIL_LOGIN(401, "L001", "Login Fail"),
+    FAIL_LOGIN(4011, "L001", "Login Fail"),
     // Member Service Connection Failure
     MEMBER_SERVICE_CONNECTION_FAILURE(500, "C001", "Member Service Connection Failure"),
     // Problem Service Connection Failure
