@@ -4,7 +4,6 @@ import com.gachonoj.problemservice.domain.constant.*;
 import com.gachonoj.problemservice.domain.dto.request.ExamRequestDto;
 import com.gachonoj.problemservice.domain.dto.request.TestcaseRequestDto;
 import com.gachonoj.problemservice.domain.dto.request.ProblemRequestDto;
-import com.gachonoj.problemservice.domain.dto.request.QuestionRequestDto;
 import com.gachonoj.problemservice.domain.dto.response.ExamOrContestListResponseDto;
 import com.gachonoj.problemservice.domain.dto.response.PastContestResponseDto;
 import com.gachonoj.problemservice.domain.dto.response.ProfessorExamListResponseDto;
@@ -129,30 +128,53 @@ public class ExamService {
     }
 
     @Transactional
-    public void updateExam(Long examId, Long memberId, ExamRequestDto request) {
-        // 시험 정보를 ID를 통해 찾아 업데이트
-        Exam exam = examRepository.findById(examId)
-                .orElseThrow(() -> new RuntimeException("Exam not found with id: " + examId));
+    public void updateExam(Long examId, ExamRequestDto request) {
+        Exam existingExam = examRepository.findById(examId)
+                .orElseThrow(() -> new IllegalArgumentException("Exam not found with id: " + examId));
 
-        // 시험 정보 업데이트
-        exam.setExamTitle(request.getExamTitle());
-        exam.setMemberId(memberId);
-        exam.setExamMemo(request.getExamMemo());
-        exam.setExamNotice(request.getExamNotice());
-        exam.setExamStartDate(LocalDateTime.parse(request.getExamStartDate()));
-        exam.setExamEndDate(LocalDateTime.parse(request.getExamEndDate()));
-        exam.setExamDueTime(request.getExamDueTime());
-        exam.setExamStatus(request.getExamStatus());
-        exam.setExamType(request.getExamType());
-        exam.setExamUpdateDate(LocalDateTime.now());  // 현재 시간으로 업데이트 날짜 설정
-        examRepository.save(exam);
+        // 업데이트할 시험 정보 설정
+        existingExam.setExamTitle(request.getExamTitle());
+        existingExam.setExamMemo(request.getExamMemo());
+        existingExam.setExamNotice(request.getExamNotice());
+        existingExam.setExamStartDate(LocalDateTime.parse(request.getExamStartDate()));
+        existingExam.setExamEndDate(LocalDateTime.parse(request.getExamEndDate()));
+        existingExam.setExamDueTime(request.getExamDueTime());
+        existingExam.setExamStatus(request.getExamStatus());
+        existingExam.setExamType(request.getExamType());
+        examRepository.save(existingExam);
 
-        // 요청된 문제들만 업데이트
-        for (ProblemRequestDto problemDto : request.getTests()) {
-            if (problemDto.getProblemId() != null) {
-                updateProblem(problemDto.getProblemId(), problemDto);
+        // 문제 업데이트 로직
+        for (ProblemRequestDto problemRequestDto : request.getTests()) {
+            Problem problem;
+            if (problemRequestDto.getProblemId() != null) {
+                problem = problemRepository.findById(problemRequestDto.getProblemId())
+                        .orElseThrow(() -> new IllegalArgumentException("Problem not found with id: " + problemRequestDto.getProblemId()));
+            } else {
+                problem = new Problem();
             }
+
+            problem.setProblemTitle(problemRequestDto.getProblemTitle());
+            problem.setProblemContents(problemRequestDto.getProblemContents());
+            problem.setProblemClass(ProblemClass.valueOf(problemRequestDto.getProblemClass()));
+            problem.setProblemTimeLimit(problemRequestDto.getProblemTimeLimit());
+            problem.setProblemMemoryLimit(problemRequestDto.getProblemMemoryLimit());
+            problem.setProblemStatus(ProblemStatus.valueOf(problemRequestDto.getProblemStatus()));
+            problem.setProblemPrompt(problemRequestDto.getProblemPrompt());
+
+            // 테스트 케이스 업데이트
+            problem.getTestcases().clear();
+            for (TestcaseRequestDto testcaseDto : problemRequestDto.getTestcases()) {
+                Testcase testcase = new Testcase();
+                testcase.setTestcaseInput(testcaseDto.getTestcaseInput());
+                testcase.setTestcaseOutput(testcaseDto.getTestcaseOutput());
+                testcase.setTestcaseStatus(TestcaseStatus.valueOf(testcaseDto.getTestcaseStatus()));
+                testcase.setProblem(problem);
+                problem.getTestcases().add(testcase);
+            }
+
+            problemRepository.save(problem);
         }
+
     }
 
     @Transactional
