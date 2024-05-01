@@ -165,4 +165,10 @@ public class MemberController {
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
         return ResponseEntity.ok(CommonResponseDto.success(memberService.getMemberInfoProblem(memberId)));
     }
+    // 비밀번호 찾기 이메일 전송
+    @PostMapping("/email/password")
+    public ResponseEntity<CommonResponseDto<Void>> sendPasswordEmail(@RequestBody @Valid EmailRequestDto emailRequestDto) {
+        memberService.sendPasswordEmail(emailRequestDto.getMemberEmail());
+        return ResponseEntity.ok(CommonResponseDto.success());
+    }
 }

@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
@@ -49,6 +50,7 @@ public class MemberService {
     // 이메일 인증 코드
     private int authCode;
     // 이메일 인증코드를 위한 난수 생성기
+    // TODO : return 타입 변경해서 메소드 불릴때 인증코드를 반환하게 하기
     public void makeRandomNumber() {
         Random r = new Random();
         String randomNumber = "";
@@ -130,7 +132,7 @@ public class MemberService {
     }
     // 회원가입 유효성 검사
     public void verifySignUp(String password, String passwordConfirm, String email, String number) {
-        String regExp = "^(?=.*[a-zA-Z])(?=.*[!@#$%^])(?=.*[0-9]).{8,25}$";
+        String regExp = "^(?=.*[a-zA-Z])(?=.*[~!@#$%&*()_+=?])(?=.*[0-9]).{8,25}$";
         if(!password.matches(regExp)) {
             throw new IllegalArgumentException("비밀번호는 영문, 숫자, 특수문자를 포함한 8~25자여야 합니다.");
         }
@@ -397,5 +399,44 @@ public class MemberService {
         Integer rating = calculateRating(member.getMemberRank());
         Integer needRating = calculateNeedRating(member.getMemberRank());
         return new MemberInfoProblemResponseDto(member.getMemberNickname(), member.getMemberIntroduce(), member.getMemberImg(),rating,member.getMemberRank(),needRating);
+    }
+    // 비밀번호 찾기 이메일 전송
+    @Transactional
+    public void sendPasswordEmail(String memberEmail) {
+        Member member = memberRepository.findByMemberEmail(memberEmail);
+        if (member == null) {
+            throw new IllegalArgumentException("가입되지 않은 이메일입니다.");
+        }
+        String newPassword = makeRandomPassword();
+        member.updateMemberPassword(passwordEncoder.encode(newPassword));
+
+        String setFrom = "gachonlastdance@gmail.com"; // email-config에 설정한 자신의 이메일 주소를 입력
+        String toMail = memberEmail;
+        String title = "GachonOJ 임시 비밀번호 이메일"; // 이메일 제목
+        String content =
+                "GachonOJ의 방문해주셔서 감사합니다." +    //html 형식으로 작성 !
+                        "<br><br>" +
+                        "회원님의 임시비밀번호는 " + newPassword + "입니다." +
+                        "<br>"; //이메일 내용 삽
+        sendEmail(setFrom, toMail, title, content);
+    }
+    // 비밀번호 찾기 난수 생성
+    public String makeRandomPassword() {
+        String CHAR_LOWER = "abcdefghijklmnopqrstuvwxyz";
+        String CHAR_UPPER = CHAR_LOWER.toUpperCase();
+        String NUMBER = "0123456789";
+        String OTHER_CHAR = "~!@#$%&*()_+-=?";
+        String PASSWORD_ALLOW_BASE = CHAR_LOWER + CHAR_UPPER + NUMBER + OTHER_CHAR;
+
+        SecureRandom random = new SecureRandom();
+
+        int passwordLength = random.nextInt(14)+12;
+
+        StringBuilder password = new StringBuilder();
+        for(int i=0; i<passwordLength; i++){
+            int index = random.nextInt(PASSWORD_ALLOW_BASE.length());
+            password.append(PASSWORD_ALLOW_BASE.charAt(index));
+        }
+        return password.toString();
     }
 }
