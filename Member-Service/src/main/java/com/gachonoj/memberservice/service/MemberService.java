@@ -47,18 +47,17 @@ public class MemberService {
 
     private static final int PAGE_SIZE = 10;
 
-    // 이메일 인증 코드
-    private int authCode;
     // 이메일 인증코드를 위한 난수 생성기
-    // TODO : return 타입 변경해서 메소드 불릴때 인증코드를 반환하게 하기
-    public void makeRandomNumber() {
+    public int makeRandomNumber() {
         Random r = new Random();
+        int authCode;
         String randomNumber = "";
         for(int i = 0; i < 6; i++) {
             randomNumber += Integer.toString(r.nextInt(10));
         }
 
         authCode = Integer.parseInt(randomNumber);
+        return authCode;
     }
     // 이메일 인증코드를 확인하는 메소드
     public void verifyEmail(String email, String inputAuthCode) {
@@ -78,7 +77,7 @@ public class MemberService {
         isValidEmail(email);
 
         //유효성 검사가 통과하면 이메일 인증코드 생성 및 전송
-        makeRandomNumber();
+        int authCode = makeRandomNumber();
         String setFrom = "gachonlastdance@gmail.com"; // email-config에 설정한 자신의 이메일 주소를 입력
         String toMail = email;
         String title = "GachonOJ 회원 가입 인증 이메일"; // 이메일 제목
@@ -91,6 +90,7 @@ public class MemberService {
                         "<br>" +
                         "인증번호는 5분 뒤 만료됩니다."; //이메일 내용 삽
         sendEmail(setFrom, toMail, title, content);
+        redisService.setDataExpire(toMail,Integer.toString(authCode), 300L);
         return Integer.toString(authCode);
     }
     // 이메일 인증 코드 전송
@@ -106,7 +106,6 @@ public class MemberService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        redisService.setDataExpire(toMail,Integer.toString(authCode), 300L);
     }
     //TODO : 캡슐화
     // 비밀번호 암호화 엔티티객체에 구현하여 캡슐화하기
@@ -316,7 +315,6 @@ public class MemberService {
         }
     }
     // 사용자 추가 생성
-    // TODO : Role이 Student로 계속 들어가는 오류 수정
     @Transactional
     public void createMember(CreateMemberRequestDto createMemberRequestDto) {
         // 회원가입 유효성 검사
