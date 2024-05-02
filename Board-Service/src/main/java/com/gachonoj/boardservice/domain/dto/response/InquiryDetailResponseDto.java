@@ -14,20 +14,20 @@ import java.time.format.DateTimeFormatter;
 @AllArgsConstructor
 public class InquiryDetailResponseDto {
     private String inquiryTitle;
-    private String inquiryContent;
+    private String inquiryContents;
     private String inquiryCreatedDate;
     private String replyContent;
 
     public InquiryDetailResponseDto(Inquiry inquiry,String inquiryCreatedDate, Reply reply) {
         this.inquiryTitle = inquiry.getInquiryTitle();
-        this.inquiryContent = inquiry.getInquiryContents();
+        this.inquiryContents = inquiry.getInquiryContents();
         this.inquiryCreatedDate = inquiryCreatedDate;
         this.replyContent = reply.getReplyContents();
     }
 
     public InquiryDetailResponseDto(Inquiry inquiry,String inquiryCreatedDate) {
         this.inquiryTitle = inquiry.getInquiryTitle();
-        this.inquiryContent = inquiry.getInquiryContents();
+        this.inquiryContents = inquiry.getInquiryContents();
         this.inquiryCreatedDate = inquiryCreatedDate;
         this.replyContent = null;
     }
