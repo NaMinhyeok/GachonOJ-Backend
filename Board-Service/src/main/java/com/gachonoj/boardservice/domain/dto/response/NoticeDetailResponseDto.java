@@ -13,12 +13,12 @@ import java.time.format.DateTimeFormatter;
 public class NoticeDetailResponseDto {
     private String memberNickname;
     private String noticeTitle;
-    private String noticeContent;
+    private String noticeContents;
     private String noticeCreatedDate;
 
     public NoticeDetailResponseDto(Notice notice,String createdDate,String memberNickname) {
         this.noticeTitle = notice.getNoticeTitle();
-        this.noticeContent = notice.getNoticeContents();
+        this.noticeContents = notice.getNoticeContents();
         this.noticeCreatedDate = createdDate;
         this.memberNickname = memberNickname;
     }
