@@ -77,6 +77,7 @@ public class ExamService {
         exam.setExamTitle(request.getExamTitle());
         exam.setMemberId(memberId);
         exam.setExamMemo(request.getExamMemo());
+        exam.setExamContents(request.getExamContents());
         exam.setExamNotice(request.getExamNotice());
         exam.setExamStartDate(LocalDateTime.parse(request.getExamStartDate()));
         exam.setExamEndDate(LocalDateTime.parse(request.getExamEndDate()));
@@ -133,6 +134,7 @@ public class ExamService {
         }
     }
 
+    // 시험 문제 수정
     @Transactional
     public void updateExam(Long examId, ExamRequestDto request) {
         Exam existingExam = examRepository.findById(examId)
@@ -142,6 +144,7 @@ public class ExamService {
         existingExam.setExamTitle(request.getExamTitle());
         existingExam.setExamMemo(request.getExamMemo());
         existingExam.setExamNotice(request.getExamNotice());
+        existingExam.setExamContents(request.getExamContents());
         existingExam.setExamStartDate(LocalDateTime.parse(request.getExamStartDate()));
         existingExam.setExamEndDate(LocalDateTime.parse(request.getExamEndDate()));
         existingExam.setExamDueTime(request.getExamDueTime());
@@ -187,6 +190,7 @@ public class ExamService {
         }
     }
 
+    // 그 안의 문제들 수정
     private void updateQuestions(Exam exam, List<ProblemRequestDto> problemRequestDtos) {
         Set<Long> problemIds = problemRequestDtos.stream()
                 .map(ProblemRequestDto::getProblemId)
@@ -215,6 +219,7 @@ public class ExamService {
         }
     }
 
+    // 응시자 리스트 수정
     private void updateCandidateTests(Exam exam, List<Long> candidateIds) {
         List<Test> existingTests = testRepository.findByExamExamId(exam.getExamId());
         Set<Long> existingTestMemberIds = existingTests.stream()
@@ -236,6 +241,8 @@ public class ExamService {
                 .filter(test -> !candidateIds.contains(test.getMemberId()))
                 .forEach(testRepository::delete);
     }
+
+    // 시험 삭제
     @Transactional
     public void deleteExam(Long examId, Long requestingMemberId) {
         int affectedRows = examRepository.deleteByIdAndMemberId(examId, requestingMemberId);
