@@ -93,6 +93,8 @@ public class ExamService {
             Problem problem = new Problem();  // 실제 엔티티 클래스
             problem.setProblemTitle(problemRequestDto.getProblemTitle());
             problem.setProblemContents(problemRequestDto.getProblemContents());
+            problem.setProblemInputContents(problemRequestDto.getProblemInputContents());
+            problem.setProblemOutputContents(problemRequestDto.getProblemOutputContents());
             problem.setProblemClass(ProblemClass.valueOf(problemRequestDto.getProblemClass()));
             problem.setProblemTimeLimit(problemRequestDto.getProblemTimeLimit());
             problem.setProblemMemoryLimit(problemRequestDto.getProblemMemoryLimit());
@@ -137,6 +139,10 @@ public class ExamService {
     // 시험 문제 수정
     @Transactional
     public void updateExam(Long examId, ExamRequestDto request) {
+        if (examId == null) {
+            throw new IllegalArgumentException("Exam ID must not be null");
+        }
+
         Exam existingExam = examRepository.findById(examId)
                 .orElseThrow(() -> new IllegalArgumentException("Exam not found with id: " + examId));
 
@@ -154,7 +160,6 @@ public class ExamService {
 
         // Update questions linked to the exam
         updateQuestions(existingExam, request.getTests());
-
         // Update candidate tests
         updateCandidateTests(existingExam, request.getCandidateList());
         // 문제 업데이트 로직
@@ -169,6 +174,8 @@ public class ExamService {
 
             problem.setProblemTitle(problemRequestDto.getProblemTitle());
             problem.setProblemContents(problemRequestDto.getProblemContents());
+            problem.setProblemInputContents(problemRequestDto.getProblemInputContents());
+            problem.setProblemOutputContents(problemRequestDto.getProblemOutputContents());
             problem.setProblemClass(ProblemClass.valueOf(problemRequestDto.getProblemClass()));
             problem.setProblemTimeLimit(problemRequestDto.getProblemTimeLimit());
             problem.setProblemMemoryLimit(problemRequestDto.getProblemMemoryLimit());
@@ -192,56 +199,56 @@ public class ExamService {
 
     // 그 안의 문제들 수정
     private void updateQuestions(Exam exam, List<ProblemRequestDto> problemRequestDtos) {
-        Set<Long> problemIds = problemRequestDtos.stream()
-                .map(ProblemRequestDto::getProblemId)
-                .collect(Collectors.toSet());
+        if (problemRequestDtos == null || problemRequestDtos.isEmpty()) {
+            throw new IllegalArgumentException("No problem information provided.");
+        }
 
         List<Question> existingQuestions = questionRepository.findByExamExamId(exam.getExamId());
         Map<Long, Question> questionMap = existingQuestions.stream()
                 .collect(Collectors.toMap(q -> q.getProblem().getProblemId(), q -> q));
 
         for (ProblemRequestDto dto : problemRequestDtos) {
+            if (dto.getProblemId() == null) {
+                throw new IllegalArgumentException("Problem ID must not be null for any problem in the list.");
+            }
+
             Question question = questionMap.getOrDefault(dto.getProblemId(), new Question());
             question.setExam(exam);
             Problem problem = problemRepository.findById(dto.getProblemId())
                     .orElseThrow(() -> new IllegalArgumentException("Problem not found with id: " + dto.getProblemId()));
             question.setProblem(problem);
             question.setQuestionScore(dto.getQuestionScore() != null ? dto.getQuestionScore() : 10);
-            question.setQuestionSequence(1);  // 예시: 문제 순서가 따로 제공되지 않으므로 기본값 설정
+            question.setQuestionSequence(dto.getQuestionSequence());
             questionRepository.save(question);
         }
 
         // Remove old questions not in the updated list
-        for (Question q : existingQuestions) {
-            if (!problemIds.contains(q.getProblem().getProblemId())) {
-                questionRepository.delete(q);
-            }
-        }
+        existingQuestions.stream()
+                .filter(q -> !problemRequestDtos.stream().map(ProblemRequestDto::getProblemId).collect(Collectors.toSet()).contains(q.getProblem().getProblemId()))
+                .forEach(questionRepository::delete);
     }
-
     // 응시자 리스트 수정
+    @Transactional
     private void updateCandidateTests(Exam exam, List<Long> candidateIds) {
         List<Test> existingTests = testRepository.findByExamExamId(exam.getExamId());
-        Set<Long> existingTestMemberIds = existingTests.stream()
-                .map(Test::getMemberId)
-                .collect(Collectors.toSet());
+        Map<Long, Test> existingTestsMap = existingTests.stream()
+                .collect(Collectors.toMap(Test::getMemberId, test -> test));
 
-        // Add new candidate tests
-        candidateIds.stream()
-                .filter(id -> !existingTestMemberIds.contains(id))
-                .forEach(id -> {
-                    Test newTest = new Test();
-                    newTest.setExam(exam);
-                    newTest.setMemberId(id);
-                    testRepository.save(newTest);
-                });
+        // Add or update existing candidate tests
+        candidateIds.forEach(candidateId -> {
+            Test test = existingTestsMap.getOrDefault(candidateId, new Test());
+            test.setExam(exam);
+            test.setMemberId(candidateId);
+            testRepository.save(test);
+        });
 
         // Remove tests for candidates not listed anymore
-        existingTests.stream()
-                .filter(test -> !candidateIds.contains(test.getMemberId()))
-                .forEach(testRepository::delete);
+        existingTests.forEach(test -> {
+            if (!candidateIds.contains(test.getMemberId())) {
+                testRepository.delete(test);
+            }
+        });
     }
-
     // 시험 삭제
     @Transactional
     public void deleteExam(Long examId, Long requestingMemberId) {
