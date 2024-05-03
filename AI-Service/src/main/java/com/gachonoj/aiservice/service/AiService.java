@@ -25,7 +25,6 @@ public class AiService {
         prompt = code + "\n" + prompt;
         ChatGPTRequest request = new ChatGPTRequest(model, prompt);
         ChatGPTResponse response = restTemplate.postForObject(url, request, ChatGPTResponse.class);
-        log.info(response.toString());
         return response.getChoices().get(0).getMessage().getContent();
     }
 
