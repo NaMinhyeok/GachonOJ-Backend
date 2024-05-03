@@ -1,6 +1,7 @@
 package com.gachonoj.problemservice.repository;
 
 import com.gachonoj.problemservice.domain.constant.ProblemClass;
+import com.gachonoj.problemservice.domain.constant.ProblemStatus;
 import com.gachonoj.problemservice.domain.entity.Problem;
 import feign.Param;
 import org.springframework.data.domain.Page;
@@ -22,12 +23,16 @@ public interface ProblemRepository extends JpaRepository<Problem,Long> {
     Page<Problem> findAllByProblemIdIn(List<Long> ids, Pageable pageable);
     // 문제 제목으로 검색
     Page<Problem> findByProblemTitleContaining(String search, Pageable pageable);
-    // 문제 분류별 조회
-    Page<Problem> findByProblemClass(ProblemClass problemClass, Pageable pageable);
-    // 난이도별 문제 조회
-    Page<Problem> findByProblemDiff(int i, Pageable pageable);
-    // 추천 문제 조회 6개
-    List<Problem> findTop6ByOrderByProblemCreatedDateDesc();
+    // 등록된 문제 제목으로 검색
+    Page<Problem> findByProblemTitleContainingAndProblemStatus(String search, ProblemStatus problemStatus, Pageable pageable);
+    // 등록된 문제 분류별 조회
+    Page<Problem> findByProblemClassAndProblemStatus(ProblemClass problemClass, ProblemStatus problemStatus, Pageable pageable);
+    // 등록된 문제 난이도별 조회
+    Page<Problem> findByProblemDiffAndProblemStatus(int i, ProblemStatus problemStatus, Pageable pageable);
+    // 등록된 문제 추천 문제 조회 6개
+    List<Problem> findTop6ByProblemStatusOrderByProblemCreatedDateDesc(ProblemStatus problemStatus);
+    // 등록된 문제 전체 조회
+    Page<Problem> findByProblemStatus(ProblemStatus problemStatus, Pageable pageable);
     // 문제 분류 기능
     @Query("SELECT p FROM Problem p WHERE p.problemId IN :problemIds AND (:classType IS NULL OR p.problemClass = :classType) AND (:difficulty IS NULL OR p.problemDiff = :difficulty)")
     Page<Problem> findByProblemIdInAndClassTypeAndDifficulty(List<Long> problemIds, String classType, Integer difficulty, Pageable pageable);
