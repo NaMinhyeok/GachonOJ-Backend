@@ -19,10 +19,9 @@ public interface ProblemRepository extends JpaRepository<Problem,Long> {
     // 문제 검색
     Optional<Problem> findByProblemId(Long problemId);
 
-    // 문제 페이지네이션 형태로 검색
-    Page<Problem> findAllByProblemIdIn(List<Long> ids, Pageable pageable);
+    // 로그인한 회원 type에 따른 문제 목록 조회에 이용되는 메소드
+    Page<Problem> findAllByProblemIdInAndProblemStatus(List<Long> ids, ProblemStatus problemStatus ,Pageable pageable);
     // 문제 제목으로 검색
-    Page<Problem> findByProblemTitleContaining(String search, Pageable pageable);
     // 등록된 문제 제목으로 검색
     Page<Problem> findByProblemTitleContainingAndProblemStatus(String search, ProblemStatus problemStatus, Pageable pageable);
     // 등록된 문제 분류별 조회
@@ -33,9 +32,4 @@ public interface ProblemRepository extends JpaRepository<Problem,Long> {
     List<Problem> findTop6ByProblemStatusOrderByProblemCreatedDateDesc(ProblemStatus problemStatus);
     // 등록된 문제 전체 조회
     Page<Problem> findByProblemStatus(ProblemStatus problemStatus, Pageable pageable);
-    // 문제 분류 기능
-    @Query("SELECT p FROM Problem p WHERE p.problemId IN :problemIds AND (:classType IS NULL OR p.problemClass = :classType) AND (:difficulty IS NULL OR p.problemDiff = :difficulty)")
-    Page<Problem> findByProblemIdInAndClassTypeAndDifficulty(List<Long> problemIds, String classType, Integer difficulty, Pageable pageable);
-
-
 }

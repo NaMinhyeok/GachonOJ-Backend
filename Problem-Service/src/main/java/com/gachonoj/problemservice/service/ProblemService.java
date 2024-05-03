@@ -113,7 +113,6 @@ public class ProblemService {
         }
     }
 
-    //TODO : 검색, 분류, 난이도, 정렬 기능 추가
     // 사용자 문제 목록 조회
     @Transactional(readOnly = true)
     public Page<ProblemListResponseDto> getProblemListByMember(String type, int pageNo, String search, String classType, Integer diff, String sortType, Long memberId) {
@@ -155,10 +154,10 @@ public class ProblemService {
 
     // 문제 목록 조회 메서드
     private Page<ProblemListResponseDto> getProblemListResponseDtoPage(List<Long> problemIds, Pageable pageable) {
-        Page<Problem> problems = problemRepository.findAllByProblemIdIn(problemIds, pageable);
+        Page<Problem> problems = problemRepository.findAllByProblemIdInAndProblemStatus(problemIds, ProblemStatus.REGISTERED, pageable);
         return problems.map(this::createProblemListResponseDto);
     }
-    // DTO 생성 메서드
+    // 사용자 문제 목록 DTO 생성 메서드
     private ProblemListResponseDto createProblemListResponseDto(Problem problem) {
         Integer correctPeople = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
         Double correctRate = submissionServiceFeignClient.getProblemCorrectRate(problem.getProblemId());
