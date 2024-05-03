@@ -5,7 +5,9 @@ import lombok.Getter;
 @Getter
 public enum ProblemStatus {
     SAVED("저장"),
-    REGISTERED("등록");
+    REGISTERED("등록"),
+    PRIVATE("비공개");
+
     private final String label;
     ProblemStatus(String label) {
         this.label = label;
