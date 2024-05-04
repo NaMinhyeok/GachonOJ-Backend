@@ -26,4 +26,14 @@ public class ProblemFeignController {
     public List<SubmissionProblemTestCaseResponseDto> getTestCases(@PathVariable Long problemId) {
         return problemFeignService.getTestCases(problemId);
     }
+    // 공개된 테스트케이스 조회
+    @GetMapping("/{problemId}/testcase/visible")
+    public List<SubmissionProblemTestCaseResponseDto> getVisibleTestCases(@PathVariable Long problemId) {
+        return problemFeignService.getVisibleTestCases(problemId);
+    }
+    // 문제 점수 조회
+    @GetMapping("/{problemId}/score")
+    public Integer getProblemScore(@PathVariable Long problemId) {
+        return problemFeignService.getProblemScore(problemId);
+    }
 }

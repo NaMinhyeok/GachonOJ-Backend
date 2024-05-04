@@ -1,5 +1,7 @@
 package com.gachonoj.problemservice.feign.service;
 
+import com.gachonoj.problemservice.domain.constant.TestcaseStatus;
+import com.gachonoj.problemservice.domain.entity.Problem;
 import com.gachonoj.problemservice.domain.entity.Testcase;
 import com.gachonoj.problemservice.feign.dto.response.SubmissionProblemTestCaseResponseDto;
 import com.gachonoj.problemservice.repository.ProblemRepository;
@@ -31,5 +33,30 @@ public class ProblemFeignService {
         return testcases.stream()
                 .map(testcase -> new SubmissionProblemTestCaseResponseDto(testcase.getTestcaseInput(), testcase.getTestcaseOutput()))
                 .toList();
+    }
+    // 문제의 공개된 테스트케이스 조회
+    public List<SubmissionProblemTestCaseResponseDto> getVisibleTestCases(Long problemId){
+        List<Testcase> testcases = testcaseRepository.findByProblemProblemIdAndTestcaseStatus(problemId, TestcaseStatus.VISIBLE);
+        return testcases.stream()
+                .map(testcase -> new SubmissionProblemTestCaseResponseDto(testcase.getTestcaseInput(), testcase.getTestcaseOutput()))
+                .toList();
+    }
+    // 문제 점수 조회
+    public Integer getProblemScore(Long problemId){
+        Problem problem = problemRepository.findByProblemId(problemId)
+                .orElseThrow(()->new IllegalArgumentException("해당 문제가 존재하지 않습니다."));
+        Integer problemDiff = problem.getProblemDiff();
+        return calculateProblemScore(problemDiff);
+    }
+    // 문제 점수 계산
+    public Integer calculateProblemScore(Integer problemDiff){
+        return switch (problemDiff) {
+            case 1 -> 5;
+            case 2 -> 10;
+            case 3 -> 15;
+            case 4 -> 20;
+            case 5 -> 25;
+            default -> 0;
+        };
     }
 }

@@ -40,6 +40,7 @@ import java.util.stream.Collectors;
 public class ProblemService {
     private final ProblemRepository problemRepository;
     private final BookmarkRepository bookmarkRepository;
+    private final ExamRepository examRepository;
     private final SubmissionServiceFeignClient submissionServiceFeignClient;
 
 
@@ -102,31 +103,6 @@ public class ProblemService {
         problemRepository.findById(problemId)
                 .ifPresent(problemRepository::delete);
     }
-
-    // 사용자 북마크 문제 조회
-//    @Transactional(readOnly = true)
-//    public Page<BookmarkProblemResponseDto> getBookmarkProblemList(Long memberId, int pageNo) {
-//        Pageable pageable = PageRequest.of(pageNo-1, 10, Sort.by(Sort.Direction.DESC, "problem.problemId")); // 정렬 기준 수정
-//        Page<Bookmark> bookmarks = bookmarkRepository.findByMemberId(memberId, pageable);
-//
-//        return bookmarks.map(bookmark -> {
-//            Problem problem = bookmark.getProblem(); // 문제 조회를 위해 필요없는 호출 제거
-//            if (problem == null) {
-//                throw new IllegalArgumentException("Problem not found");
-//            }
-//            Integer correctPeople = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
-//            Double correctRate = submissionServiceFeignClient.getProblemCorrectRate(problem.getProblemId());
-//            return new BookmarkProblemResponseDto(
-//                    problem.getProblemId(),
-//                    problem.getProblemTitle(),
-//                    problem.getProblemDiff(),
-//                    problem.getProblemClass(),
-//                    correctPeople,
-//                    correctRate,
-//                    true
-//            );
-//        });
-//    }
 
     // 북마크 기능 구현
     @Transactional
@@ -220,58 +196,6 @@ public class ProblemService {
         };
     }
 
-/*    // 북마크 문제 조회 메서드
-    private Page<ProblemListResponseDto> getBookmarkProblemList(Long memberId, Pageable pageable, String classType, Integer diff) {
-        List<Long> problemIds = bookmarkRepository.findByMemberId(memberId).stream()
-                .map(bookmark -> bookmark.getProblem().getProblemId())
-                .collect(Collectors.toList());
-
-        return problemRepository.findByProblemIdInAndClassTypeAndDifficulty(problemIds, classType, diff, pageable)
-                .map(problem -> {
-                    Integer correctPeople = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
-                    Double correctRate = submissionServiceFeignClient.getProblemCorrectRate(problem.getProblemId());
-                    return new ProblemListResponseDto(
-                            problem,
-                            correctPeople,
-                            correctRate
-                    );
-                });
-    }
-    // 맞춘 문제 조회 메서드
-    private Page<ProblemListResponseDto> getSolvedProblemList(Long memberId, Pageable pageable, String classType, Integer diff) {
-        // 사용자가 정답을 맞춘 문제 ID 목록을 가져옵니다.
-        List<Long> problemIds = submissionServiceFeignClient.getCorrectProblemIds(memberId);
-
-        // 문제 ID 목록과 분류, 난이도를 기반으로 필터링하며 문제 목록을 조회합니다.
-        return problemRepository.findByProblemIdInAndClassTypeAndDifficulty(problemIds, classType, diff, pageable)
-                .map(problem -> {
-                    Integer correctPeople = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
-                    Double correctRate = submissionServiceFeignClient.getProblemCorrectRate(problem.getProblemId());
-                    return new ProblemListResponseDto(
-                            problem,
-                            correctPeople,
-                            correctRate
-                    );
-                });
-    }
-    // 틀린 문제 조회 메서드
-    private Page<ProblemListResponseDto> getWrongProblemList(Long memberId, Pageable pageable, String classType, Integer diff) {
-        // 사용자가 정답을 맞춘 문제 ID 목록을 가져옵니다.
-        List<Long> problemIds = submissionServiceFeignClient.getIncorrectProblemIds(memberId);
-
-        // 문제 ID 목록과 분류, 난이도를 기반으로 필터링하며 문제 목록을 조회합니다.
-        return problemRepository.findByProblemIdInAndClassTypeAndDifficulty(problemIds, classType, diff, pageable)
-                .map(problem -> {
-                    Integer correctPeople = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
-                    Double correctRate = submissionServiceFeignClient.getProblemCorrectRate(problem.getProblemId());
-                    return new ProblemListResponseDto(
-                            problem,
-                            correctPeople,
-                            correctRate
-                    );
-                });
-    } */
-
     // 북마크 문제 조회 메서드
     private Page<ProblemListResponseDto> getBookmarkProblemList(Long memberId, Pageable pageable) {
         List<Long> problemIds = bookmarkRepository.findByMemberId(memberId).stream()
@@ -293,10 +217,10 @@ public class ProblemService {
 
     // 문제 목록 조회 메서드
     private Page<ProblemListResponseDto> getProblemListResponseDtoPage(List<Long> problemIds, Pageable pageable) {
-            Page<Problem> problems = problemRepository.findAllByProblemIdIn(problemIds, pageable);
+        Page<Problem> problems = problemRepository.findAllByProblemIdInAndProblemStatus(problemIds, ProblemStatus.REGISTERED, pageable);
         return problems.map(this::createProblemListResponseDto);
     }
-    // DTO 생성 메서드
+    // 사용자 문제 목록 DTO 생성 메서드
     private ProblemListResponseDto createProblemListResponseDto(Problem problem) {
         Integer correctPeople = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
         Double correctRate = submissionServiceFeignClient.getProblemCorrectRate(problem.getProblemId());
@@ -317,14 +241,14 @@ public class ProblemService {
 
         Page<Problem> problems;
         if (search != null) {
-            problems = problemRepository.findByProblemTitleContaining(search, pageable);
+            problems = problemRepository.findByProblemTitleContainingAndProblemStatus(search, ProblemStatus.REGISTERED, pageable);
         } else if (classType != null) {
             ProblemClass problemClass = ProblemClass.fromLabel(classType);
-            problems = problemRepository.findByProblemClass(problemClass, pageable);
+            problems = problemRepository.findByProblemClassAndProblemStatus(problemClass, ProblemStatus.REGISTERED, pageable);
         } else if (diff != null) {
-            problems = problemRepository.findByProblemDiff(diff, pageable);
+            problems = problemRepository.findByProblemDiffAndProblemStatus(diff, ProblemStatus.REGISTERED, pageable);
         } else {
-            problems = problemRepository.findAll(pageable);
+            problems = problemRepository.findByProblemStatus(ProblemStatus.REGISTERED, pageable);
         }
 
         return problems.map(problem -> {
@@ -336,7 +260,7 @@ public class ProblemService {
     // 추천 알고리즘 문제 조회
     @Transactional(readOnly = true)
     public List<RecommendProblemResponseDto> getRecommenedProblemList() {
-        List<Problem> problem = problemRepository.findTop6ByOrderByProblemCreatedDateDesc();
+        List<Problem> problem = problemRepository.findTop6ByProblemStatusOrderByProblemCreatedDateDesc(ProblemStatus.REGISTERED);
         return problem.stream().map(RecommendProblemResponseDto::new).collect(Collectors.toList());
     }
     // 관리자 문제 목록 조회
@@ -345,9 +269,9 @@ public class ProblemService {
         Pageable pageable = PageRequest.of(pageNo - 1, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "problemId"));
         Page<Problem> problems;
         if(search != null){
-            problems = problemRepository.findByProblemTitleContaining(search, pageable);
+            problems = problemRepository.findByProblemTitleContainingAndProblemStatus(search, ProblemStatus.REGISTERED, pageable);
         } else{
-            problems = problemRepository.findAll(pageable);
+            problems = problemRepository.findByProblemStatus(ProblemStatus.REGISTERED, pageable);
 
         }
         return problems.map(problem -> {

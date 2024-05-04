@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
@@ -46,17 +47,17 @@ public class MemberService {
 
     private static final int PAGE_SIZE = 10;
 
-    // 이메일 인증 코드
-    private int authCode;
     // 이메일 인증코드를 위한 난수 생성기
-    public void makeRandomNumber() {
+    public int makeRandomNumber() {
         Random r = new Random();
+        int authCode;
         String randomNumber = "";
         for(int i = 0; i < 6; i++) {
             randomNumber += Integer.toString(r.nextInt(10));
         }
 
         authCode = Integer.parseInt(randomNumber);
+        return authCode;
     }
     // 이메일 인증코드를 확인하는 메소드
     public void verifyEmail(String email, String inputAuthCode) {
@@ -76,7 +77,7 @@ public class MemberService {
         isValidEmail(email);
 
         //유효성 검사가 통과하면 이메일 인증코드 생성 및 전송
-        makeRandomNumber();
+        int authCode = makeRandomNumber();
         String setFrom = "gachonlastdance@gmail.com"; // email-config에 설정한 자신의 이메일 주소를 입력
         String toMail = email;
         String title = "GachonOJ 회원 가입 인증 이메일"; // 이메일 제목
@@ -89,6 +90,7 @@ public class MemberService {
                         "<br>" +
                         "인증번호는 5분 뒤 만료됩니다."; //이메일 내용 삽
         sendEmail(setFrom, toMail, title, content);
+        redisService.setDataExpire(toMail,Integer.toString(authCode), 300L);
         return Integer.toString(authCode);
     }
     // 이메일 인증 코드 전송
@@ -104,7 +106,6 @@ public class MemberService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        redisService.setDataExpire(toMail,Integer.toString(authCode), 300L);
     }
     //TODO : 캡슐화
     // 비밀번호 암호화 엔티티객체에 구현하여 캡슐화하기
@@ -130,7 +131,7 @@ public class MemberService {
     }
     // 회원가입 유효성 검사
     public void verifySignUp(String password, String passwordConfirm, String email, String number) {
-        String regExp = "^(?=.*[a-zA-Z])(?=.*[!@#$%^])(?=.*[0-9]).{8,25}$";
+        String regExp = "^(?=.*[a-zA-Z])(?=.*[~!@#$%&*()_+=?])(?=.*[0-9]).{8,25}$";
         if(!password.matches(regExp)) {
             throw new IllegalArgumentException("비밀번호는 영문, 숫자, 특수문자를 포함한 8~25자여야 합니다.");
         }
@@ -180,13 +181,13 @@ public class MemberService {
     // 호버시 회원 정보 조회
     public HoverResponseDto getHoverInfo(Long memberId) {
         Member member = memberRepository.findByMemberId(memberId);
-        Integer rating = calculateRating(memberId);
+        Integer rating = calculateRating(member.getMemberRank());
         return new HoverResponseDto(member.getMemberEmail(), member.getMemberNickname(), rating);
     }
     // 사용자 정보 조회 ( 사용자 정보 수정 화면에서 정보 조회)
     public MemberInfoResponseDto getMemberInfo(Long memberId) {
         Member member = memberRepository.findByMemberId(memberId);
-        Integer rating = calculateRating(memberId);
+        Integer rating = calculateRating(member.getMemberRank());
         return new MemberInfoResponseDto(member.getMemberEmail(), member.getMemberName(), member.getMemberNumber(), member.getMemberIntroduce(), member.getMemberNickname(), member.getMemberImg(), rating);
     }
     // 사용자 본인 정보 수정
@@ -204,25 +205,24 @@ public class MemberService {
     // 대회 페이지 사용자 정보 조회
     public MemberInfoExamResponseDto getMemberInfoExam(Long memberId) {
         Member member = memberRepository.findByMemberId(memberId);
-        Integer rating = calculateRating(memberId);
+        Integer rating = calculateRating(member.getMemberRank());
         return new MemberInfoExamResponseDto(member.getMemberNickname(), rating, member.getMemberName(), member.getMemberNumber());
     }
     // rating 계산
-    public Integer calculateRating(Long memberId) {
-        Member member = memberRepository.findByMemberId(memberId);
-        if(member.getMemberRank() < 1000) {
+    public Integer calculateRating(Integer rank) {
+        if(rank < 1000) {
             return 0;
-        } else if(member.getMemberRank() < 1200) {
+        } else if(rank < 1200) {
             return 1;
-        } else if(member.getMemberRank() < 1400) {
+        } else if(rank < 1400) {
             return 2;
-        } else if(member.getMemberRank() < 1600) {
+        } else if(rank < 1600) {
             return 3;
-        } else if(member.getMemberRank() < 1900) {
+        } else if(rank < 1900) {
             return 4;
-        } else if(member.getMemberRank() < 2200) {
+        } else if(rank < 2200) {
             return 5;
-        } else if(member.getMemberRank() < 2500) {
+        } else if(rank < 2500) {
             return 6;
         } else {
             return 7;
@@ -235,7 +235,7 @@ public class MemberService {
             SubmissionMemberInfoResponseDto submissionMemberInfoResponseDto = submissionServiceFeignClient.getMemberInfoBySubmission(memberId);
             Integer bookmarkProblemCount = problemServiceFeignClient.getBookmarkCountByMemberId(memberId);
             Member member = memberRepository.findByMemberId(memberId);
-            Integer rating = calculateRating(memberId);
+            Integer rating = calculateRating(member.getMemberRank());
             return new MemberInfoRankingResponseDto(member.getMemberNickname(),rating,submissionMemberInfoResponseDto.getSolvedProblemCount(), submissionMemberInfoResponseDto.getTryProblemCount(),bookmarkProblemCount);
         } catch (Exception e) {
             log.error(ErrorCode.OTHER_SERVICE_CONNECTION_FAILURE.getMessage());
@@ -315,7 +315,6 @@ public class MemberService {
         }
     }
     // 사용자 추가 생성
-    // TODO : Role이 Student로 계속 들어가는 오류 수정
     @Transactional
     public void createMember(CreateMemberRequestDto createMemberRequestDto) {
         // 회원가입 유효성 검사
@@ -372,13 +371,6 @@ public class MemberService {
     public void logout(Long memberId) {
         redisService.deleteData(memberId.toString());
     }
-    // 회원 정보 조회 문제 화면에서
-    public MemberInfoProblemResponseDto getMemberInfoProblem(Long memberId) {
-        Member member = memberRepository.findByMemberId(memberId);
-        Integer rating = calculateRating(memberId);
-        Integer needRating = calculateNeedRating(member.getMemberRank());
-        return new MemberInfoProblemResponseDto(member.getMemberNickname(), member.getMemberIntroduce(), member.getMemberImg(),rating,member.getMemberRank(),needRating);
-    }
     // 레이팅을 올리기 위한 필요한 점수 계산
     public Integer calculateNeedRating(Integer memberRank) {
         if(memberRank < 1000) {
@@ -398,5 +390,51 @@ public class MemberService {
         } else {
             return 3000-memberRank;
         }
+    }
+    // 회원 정보 조회 문제 화면에서
+    public MemberInfoProblemResponseDto getMemberInfoProblem(Long memberId) {
+        Member member = memberRepository.findByMemberId(memberId);
+        Integer rating = calculateRating(member.getMemberRank());
+        Integer needRating = calculateNeedRating(member.getMemberRank());
+        return new MemberInfoProblemResponseDto(member.getMemberNickname(), member.getMemberIntroduce(), member.getMemberImg(),rating,member.getMemberRank(),needRating);
+    }
+    // 비밀번호 찾기 이메일 전송
+    @Transactional
+    public void sendPasswordEmail(String memberEmail) {
+        Member member = memberRepository.findByMemberEmail(memberEmail);
+        if (member == null) {
+            throw new IllegalArgumentException("가입되지 않은 이메일입니다.");
+        }
+        String newPassword = makeRandomPassword();
+        member.updateMemberPassword(passwordEncoder.encode(newPassword));
+
+        String setFrom = "gachonlastdance@gmail.com"; // email-config에 설정한 자신의 이메일 주소를 입력
+        String toMail = memberEmail;
+        String title = "GachonOJ 임시 비밀번호 이메일"; // 이메일 제목
+        String content =
+                "GachonOJ의 방문해주셔서 감사합니다." +    //html 형식으로 작성 !
+                        "<br><br>" +
+                        "회원님의 임시비밀번호는 " + newPassword + "입니다." +
+                        "<br>"; //이메일 내용 삽
+        sendEmail(setFrom, toMail, title, content);
+    }
+    // 비밀번호 찾기 난수 생성
+    public String makeRandomPassword() {
+        String CHAR_LOWER = "abcdefghijklmnopqrstuvwxyz";
+        String CHAR_UPPER = CHAR_LOWER.toUpperCase();
+        String NUMBER = "0123456789";
+        String OTHER_CHAR = "~!@#$%&*()_+-=?";
+        String PASSWORD_ALLOW_BASE = CHAR_LOWER + CHAR_UPPER + NUMBER + OTHER_CHAR;
+
+        SecureRandom random = new SecureRandom();
+
+        int passwordLength = random.nextInt(14)+12;
+
+        StringBuilder password = new StringBuilder();
+        for(int i=0; i<passwordLength; i++){
+            int index = random.nextInt(PASSWORD_ALLOW_BASE.length());
+            password.append(PASSWORD_ALLOW_BASE.charAt(index));
+        }
+        return password.toString();
     }
 }
