@@ -22,6 +22,8 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.gachonoj.problemservice.domain.dto.response.ExamDetailResponseDto;
+import com.gachonoj.problemservice.domain.dto.response.ProblemDetailResponseDto;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -242,6 +244,47 @@ public class ExamService {
                 testRepository.delete(test);
             }
         });
+    }
+
+
+    @Transactional(readOnly = true)
+    public ExamDetailResponseDto getExamDetail(Long examId) {
+        Exam exam = examRepository.findById(examId)
+                .orElseThrow(() -> new IllegalArgumentException("Exam not found with id: " + examId));
+
+        // 문제 목록 가져오기
+        List<Problem> problems = questionRepository.findProblemsByExamId(examId);
+        List<ProblemDetailResponseDto> problemDetails = problems.stream()
+                .map(problem -> {
+                    List<String> inputs = problem.getTestcases().stream()
+                            .map(Testcase::getTestcaseInput)
+                            .collect(Collectors.toList());
+                    List<String> outputs = problem.getTestcases().stream()
+                            .map(Testcase::getTestcaseOutput)
+                            .collect(Collectors.toList());
+                    return new ProblemDetailResponseDto(
+                            problem.getProblemTitle(),
+                            problem.getProblemContents(),
+                            problem.getProblemInputContents(),
+                            problem.getProblemOutputContents(),
+                            inputs,
+                            outputs
+                    );
+                })
+                .collect(Collectors.toList());
+
+        return new ExamDetailResponseDto(
+                exam.getExamId(),
+                exam.getExamTitle(),
+                exam.getExamContents(),
+                exam.getExamStartDate(),
+                exam.getExamEndDate(),
+                exam.getExamStatus().name(),
+                exam.getExamType().name(),
+                exam.getExamMemo(),
+                exam.getExamNotice(),
+                problemDetails
+        );
     }
 
     // 시험 삭제

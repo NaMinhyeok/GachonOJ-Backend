@@ -5,6 +5,7 @@ import com.gachonoj.problemservice.common.response.CommonResponseDto;
 import com.gachonoj.problemservice.domain.dto.request.ExamRequestDto;
 import com.gachonoj.problemservice.domain.dto.request.ProblemRequestDto;
 import com.gachonoj.problemservice.domain.dto.response.*;
+import com.gachonoj.problemservice.domain.entity.Exam;
 import com.gachonoj.problemservice.service.ExamService;
 import com.gachonoj.problemservice.service.ProblemService;
 import jakarta.servlet.http.HttpServlet;
@@ -50,6 +51,13 @@ public class ProblemController {
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));  // 회원 ID를 헤더에서 추출
         examService.updateExam(examId, examDto);  // 서비스 레이어에 업데이트 로직 위임
         return ResponseEntity.ok(CommonResponseDto.success());  // 성공 응답
+    }
+
+    // 시험 문제 조회
+    @GetMapping("/exam/{examId}")
+    public ResponseEntity<CommonResponseDto<ExamDetailResponseDto>> getExamDetail(@PathVariable Long examId) {
+        ExamDetailResponseDto examDetail = examService.getExamDetail(examId);
+        return ResponseEntity.ok(CommonResponseDto.success(examDetail));  // 성공 응답
     }
 
     // 시험 삭제

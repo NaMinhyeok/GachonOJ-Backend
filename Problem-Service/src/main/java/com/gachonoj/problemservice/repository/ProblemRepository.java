@@ -2,6 +2,7 @@ package com.gachonoj.problemservice.repository;
 
 import com.gachonoj.problemservice.domain.constant.ProblemClass;
 import com.gachonoj.problemservice.domain.entity.Problem;
+import com.gachonoj.problemservice.domain.entity.Question;
 import feign.Param;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,7 +18,6 @@ public interface ProblemRepository extends JpaRepository<Problem,Long> {
 
     // 문제 검색
     Optional<Problem> findByProblemId(Long problemId);
-
     // 문제 페이지네이션 형태로 검색
     Page<Problem> findAllByProblemIdIn(List<Long> ids, Pageable pageable);
     // 문제 제목으로 검색
