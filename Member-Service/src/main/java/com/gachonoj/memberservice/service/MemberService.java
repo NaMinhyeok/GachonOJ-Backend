@@ -13,6 +13,7 @@ import com.gachonoj.memberservice.repository.MemberRepository;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.URL;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.Objects;
@@ -278,13 +280,19 @@ public class MemberService {
         });
     }
     // 회원정보 수정
+    // TODO : JAXB is unavailable. Will fallback to SDK implementation which may be less performant.If you are using Java 9+, you will need to include javax.xml.bind:jaxb-api as a dependency. Waring 해결하기
     @Transactional
     public void updateMemberInfo(Long memberId, MultipartFile memberImg, MemberInfoRequestDto memberInfoRequestDto) throws IOException {
         Member member = memberRepository.findByMemberId(memberId);
         if(memberImg != null) {
             // 원래 있던 이미지 삭제
             if(member.getMemberImg() != null) {
-                s3UploadService.deleteImage(member.getMemberImg());
+                log.info("memberImg : " + member.getMemberImg());
+                String imgUrl = member.getMemberImg();
+                URL url = new URL(imgUrl);
+                String fileName = url.getPath().substring(url.getPath().lastIndexOf('/') + 1);
+                log.info("fileName : " + fileName);
+                s3UploadService.deleteImage(fileName);
             }
             // 이미지 저장
             String memberImgUrl = s3UploadService.saveFile(memberImg);
