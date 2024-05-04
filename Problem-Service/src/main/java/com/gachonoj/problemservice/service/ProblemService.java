@@ -115,6 +115,16 @@ public class ProblemService {
             throw new IllegalStateException("Bookmark already exists");
         }
     }
+    // 북마크 삭제 기능 구현
+    @Transactional
+    public void removeBookmark(Long memberId, Long problemId) {
+        // 북마크가 존재하는지 확인
+        Bookmark bookmark = bookmarkRepository.findByMemberIdAndProblemProblemId(memberId, problemId)
+                .orElseThrow(() -> new IllegalArgumentException("Bookmark not found with memberId: " + memberId + " and problemId: " + problemId));
+
+        // 북마크 삭제
+        bookmarkRepository.delete(bookmark);
+    }
 
     // 사용자 문제 목록 조회
     @Transactional(readOnly = true)
