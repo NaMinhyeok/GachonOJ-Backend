@@ -19,7 +19,6 @@ import com.gachonoj.problemservice.repository.ExamRepository;
 import com.gachonoj.problemservice.repository.ProblemRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Hibernate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -117,65 +116,6 @@ public class ProblemService {
         }
     }
 
-    // 북마크 삭제 기능 구현
-    @Transactional
-    public void removeBookmark(Long memberId, Long problemId) {
-        // 북마크가 존재하는지 확인
-        Bookmark bookmark = bookmarkRepository.findByMemberIdAndProblemProblemId(memberId, problemId)
-                .orElseThrow(() -> new IllegalArgumentException("Bookmark not found with memberId: " + memberId + " and problemId: " + problemId));
-
-        // 북마크 삭제
-        bookmarkRepository.delete(bookmark);
-    }
-
-//    @Transactional(readOnly = true)
-//    public Page<WrongProblemResponseDto> getIncorrectProblemList(Long memberId, int pageNo) {
-//        Pageable pageable = PageRequest.of(pageNo - 1, 10, Sort.by(Sort.Direction.DESC, "problemId"));
-//
-//        List<Long> problemIds = submissionServiceFeignClient.getIncorrectProblemIds(memberId);
-//
-//        // 페이지네이션 적용한 문제 ID 리스트 조회
-//        Page<Problem> problems = problemRepository.findAllByProblemIdIn(problemIds, pageable);
-//
-//        return problems.map(problem -> {
-//            Integer correctPeople = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
-//            Double correctRate = submissionServiceFeignClient.getProblemCorrectRate(problem.getProblemId());
-//            return new WrongProblemResponseDto(
-//                    problem.getProblemId(),
-//                    problem.getProblemTitle(),
-//                    problem.getProblemDiff(),
-//                    problem.getProblemClass(),
-//                    correctPeople,
-//                    correctRate,
-//                    false // isBookmarked 필드는 사용자가 별도로 제공해야 하는 정보를 기반으로 설정합니다
-//            );
-//        });
-//    }
-//
-//    @Transactional(readOnly = true)
-//    public Page<SolvedProblemResponseDto> getSolvedProblemList(Long memberId, int pageNo) {
-//        Pageable pageable = PageRequest.of(pageNo - 1, 10, Sort.by(Sort.Direction.DESC, "problemId"));
-//
-//        List<Long> problemIds = submissionServiceFeignClient.getCorrectProblemIds(memberId);
-//
-//        // 페이지네이션 적용한 문제 ID 리스트 조회
-//        Page<Problem> problems = problemRepository.findAllByProblemIdIn(problemIds, pageable);
-//
-//        return problems.map(problem -> {
-//            Integer correctPeople = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
-//            Double correctRate = submissionServiceFeignClient.getProblemCorrectRate(problem.getProblemId());
-//            return new SolvedProblemResponseDto(
-//                    problem.getProblemId(),
-//                    problem.getProblemTitle(),
-//                    problem.getProblemDiff(),
-//                    problem.getProblemClass(),
-//                    correctPeople,
-//                    correctRate,
-//                    false // isBookmarked 필드는 사용자가 별도로 제공해야 하는 정보를 기반으로 설정합니다
-//            );
-//        });
-//    }
-    //TODO : 검색, 분류, 난이도, 정렬 기능 추가
     // 사용자 문제 목록 조회
     @Transactional(readOnly = true)
     public Page<ProblemListResponseDto> getProblemListByMember(String type, int pageNo, String search, String classType, Integer diff, String sortType, Long memberId) {
@@ -283,7 +223,7 @@ public class ProblemService {
             return new ProblemListByAdminResponseDto(problem, correctPeople, correctSubmit, submitCount, problemCreatedDate,problemStatus);
         });
     }
-    // 문제 응시 화면 문제 상세 조회
+    //문제 응시 화면 문제 상세 조회
     @Transactional(readOnly = true)
     public ProblemDetailResponseDto getProblemDetail(Long problemId) {
         Problem problem = problemRepository.findById(problemId)

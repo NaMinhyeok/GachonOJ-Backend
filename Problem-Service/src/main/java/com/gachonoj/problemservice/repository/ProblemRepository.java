@@ -19,8 +19,6 @@ public interface ProblemRepository extends JpaRepository<Problem,Long> {
 
     // 문제 검색
     Optional<Problem> findByProblemId(Long problemId);
-    // 문제 페이지네이션 형태로 검색
-    Page<Problem> findAllByProblemIdIn(List<Long> ids, Pageable pageable);
 
     // 로그인한 회원 type에 따른 문제 목록 조회에 이용되는 메소드
     Page<Problem> findAllByProblemIdInAndProblemStatus(List<Long> ids, ProblemStatus problemStatus ,Pageable pageable);
