@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -46,7 +47,7 @@ public class ExamService {
     @Scheduled(cron = "0 */5 * * * *") // 매 5분마다 실행
     @Transactional
     @Async
-    public void updateExamStatusBasesdOnCurrentTime() {
+    public void updateExamStatusBasedOnCurrentTime() {
         List<Exam> exams = examRepository.findAll();
         LocalDateTime now = LocalDateTime.now();
         //TODO: RESERVATION 과 WIRITING을 구분해야함
@@ -146,7 +147,6 @@ public class ExamService {
         Exam existingExam = examRepository.findById(examId)
                 .orElseThrow(() -> new IllegalArgumentException("Exam not found with id: " + examId));
 
-        // 업데이트할 시험 정보 설정
         existingExam.setExamTitle(request.getExamTitle());
         existingExam.setExamMemo(request.getExamMemo());
         existingExam.setExamNotice(request.getExamNotice());
@@ -158,19 +158,24 @@ public class ExamService {
         existingExam.setExamType(request.getExamType());
         examRepository.save(existingExam);
 
-        // Update questions linked to the exam
-        updateQuestions(existingExam, request.getTests());
-        // Update candidate tests
-        updateCandidateTests(existingExam, request.getCandidateList());
-        // 문제 업데이트 로직
-        for (ProblemRequestDto problemRequestDto : request.getTests()) {
-            Problem problem;
-            if (problemRequestDto.getProblemId() != null) {
-                problem = problemRepository.findById(problemRequestDto.getProblemId())
-                        .orElseThrow(() -> new IllegalArgumentException("Problem not found with id: " + problemRequestDto.getProblemId()));
-            } else {
-                problem = new Problem();
+        if (request.getTests() == null || request.getTests().isEmpty()) {
+            throw new IllegalArgumentException("No problems provided for the exam.");
+        }
+
+        request.getTests().forEach(dto -> {
+            if (dto.getProblemId() == null) {
+                throw new IllegalArgumentException("Problem ID must not be null for problem title: " + dto.getProblemTitle());
             }
+        });
+
+        updateQuestions(existingExam, request.getTests());
+        updateCandidateTests(existingExam, request.getCandidateList());
+
+        for (ProblemRequestDto problemRequestDto : request.getTests()) {
+            Problem problem = problemRepository.findById(problemRequestDto.getProblemId())
+                    .orElseThrow(() -> new IllegalArgumentException("Problem not found with id: " + problemRequestDto.getProblemId()));
+
+
 
             problem.setProblemTitle(problemRequestDto.getProblemTitle());
             problem.setProblemContents(problemRequestDto.getProblemContents());
@@ -199,19 +204,11 @@ public class ExamService {
 
     // 그 안의 문제들 수정
     private void updateQuestions(Exam exam, List<ProblemRequestDto> problemRequestDtos) {
-        if (problemRequestDtos == null || problemRequestDtos.isEmpty()) {
-            throw new IllegalArgumentException("No problem information provided.");
-        }
-
         List<Question> existingQuestions = questionRepository.findByExamExamId(exam.getExamId());
         Map<Long, Question> questionMap = existingQuestions.stream()
-                .collect(Collectors.toMap(q -> q.getProblem().getProblemId(), q -> q));
+                .collect(Collectors.toMap(q -> q.getProblem().getProblemId(), Function.identity()));
 
         for (ProblemRequestDto dto : problemRequestDtos) {
-            if (dto.getProblemId() == null) {
-                throw new IllegalArgumentException("Problem ID must not be null for any problem in the list.");
-            }
-
             Question question = questionMap.getOrDefault(dto.getProblemId(), new Question());
             question.setExam(exam);
             Problem problem = problemRepository.findById(dto.getProblemId())
@@ -222,13 +219,10 @@ public class ExamService {
             questionRepository.save(question);
         }
 
-        // Remove old questions not in the updated list
-        existingQuestions.stream()
-                .filter(q -> !problemRequestDtos.stream().map(ProblemRequestDto::getProblemId).collect(Collectors.toSet()).contains(q.getProblem().getProblemId()))
-                .forEach(questionRepository::delete);
+        existingQuestions.removeIf(q -> !problemRequestDtos.stream().map(ProblemRequestDto::getProblemId).collect(Collectors.toSet()).contains(q.getProblem().getProblemId()));
+        existingQuestions.forEach(questionRepository::delete);
     }
     // 응시자 리스트 수정
-    @Transactional
     private void updateCandidateTests(Exam exam, List<Long> candidateIds) {
         List<Test> existingTests = testRepository.findByExamExamId(exam.getExamId());
         Map<Long, Test> existingTestsMap = existingTests.stream()
@@ -249,6 +243,7 @@ public class ExamService {
             }
         });
     }
+
     // 시험 삭제
     @Transactional
     public void deleteExam(Long examId, Long requestingMemberId) {
