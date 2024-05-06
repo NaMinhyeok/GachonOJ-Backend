@@ -61,7 +61,7 @@ public class ProblemController {
     @DeleteMapping("/exam/{examId}")
     public ResponseEntity<CommonResponseDto<Void>> deleteExam(@PathVariable Long examId, HttpServletRequest request) {
         String memberIdStr = request.getHeader("X-Authorization-Id");
-        Long memberId;
+        long memberId;
         try {
             memberId = Long.parseLong(memberIdStr);
         } catch (NumberFormatException e) {
