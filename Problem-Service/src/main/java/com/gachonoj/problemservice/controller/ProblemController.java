@@ -251,6 +251,14 @@ public class ProblemController {
         return ResponseEntity.ok(CommonResponseDto.success(result));
     }
 
+    @GetMapping("/exam/info/{examId}")
+    public ResponseEntity<CommonResponseDto<ExamInfoResponseDto>> getExamInfo(@PathVariable Long examId,
+                                                                              HttpServletRequest request) {
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        ExamInfoResponseDto result = examService.getExamInfo(examId, memberId);
+        return ResponseEntity.ok(CommonResponseDto.success(result));
+    }
+
     // 문제 조회
     @GetMapping("/admin/register/{problemId}")
     public ResponseEntity<CommonResponseDto<ProblemDetailAdminResponseDto>> getProblemDetailAdmin(@PathVariable Long problemId) {
