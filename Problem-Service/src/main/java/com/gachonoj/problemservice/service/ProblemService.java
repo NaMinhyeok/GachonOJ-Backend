@@ -251,7 +251,7 @@ public class ProblemService {
     }
 
 
-    // 문제 상세 조회
+    // 문제 수정시 문제 상세 조회
     @Transactional
     public ProblemDetailAdminResponseDto getProblemDetailAdmin(Long problemId) {
         Problem problem = problemRepository.findById(problemId)
