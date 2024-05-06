@@ -256,7 +256,7 @@ public class ProblemController {
         return ResponseEntity.ok(CommonResponseDto.success(result));
     }
 
-    // 문제 조회
+    // 문제 수정시 문제 상세 조회
     @GetMapping("/admin/register/{problemId}")
     public ResponseEntity<CommonResponseDto<ProblemDetailAdminResponseDto>> getProblemDetailAdmin(@PathVariable Long problemId) {
         ProblemDetailAdminResponseDto result = problemService.getProblemDetailAdmin(problemId);

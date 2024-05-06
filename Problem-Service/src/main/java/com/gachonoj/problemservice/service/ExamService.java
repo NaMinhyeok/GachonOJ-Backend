@@ -240,7 +240,7 @@ public class ExamService {
         });
     }
 
-
+    // 시험 문제 조회
     @Transactional(readOnly = true)
     public ExamDetailResponseDto getExamDetail(Long examId) {
         Exam exam = examRepository.findById(examId)

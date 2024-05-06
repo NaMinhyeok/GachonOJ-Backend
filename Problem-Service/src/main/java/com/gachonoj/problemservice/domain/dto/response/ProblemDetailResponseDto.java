@@ -13,6 +13,7 @@ import java.util.List;
 public class ProblemDetailResponseDto {
     private String problemTitle;
     private String problemContents;
+    private String problemDiff;
     private String problemInputContents;
     private String problemOutputContents;
     private List<String> testcaseInputs;
@@ -21,9 +22,19 @@ public class ProblemDetailResponseDto {
     public ProblemDetailResponseDto(Problem problem, List<String> testcaseInputs, List<String> testcaseOutputs) {
         this.problemTitle = problem.getProblemTitle();
         this.problemContents = problem.getProblemContents();
+        this.problemDiff = problem.getProblemDiff() + "단계";
         this.problemInputContents = problem.getProblemInputContents();
         this.problemOutputContents = problem.getProblemOutputContents();
         this.testcaseInputs = testcaseInputs;
         this.testcaseOutputs = testcaseOutputs;
+    }
+
+    public ProblemDetailResponseDto(String problemTitle, String problemContents, String problemInputContents, String problemOutputContents, List<String> inputs, List<String> outputs) {
+        this.problemTitle = problemTitle;
+        this.problemContents = problemContents;
+        this.problemInputContents = problemInputContents;
+        this.problemOutputContents = problemOutputContents;
+        this.testcaseInputs = inputs;
+        this.testcaseOutputs = outputs;
     }
 }
