@@ -5,12 +5,9 @@ import com.gachonoj.problemservice.common.response.CommonResponseDto;
 import com.gachonoj.problemservice.domain.dto.request.ExamRequestDto;
 import com.gachonoj.problemservice.domain.dto.request.ProblemRequestDto;
 import com.gachonoj.problemservice.domain.dto.response.*;
-import com.gachonoj.problemservice.domain.entity.Exam;
 import com.gachonoj.problemservice.service.ExamService;
 import com.gachonoj.problemservice.service.ProblemService;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -251,11 +248,11 @@ public class ProblemController {
         return ResponseEntity.ok(CommonResponseDto.success(result));
     }
 
+    // 시험 또는 대회 대기 화면
     @GetMapping("/exam/info/{examId}")
-    public ResponseEntity<CommonResponseDto<ExamInfoResponseDto>> getExamInfo(@PathVariable Long examId,
-                                                                              HttpServletRequest request) {
-        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
-        ExamInfoResponseDto result = examService.getExamInfo(examId, memberId);
+    public ResponseEntity<CommonResponseDto<ExamOrContestInfoResponseDto>> getExamOrContestInfo(@PathVariable Long examId,
+                                                                                       @RequestParam String type) {
+        ExamOrContestInfoResponseDto result = examService.getExamOrContestInfo(examId, type);
         return ResponseEntity.ok(CommonResponseDto.success(result));
     }
 

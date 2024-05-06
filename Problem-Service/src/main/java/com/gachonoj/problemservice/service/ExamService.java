@@ -2,7 +2,6 @@ package com.gachonoj.problemservice.service;
 
 import com.gachonoj.problemservice.domain.constant.*;
 import com.gachonoj.problemservice.domain.dto.request.ExamRequestDto;
-import com.gachonoj.problemservice.domain.dto.request.QuestionRequestDto;
 import com.gachonoj.problemservice.domain.dto.request.TestcaseRequestDto;
 import com.gachonoj.problemservice.domain.dto.request.ProblemRequestDto;
 import com.gachonoj.problemservice.domain.dto.response.*;
@@ -364,7 +363,12 @@ public class ExamService {
 
     // 시험 대기 화면 조회
     @Transactional(readOnly = true)
-    public ExamInfoResponseDto getExamInfo(Long examId, Long memberId) {
+    public ExamOrContestInfoResponseDto getExamOrContestInfo(Long examId, String type) {
+        ExamType examType = ExamType.fromLabel(type);
+        if (examType == null) {
+            throw new IllegalArgumentException("Invalid exam type provided.");
+        }
+
         Exam exam = examRepository.findById(examId)
                 .orElseThrow(() -> new IllegalArgumentException("Exam not found with id: " + examId));
 
@@ -374,13 +378,13 @@ public class ExamService {
             throw new IllegalStateException("지금은 참가할 수 없습니다.");
         }
 
-        return new ExamInfoResponseDto(
+        return new ExamOrContestInfoResponseDto(
                 exam.getExamId(),
                 exam.getExamTitle(),
                 exam.getExamContents(),
                 exam.getExamStartDate(),
                 exam.getExamEndDate(),
-                exam.getExamType().name(),
+                examType.getLabel(),
                 exam.getExamNotice()
         );
     }

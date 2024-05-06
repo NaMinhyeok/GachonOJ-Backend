@@ -3,14 +3,13 @@ package com.gachonoj.problemservice.domain.dto.response;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 @Setter
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ExamInfoResponseDto {
+public class ExamOrContestInfoResponseDto {
     private Long examId;
     private String examTitle;
     private String examContents;
