@@ -1,7 +1,6 @@
-package com.gachonoj.submissionservice.fegin.client;
+package com.gachonoj.submissionservice.feign.client;
 
-import com.gachonoj.submissionservice.fegin.dto.response.SubmissionMemberRankInfoResponseDto;
-import lombok.Getter;
+import com.gachonoj.submissionservice.feign.dto.response.SubmissionMemberRankInfoResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

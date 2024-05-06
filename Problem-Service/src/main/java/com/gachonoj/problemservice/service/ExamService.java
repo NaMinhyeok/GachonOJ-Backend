@@ -2,13 +2,9 @@ package com.gachonoj.problemservice.service;
 
 import com.gachonoj.problemservice.domain.constant.*;
 import com.gachonoj.problemservice.domain.dto.request.ExamRequestDto;
-import com.gachonoj.problemservice.domain.dto.request.QuestionRequestDto;
 import com.gachonoj.problemservice.domain.dto.request.TestcaseRequestDto;
 import com.gachonoj.problemservice.domain.dto.request.ProblemRequestDto;
-import com.gachonoj.problemservice.domain.dto.response.ExamOrContestListResponseDto;
-import com.gachonoj.problemservice.domain.dto.response.PastContestResponseDto;
-import com.gachonoj.problemservice.domain.dto.response.ProfessorExamListResponseDto;
-import com.gachonoj.problemservice.domain.dto.response.ScheduledContestResponseDto;
+import com.gachonoj.problemservice.domain.dto.response.*;
 import com.gachonoj.problemservice.domain.entity.*;
 import com.gachonoj.problemservice.feign.client.MemberServiceFeignClient;
 import com.gachonoj.problemservice.repository.*;
@@ -22,8 +18,6 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.gachonoj.problemservice.domain.dto.response.ExamDetailResponseDto;
-import com.gachonoj.problemservice.domain.dto.response.ProblemDetailResponseDto;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -365,6 +359,34 @@ public class ExamService {
             String examCreatedDate = dateFormatter(exam.getExamCreatedDate());
             return new ExamOrContestListResponseDto(exam, examUpdateDate, examCreatedDate,memberNickname);
         });
+    }
+
+    // 시험 대기 화면 조회
+    @Transactional(readOnly = true)
+    public ExamOrContestInfoResponseDto getExamOrContestInfo(Long examId, String type) {
+        ExamType examType = ExamType.fromLabel(type);
+        if (examType == null) {
+            throw new IllegalArgumentException("Invalid exam type provided.");
+        }
+
+        Exam exam = examRepository.findById(examId)
+                .orElseThrow(() -> new IllegalArgumentException("Exam not found with id: " + examId));
+
+        // 현재 시간과 시험 시작 시간 비교
+        LocalDateTime now = LocalDateTime.now();
+        if (now.isBefore(exam.getExamStartDate())) {
+            throw new IllegalStateException("지금은 참가할 수 없습니다.");
+        }
+
+        return new ExamOrContestInfoResponseDto(
+                exam.getExamId(),
+                exam.getExamTitle(),
+                exam.getExamContents(),
+                exam.getExamStartDate(),
+                exam.getExamEndDate(),
+                examType.getLabel(),
+                exam.getExamNotice()
+        );
     }
 
     // DateFormatter를 사용하여 날짜 형식을 변경하는 메서드

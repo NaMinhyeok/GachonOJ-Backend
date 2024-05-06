@@ -1,11 +1,9 @@
-package com.gachonoj.submissionservice.fegin.service;
+package com.gachonoj.submissionservice.feign.service;
 
-import com.gachonoj.submissionservice.domain.entity.Submission;
-import com.gachonoj.submissionservice.fegin.dto.response.SubmissionMemberInfoResponseDto;
+import com.gachonoj.submissionservice.feign.dto.response.SubmissionMemberInfoResponseDto;
 import com.gachonoj.submissionservice.repository.SubmissionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
