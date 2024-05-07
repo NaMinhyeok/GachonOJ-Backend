@@ -29,7 +29,6 @@ public class SubmissionService {
     private final MemberServiceFeignClient memberServiceFeignClient;
 
     // 문제 코드 실행
-    // TODO : 문제의 테스트케이스 추가된 경우 가져와서 실행하도록 한다.
     @Transactional
     public List<ExecuteResultResponseDto> executeCodeByProblemId(ExecuteRequestDto executeRequestDto, Long problemId) {
         List<String> input = problemServiceFeignClient.getVisibleTestCases(problemId).stream()
@@ -53,7 +52,6 @@ public class SubmissionService {
         return response;
     }
     // 문제 채점 실행
-    // TODO: 실행 시간, 메모리 사용량을 Problem Service에서 가져온 후 초과하지는 않는지 확인 하도록 한다.
     // TODO: 채점은 비동기로 진행되어야 한다.
     @Transactional
     public SubmissionResultResponseDto submissionByProblemId(ExecuteRequestDto executeRequestDto, Long problemId, Long memberId) {
@@ -113,6 +111,8 @@ public class SubmissionService {
     }
 
     // 코드 실행하는 메소드
+    // TODO : 이상하게도 한번에 실행이 안된다.. 왜 그런지 모르겠다.
+    //  한번 에러를 나게 만든다음에 실행시키면 그 다음번에는 잘 진행된다 왜그럴까 ? 나중에 찾아서 고칠 수 있도록 해야한다.
     @Transactional
     public Map<String,String> executeCode(ExecuteRequestDto executeRequestDto, List<String> inputList, List<String> outputList,Integer timeLimit) {
         try {
