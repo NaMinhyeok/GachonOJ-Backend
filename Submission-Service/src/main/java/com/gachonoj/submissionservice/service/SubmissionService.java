@@ -105,7 +105,9 @@ public class SubmissionService {
                 .submissionLang(Language.fromLabel(executeRequestDto.getLanguage()))
                 .build();
         // Member 엔티티에 memberRank 반영
-        memberServiceFeignClient.updateMemberRank(memberId,memberRank+problemScore);
+        if(isCorrect){
+            memberServiceFeignClient.updateMemberRank(memberId,memberRank+problemScore);
+        }
         // 반환
         return new SubmissionResultResponseDto(isCorrect,memberRank,problemScore,memberRank+problemScore,ratingChanged,rating,afterRating);
     }
