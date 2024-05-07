@@ -45,7 +45,7 @@ public class SubmissionService {
                 output.add(entry.getValue());
             }
         }
-        Map<String,String> result = executeCode(executeRequestDto, input,output);
+        Map<String,String> result = executeCode(executeRequestDto, input,output,10);
         List<ExecuteResultResponseDto> response = new ArrayList<>();
         for (Map.Entry<String, String> entry : result.entrySet()) {
             response.add(new ExecuteResultResponseDto(entry.getKey(),entry.getValue()));
@@ -67,10 +67,12 @@ public class SubmissionService {
         SubmissionMemberRankInfoResponseDto submissionMemberRankInfoResponseDto = memberServiceFeignClient.getMemberRank(memberId);
         // 문제 아이디로 problemScore 조회
         Integer problemScore = problemServiceFeignClient.getProblemScore(problemId);
+        // 문제 time limet 가져오기
+        Integer problemTimeLimit = problemServiceFeignClient.getProblemTimeLimit(problemId);
 
 
         // 코드 실행 결과
-        Map<String,String> result = executeCode(executeRequestDto, input,output);
+        Map<String,String> result = executeCode(executeRequestDto, input,output,problemTimeLimit);
         int correctCount = 0;
         // 정답 개수 세기
         for (Map.Entry<String, String> entry : result.entrySet()) {
@@ -110,7 +112,7 @@ public class SubmissionService {
 
     // 코드 실행하는 메소드
     @Transactional
-    public Map<String,String> executeCode(ExecuteRequestDto executeRequestDto, List<String> inputList, List<String> outputList) {
+    public Map<String,String> executeCode(ExecuteRequestDto executeRequestDto, List<String> inputList, List<String> outputList,Integer timeLimit) {
         try {
             Map<String,String> result = new HashMap<>();
             // /home/exec 디렉토리 생성
@@ -192,6 +194,12 @@ public class SubmissionService {
 
                 long endTime = System.nanoTime(); // 종료 시간
                 long timeElapsed = endTime - startTime; // 소요시간
+                // 시간 초과인 경우 에러 메시지를 result에 저장하고 반복문을 중단합니다.
+                if (timeElapsed > timeLimit * 1000000) {
+                    log.info("Time limit exceeded: " + timeElapsed);
+                    result.put("Time limit exceeded","시간초과");
+                    break;
+                }
                 log.info("Execution time in nanoseconds: " + timeElapsed);
                 log.info("Execution time in milliseconds: " + timeElapsed / 1000000);
                 log.info("Code output: " + i + "번째" + outputResult.toString());
