@@ -195,7 +195,7 @@ public class SubmissionService {
                 long endTime = System.nanoTime(); // 종료 시간
                 long timeElapsed = endTime - startTime; // 소요시간
                 // 시간 초과인 경우 에러 메시지를 result에 저장하고 반복문을 중단합니다.
-                if (timeElapsed > timeLimit * 1000000) {
+                if (timeElapsed / 1000000000 > timeLimit) {
                     log.info("Time limit exceeded: " + timeElapsed);
                     result.put("Time limit exceeded","시간초과");
                     break;
