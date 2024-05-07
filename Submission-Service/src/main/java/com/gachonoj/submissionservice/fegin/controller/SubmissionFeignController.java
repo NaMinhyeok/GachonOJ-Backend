@@ -1,14 +1,13 @@
 package com.gachonoj.submissionservice.fegin.controller;
 
 import com.gachonoj.submissionservice.domain.entity.Submission;
+import com.gachonoj.submissionservice.fegin.dto.response.SubmissionCodeInfoResponseDto;
 import com.gachonoj.submissionservice.fegin.dto.response.SubmissionMemberInfoResponseDto;
 import com.gachonoj.submissionservice.fegin.service.SubmissionFeignService;
+import jakarta.ws.rs.Path;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -57,5 +56,11 @@ public class SubmissionFeignController {
     @GetMapping("/problem/submitcount")
     public Integer getProblemSubmitCount(Long problemId) {
         return submissionFeignService.getProblemSubmitCount(problemId);
+    }
+
+    // 제출 번호 통해서 제출 코드, 문제 ID 가져오기
+    @GetMapping("/code/{submissionId}")
+    public SubmissionCodeInfoResponseDto getSubmissionCodeBySubmissionId(@PathVariable Long submissionId) {
+        return submissionFeignService.getSubmissionCodeInfo(submissionId);
     }
 }

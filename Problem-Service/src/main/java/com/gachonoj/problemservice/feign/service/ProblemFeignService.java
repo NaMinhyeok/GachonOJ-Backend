@@ -59,4 +59,10 @@ public class ProblemFeignService {
             default -> 0;
         };
     }
+    // 문제 ID로 문제 프롬프트 가져오기
+    public String getProblemPromptByProblemId(Long problemId){
+        Problem problem = problemRepository.findByProblemId(problemId)
+                .orElseThrow(()->new IllegalArgumentException("해당 문제가 존재하지 않습니다."));
+        return problem.getProblemPrompt();
+    }
 }
