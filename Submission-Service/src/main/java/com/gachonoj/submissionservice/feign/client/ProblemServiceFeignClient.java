@@ -18,4 +18,7 @@ public interface ProblemServiceFeignClient {
     // 문제 점수 조회
     @GetMapping("/problem/{problemId}/score")
     Integer getProblemScore(@PathVariable Long problemId);
+    // 문제 time limit 가져오기
+    @GetMapping("/problem/{problemId}/time-limit")
+    Integer getProblemTimeLimit(@PathVariable Long problemId);
 }
