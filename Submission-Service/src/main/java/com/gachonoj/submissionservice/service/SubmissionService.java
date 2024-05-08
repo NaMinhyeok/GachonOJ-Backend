@@ -10,6 +10,7 @@ import com.gachonoj.submissionservice.feign.client.MemberServiceFeignClient;
 import com.gachonoj.submissionservice.feign.client.ProblemServiceFeignClient;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionMemberRankInfoResponseDto;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionProblemTestCaseResponseDto;
+import com.gachonoj.submissionservice.repository.SubmissionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ import java.util.*;
 public class SubmissionService {
     private final ProblemServiceFeignClient problemServiceFeignClient;
     private final MemberServiceFeignClient memberServiceFeignClient;
+    private final SubmissionRepository submissionRepository;
 
     // 문제 코드 실행
     @Transactional
@@ -94,7 +96,7 @@ public class SubmissionService {
             afterRating++;
             ratingChanged = true;
         }
-        // Submission 엔티티 저장
+        // submission 엔티티 생성
         Submission submission = Submission.builder()
                 .memberId(memberId)
                 .problemId(problemId)
@@ -106,6 +108,8 @@ public class SubmissionService {
         if(isCorrect){
             memberServiceFeignClient.updateMemberRank(memberId,memberRank+problemScore);
         }
+        // Submission 엔티티 저장
+        submissionRepository.save(submission);
         // 반환
         return new SubmissionResultResponseDto(isCorrect,memberRank,problemScore,memberRank+problemScore,ratingChanged,rating,afterRating);
     }

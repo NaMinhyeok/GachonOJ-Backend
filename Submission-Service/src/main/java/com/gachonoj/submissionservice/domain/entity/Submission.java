@@ -24,7 +24,7 @@ public class Submission {
     private Long memberId;
     @Column(nullable = false)
     private Long problemId;
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String submissionCode;
     @CreatedDate
     private LocalDateTime submissionDate;
