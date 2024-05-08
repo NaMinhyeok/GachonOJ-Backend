@@ -6,10 +6,10 @@ import com.gachonoj.submissionservice.domain.dto.request.ExecuteRequestDto;
 import com.gachonoj.submissionservice.domain.dto.response.ExecuteResultResponseDto;
 import com.gachonoj.submissionservice.domain.dto.response.SubmissionResultResponseDto;
 import com.gachonoj.submissionservice.domain.entity.Submission;
-import com.gachonoj.submissionservice.fegin.client.MemberServiceFeignClient;
-import com.gachonoj.submissionservice.fegin.client.ProblemServiceFeignClient;
-import com.gachonoj.submissionservice.fegin.dto.response.SubmissionMemberRankInfoResponseDto;
-import com.gachonoj.submissionservice.fegin.dto.response.SubmissionProblemTestCaseResponseDto;
+import com.gachonoj.submissionservice.feign.client.MemberServiceFeignClient;
+import com.gachonoj.submissionservice.feign.client.ProblemServiceFeignClient;
+import com.gachonoj.submissionservice.feign.dto.response.SubmissionMemberRankInfoResponseDto;
+import com.gachonoj.submissionservice.feign.dto.response.SubmissionProblemTestCaseResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,7 +29,6 @@ public class SubmissionService {
     private final MemberServiceFeignClient memberServiceFeignClient;
 
     // 문제 코드 실행
-    // TODO : 문제의 테스트케이스 추가된 경우 가져와서 실행하도록 한다.
     @Transactional
     public List<ExecuteResultResponseDto> executeCodeByProblemId(ExecuteRequestDto executeRequestDto, Long problemId) {
         List<String> input = problemServiceFeignClient.getVisibleTestCases(problemId).stream()
@@ -45,7 +44,7 @@ public class SubmissionService {
                 output.add(entry.getValue());
             }
         }
-        Map<String,String> result = executeCode(executeRequestDto, input,output);
+        Map<String,String> result = executeCode(executeRequestDto, input,output,10);
         List<ExecuteResultResponseDto> response = new ArrayList<>();
         for (Map.Entry<String, String> entry : result.entrySet()) {
             response.add(new ExecuteResultResponseDto(entry.getKey(),entry.getValue()));
@@ -53,7 +52,6 @@ public class SubmissionService {
         return response;
     }
     // 문제 채점 실행
-    // TODO: 실행 시간, 메모리 사용량을 Problem Service에서 가져온 후 초과하지는 않는지 확인 하도록 한다.
     // TODO: 채점은 비동기로 진행되어야 한다.
     @Transactional
     public SubmissionResultResponseDto submissionByProblemId(ExecuteRequestDto executeRequestDto, Long problemId, Long memberId) {
@@ -67,10 +65,12 @@ public class SubmissionService {
         SubmissionMemberRankInfoResponseDto submissionMemberRankInfoResponseDto = memberServiceFeignClient.getMemberRank(memberId);
         // 문제 아이디로 problemScore 조회
         Integer problemScore = problemServiceFeignClient.getProblemScore(problemId);
+        // 문제 time limet 가져오기
+        Integer problemTimeLimit = problemServiceFeignClient.getProblemTimeLimit(problemId);
 
 
         // 코드 실행 결과
-        Map<String,String> result = executeCode(executeRequestDto, input,output);
+        Map<String,String> result = executeCode(executeRequestDto, input,output,problemTimeLimit);
         int correctCount = 0;
         // 정답 개수 세기
         for (Map.Entry<String, String> entry : result.entrySet()) {
@@ -103,14 +103,18 @@ public class SubmissionService {
                 .submissionLang(Language.fromLabel(executeRequestDto.getLanguage()))
                 .build();
         // Member 엔티티에 memberRank 반영
-        memberServiceFeignClient.updateMemberRank(memberId,memberRank+problemScore);
+        if(isCorrect){
+            memberServiceFeignClient.updateMemberRank(memberId,memberRank+problemScore);
+        }
         // 반환
         return new SubmissionResultResponseDto(isCorrect,memberRank,problemScore,memberRank+problemScore,ratingChanged,rating,afterRating);
     }
 
     // 코드 실행하는 메소드
+    // TODO : 이상하게도 한번에 실행이 안된다.. 왜 그런지 모르겠다.
+    //  한번 에러를 나게 만든다음에 실행시키면 그 다음번에는 잘 진행된다 왜그럴까 ? 나중에 찾아서 고칠 수 있도록 해야한다.
     @Transactional
-    public Map<String,String> executeCode(ExecuteRequestDto executeRequestDto, List<String> inputList, List<String> outputList) {
+    public Map<String,String> executeCode(ExecuteRequestDto executeRequestDto, List<String> inputList, List<String> outputList,Integer timeLimit) {
         try {
             Map<String,String> result = new HashMap<>();
             // /home/exec 디렉토리 생성
@@ -192,6 +196,12 @@ public class SubmissionService {
 
                 long endTime = System.nanoTime(); // 종료 시간
                 long timeElapsed = endTime - startTime; // 소요시간
+                // 시간 초과인 경우 에러 메시지를 result에 저장하고 반복문을 중단합니다.
+                if (timeElapsed / 1000000000 > timeLimit) {
+                    log.info("Time limit exceeded: " + timeElapsed);
+                    result.put("Time limit exceeded","시간초과");
+                    break;
+                }
                 log.info("Execution time in nanoseconds: " + timeElapsed);
                 log.info("Execution time in milliseconds: " + timeElapsed / 1000000);
                 log.info("Code output: " + i + "번째" + outputResult.toString());

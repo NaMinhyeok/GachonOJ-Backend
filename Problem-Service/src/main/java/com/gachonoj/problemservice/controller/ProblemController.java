@@ -7,9 +7,7 @@ import com.gachonoj.problemservice.domain.dto.request.ProblemRequestDto;
 import com.gachonoj.problemservice.domain.dto.response.*;
 import com.gachonoj.problemservice.service.ExamService;
 import com.gachonoj.problemservice.service.ProblemService;
-import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -44,19 +42,26 @@ public class ProblemController {
     @PutMapping("/exam/{examId}")
     public ResponseEntity<CommonResponseDto<Void>> updateExam(
             @PathVariable Long examId,  // 시험 ID는 URL 매개변수로 받는다
-            @RequestBody ExamRequestDto examDto,  // 수정할 시험 정보는 Request Body에서 받는다
+            @RequestBody ExamRequestDto examDto,  // 수정할 시험정보는 Request Body에서 받는다
             HttpServletRequest request) {
 
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));  // 회원 ID를 헤더에서 추출
-        examService.updateExam(examId, memberId, examDto);  // 서비스 레이어에 업데이트 로직 위임
+        examService.updateExam(examId, examDto);  // 서비스 레이어에 업데이트 로직 위임
         return ResponseEntity.ok(CommonResponseDto.success());  // 성공 응답
+    }
+
+    // 시험 문제 조회
+    @GetMapping("/exam/{examId}")
+    public ResponseEntity<CommonResponseDto<ExamDetailResponseDto>> getExamDetail(@PathVariable Long examId) {
+        ExamDetailResponseDto examDetail = examService.getExamDetail(examId);
+        return ResponseEntity.ok(CommonResponseDto.success(examDetail));  // 성공 응답
     }
 
     // 시험 삭제
     @DeleteMapping("/exam/{examId}")
     public ResponseEntity<CommonResponseDto<Void>> deleteExam(@PathVariable Long examId, HttpServletRequest request) {
         String memberIdStr = request.getHeader("X-Authorization-Id");
-        Long memberId;
+        long memberId;
         try {
             memberId = Long.parseLong(memberIdStr);
         } catch (NumberFormatException e) {
@@ -138,6 +143,14 @@ public class ProblemController {
     public ResponseEntity<CommonResponseDto<Void>> addBookmark(@PathVariable Long problemId, HttpServletRequest request){
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
         problemService.addBookmark(memberId, problemId);
+        return ResponseEntity.ok(CommonResponseDto.success());
+    }
+
+    // 북마크 삭제
+    @DeleteMapping("/bookmark/{problemId}")
+    public ResponseEntity<CommonResponseDto<Void>> removeBookmark(@PathVariable Long problemId, HttpServletRequest request) {
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        problemService.removeBookmark(memberId, problemId);
         return ResponseEntity.ok(CommonResponseDto.success());
     }
 
@@ -232,6 +245,21 @@ public class ProblemController {
     @GetMapping("/problems/{problemId}")
     public ResponseEntity<CommonResponseDto<ProblemDetailResponseDto>> getProblemDetail(@PathVariable Long problemId) {
         ProblemDetailResponseDto result = problemService.getProblemDetail(problemId);
+        return ResponseEntity.ok(CommonResponseDto.success(result));
+    }
+
+    // 시험 또는 대회 대기 화면
+    @GetMapping("/exam/info/{examId}")
+    public ResponseEntity<CommonResponseDto<ExamOrContestInfoResponseDto>> getExamOrContestInfo(@PathVariable Long examId,
+                                                                                       @RequestParam String type) {
+        ExamOrContestInfoResponseDto result = examService.getExamOrContestInfo(examId, type);
+        return ResponseEntity.ok(CommonResponseDto.success(result));
+    }
+
+    // 문제 수정시 문제 상세 조회
+    @GetMapping("/admin/register/{problemId}")
+    public ResponseEntity<CommonResponseDto<ProblemDetailAdminResponseDto>> getProblemDetailAdmin(@PathVariable Long problemId) {
+        ProblemDetailAdminResponseDto result = problemService.getProblemDetailAdmin(problemId);
         return ResponseEntity.ok(CommonResponseDto.success(result));
     }
 }

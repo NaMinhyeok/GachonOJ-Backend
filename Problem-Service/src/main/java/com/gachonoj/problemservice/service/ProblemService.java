@@ -1,6 +1,9 @@
 package com.gachonoj.problemservice.service;
 
 import com.gachonoj.problemservice.domain.dto.request.ProblemRequestDto;
+import com.gachonoj.problemservice.domain.dto.request.TestcaseRequestDto;
+import com.gachonoj.problemservice.domain.dto.response.ProblemDetailAdminResponseDto;
+import com.gachonoj.problemservice.domain.dto.response.TestcaseResponseDto;
 import com.gachonoj.problemservice.domain.dto.response.*;
 import com.gachonoj.problemservice.domain.entity.Bookmark;
 import com.gachonoj.problemservice.domain.entity.Exam;
@@ -100,31 +103,6 @@ public class ProblemService {
                 .ifPresent(problemRepository::delete);
     }
 
-    // 사용자 북마크 문제 조회
-//    @Transactional(readOnly = true)
-//    public Page<BookmarkProblemResponseDto> getBookmarkProblemList(Long memberId, int pageNo) {
-//        Pageable pageable = PageRequest.of(pageNo-1, 10, Sort.by(Sort.Direction.DESC, "problem.problemId")); // 정렬 기준 수정
-//        Page<Bookmark> bookmarks = bookmarkRepository.findByMemberId(memberId, pageable);
-//
-//        return bookmarks.map(bookmark -> {
-//            Problem problem = bookmark.getProblem(); // 문제 조회를 위해 필요없는 호출 제거
-//            if (problem == null) {
-//                throw new IllegalArgumentException("Problem not found");
-//            }
-//            Integer correctPeople = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
-//            Double correctRate = submissionServiceFeignClient.getProblemCorrectRate(problem.getProblemId());
-//            return new BookmarkProblemResponseDto(
-//                    problem.getProblemId(),
-//                    problem.getProblemTitle(),
-//                    problem.getProblemDiff(),
-//                    problem.getProblemClass(),
-//                    correctPeople,
-//                    correctRate,
-//                    true
-//            );
-//        });
-//    }
-
     // 북마크 기능 구현
     @Transactional
     public void addBookmark(Long memberId, Long problemId) {
@@ -137,55 +115,17 @@ public class ProblemService {
             throw new IllegalStateException("Bookmark already exists");
         }
     }
+    // 북마크 삭제 기능 구현
+    @Transactional
+    public void removeBookmark(Long memberId, Long problemId) {
+        // 북마크가 존재하는지 확인
+        Bookmark bookmark = bookmarkRepository.findByMemberIdAndProblemProblemId(memberId, problemId)
+                .orElseThrow(() -> new IllegalArgumentException("Bookmark not found with memberId: " + memberId + " and problemId: " + problemId));
 
-//    @Transactional(readOnly = true)
-//    public Page<WrongProblemResponseDto> getIncorrectProblemList(Long memberId, int pageNo) {
-//        Pageable pageable = PageRequest.of(pageNo - 1, 10, Sort.by(Sort.Direction.DESC, "problemId"));
-//
-//        List<Long> problemIds = submissionServiceFeignClient.getIncorrectProblemIds(memberId);
-//
-//        // 페이지네이션 적용한 문제 ID 리스트 조회
-//        Page<Problem> problems = problemRepository.findAllByProblemIdIn(problemIds, pageable);
-//
-//        return problems.map(problem -> {
-//            Integer correctPeople = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
-//            Double correctRate = submissionServiceFeignClient.getProblemCorrectRate(problem.getProblemId());
-//            return new WrongProblemResponseDto(
-//                    problem.getProblemId(),
-//                    problem.getProblemTitle(),
-//                    problem.getProblemDiff(),
-//                    problem.getProblemClass(),
-//                    correctPeople,
-//                    correctRate,
-//                    false // isBookmarked 필드는 사용자가 별도로 제공해야 하는 정보를 기반으로 설정합니다
-//            );
-//        });
-//    }
-//
-//    @Transactional(readOnly = true)
-//    public Page<SolvedProblemResponseDto> getSolvedProblemList(Long memberId, int pageNo) {
-//        Pageable pageable = PageRequest.of(pageNo - 1, 10, Sort.by(Sort.Direction.DESC, "problemId"));
-//
-//        List<Long> problemIds = submissionServiceFeignClient.getCorrectProblemIds(memberId);
-//
-//        // 페이지네이션 적용한 문제 ID 리스트 조회
-//        Page<Problem> problems = problemRepository.findAllByProblemIdIn(problemIds, pageable);
-//
-//        return problems.map(problem -> {
-//            Integer correctPeople = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
-//            Double correctRate = submissionServiceFeignClient.getProblemCorrectRate(problem.getProblemId());
-//            return new SolvedProblemResponseDto(
-//                    problem.getProblemId(),
-//                    problem.getProblemTitle(),
-//                    problem.getProblemDiff(),
-//                    problem.getProblemClass(),
-//                    correctPeople,
-//                    correctRate,
-//                    false // isBookmarked 필드는 사용자가 별도로 제공해야 하는 정보를 기반으로 설정합니다
-//            );
-//        });
-//    }
-    //TODO : 검색, 분류, 난이도, 정렬 기능 추가
+        // 북마크 삭제
+        bookmarkRepository.delete(bookmark);
+    }
+
     // 사용자 문제 목록 조회
     @Transactional(readOnly = true)
     public Page<ProblemListResponseDto> getProblemListByMember(String type, int pageNo, String search, String classType, Integer diff, String sortType, Long memberId) {
@@ -205,58 +145,6 @@ public class ProblemService {
             default -> throw new IllegalArgumentException("Invalid type: " + type);
         };
     }
-
-/*    // 북마크 문제 조회 메서드
-    private Page<ProblemListResponseDto> getBookmarkProblemList(Long memberId, Pageable pageable, String classType, Integer diff) {
-        List<Long> problemIds = bookmarkRepository.findByMemberId(memberId).stream()
-                .map(bookmark -> bookmark.getProblem().getProblemId())
-                .collect(Collectors.toList());
-
-        return problemRepository.findByProblemIdInAndClassTypeAndDifficulty(problemIds, classType, diff, pageable)
-                .map(problem -> {
-                    Integer correctPeople = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
-                    Double correctRate = submissionServiceFeignClient.getProblemCorrectRate(problem.getProblemId());
-                    return new ProblemListResponseDto(
-                            problem,
-                            correctPeople,
-                            correctRate
-                    );
-                });
-    }
-    // 맞춘 문제 조회 메서드
-    private Page<ProblemListResponseDto> getSolvedProblemList(Long memberId, Pageable pageable, String classType, Integer diff) {
-        // 사용자가 정답을 맞춘 문제 ID 목록을 가져옵니다.
-        List<Long> problemIds = submissionServiceFeignClient.getCorrectProblemIds(memberId);
-
-        // 문제 ID 목록과 분류, 난이도를 기반으로 필터링하며 문제 목록을 조회합니다.
-        return problemRepository.findByProblemIdInAndClassTypeAndDifficulty(problemIds, classType, diff, pageable)
-                .map(problem -> {
-                    Integer correctPeople = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
-                    Double correctRate = submissionServiceFeignClient.getProblemCorrectRate(problem.getProblemId());
-                    return new ProblemListResponseDto(
-                            problem,
-                            correctPeople,
-                            correctRate
-                    );
-                });
-    }
-    // 틀린 문제 조회 메서드
-    private Page<ProblemListResponseDto> getWrongProblemList(Long memberId, Pageable pageable, String classType, Integer diff) {
-        // 사용자가 정답을 맞춘 문제 ID 목록을 가져옵니다.
-        List<Long> problemIds = submissionServiceFeignClient.getIncorrectProblemIds(memberId);
-
-        // 문제 ID 목록과 분류, 난이도를 기반으로 필터링하며 문제 목록을 조회합니다.
-        return problemRepository.findByProblemIdInAndClassTypeAndDifficulty(problemIds, classType, diff, pageable)
-                .map(problem -> {
-                    Integer correctPeople = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
-                    Double correctRate = submissionServiceFeignClient.getProblemCorrectRate(problem.getProblemId());
-                    return new ProblemListResponseDto(
-                            problem,
-                            correctPeople,
-                            correctRate
-                    );
-                });
-    } */
 
     // 북마크 문제 조회 메서드
     private Page<ProblemListResponseDto> getBookmarkProblemList(Long memberId, Pageable pageable) {
@@ -279,10 +167,10 @@ public class ProblemService {
 
     // 문제 목록 조회 메서드
     private Page<ProblemListResponseDto> getProblemListResponseDtoPage(List<Long> problemIds, Pageable pageable) {
-        Page<Problem> problems = problemRepository.findAllByProblemIdIn(problemIds, pageable);
+        Page<Problem> problems = problemRepository.findAllByProblemIdInAndProblemStatus(problemIds, ProblemStatus.REGISTERED, pageable);
         return problems.map(this::createProblemListResponseDto);
     }
-    // DTO 생성 메서드
+    // 사용자 문제 목록 DTO 생성 메서드
     private ProblemListResponseDto createProblemListResponseDto(Problem problem) {
         Integer correctPeople = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
         Double correctRate = submissionServiceFeignClient.getProblemCorrectRate(problem.getProblemId());
@@ -303,14 +191,14 @@ public class ProblemService {
 
         Page<Problem> problems;
         if (search != null) {
-            problems = problemRepository.findByProblemTitleContaining(search, pageable);
+            problems = problemRepository.findByProblemTitleContainingAndProblemStatus(search, ProblemStatus.REGISTERED, pageable);
         } else if (classType != null) {
             ProblemClass problemClass = ProblemClass.fromLabel(classType);
-            problems = problemRepository.findByProblemClass(problemClass, pageable);
+            problems = problemRepository.findByProblemClassAndProblemStatus(problemClass, ProblemStatus.REGISTERED, pageable);
         } else if (diff != null) {
-            problems = problemRepository.findByProblemDiff(diff, pageable);
+            problems = problemRepository.findByProblemDiffAndProblemStatus(diff, ProblemStatus.REGISTERED, pageable);
         } else {
-            problems = problemRepository.findAll(pageable);
+            problems = problemRepository.findByProblemStatus(ProblemStatus.REGISTERED, pageable);
         }
 
         return problems.map(problem -> {
@@ -322,7 +210,7 @@ public class ProblemService {
     // 추천 알고리즘 문제 조회
     @Transactional(readOnly = true)
     public List<RecommendProblemResponseDto> getRecommenedProblemList() {
-        List<Problem> problem = problemRepository.findTop6ByOrderByProblemCreatedDateDesc();
+        List<Problem> problem = problemRepository.findTop6ByProblemStatusOrderByProblemCreatedDateDesc(ProblemStatus.REGISTERED);
         return problem.stream().map(RecommendProblemResponseDto::new).collect(Collectors.toList());
     }
     // 관리자 문제 목록 조회
@@ -331,9 +219,9 @@ public class ProblemService {
         Pageable pageable = PageRequest.of(pageNo - 1, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "problemId"));
         Page<Problem> problems;
         if(search != null){
-            problems = problemRepository.findByProblemTitleContaining(search, pageable);
+            problems = problemRepository.findByProblemTitleContainingAndProblemStatus(search, ProblemStatus.REGISTERED, pageable);
         } else{
-            problems = problemRepository.findAll(pageable);
+            problems = problemRepository.findByProblemStatus(ProblemStatus.REGISTERED, pageable);
 
         }
         return problems.map(problem -> {
@@ -361,6 +249,25 @@ public class ProblemService {
                 .collect(Collectors.toList());
         return new ProblemDetailResponseDto(problem, testcaseInputs, testcaseOutputs);
     }
+
+
+    // 문제 수정시 문제 상세 조회
+    @Transactional
+    public ProblemDetailAdminResponseDto getProblemDetailAdmin(Long problemId) {
+        Problem problem = problemRepository.findById(problemId)
+                .orElseThrow(() -> new IllegalArgumentException("Problem not found with id: " + problemId));
+        List<Testcase> visibleTestcases = problem.getTestcases().stream()
+                .filter(testcase -> testcase.getTestcaseStatus() == TestcaseStatus.VISIBLE)
+                .toList();
+        List<String> testcaseInputs = visibleTestcases.stream()
+                .map(Testcase::getTestcaseInput)
+                .collect(Collectors.toList());
+        List<String> testcaseOutputs = visibleTestcases.stream()
+                .map(Testcase::getTestcaseOutput)
+                .collect(Collectors.toList());
+        return new ProblemDetailAdminResponseDto(problem, testcaseInputs, testcaseOutputs);
+    }
+
     // DateFormatter를 사용하여 날짜 형식을 변경하는 메서드
     private String dateFormatter (LocalDateTime date) {
         if (date == null) {

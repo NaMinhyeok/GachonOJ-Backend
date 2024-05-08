@@ -22,7 +22,8 @@ public class ProblemRequestDto {
     private String problemStatus; // Enum 이름을 String으로 받습니다.
     private String problemPrompt;
     private List<TestcaseRequestDto> testcases;
-
+    private Integer questionScore;
+    private Integer questionSequence; // 문제 순서
 
     // 필요한 경우, 추가적인 생성자, 메서드 또는 로직을 여기에 구현할 수 있습니다.
     // problemId 필드에 대한 getter 메서드

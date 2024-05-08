@@ -15,14 +15,14 @@ import java.time.format.DateTimeFormatter;
 public class InquiryDetailAdminResponseDto {
     private String inquiryTitle;
     private String memberNickname;
-    private String inquiryContent;
+    private String inquiryContents;
     private String inquiryCreatedDate;
     private String replyContent;
 
     public InquiryDetailAdminResponseDto(Inquiry inquiry, String memberNickname,String inquiryCreatedDate, Reply reply) {
         this.inquiryTitle = inquiry.getInquiryTitle();
         this.memberNickname = memberNickname;
-        this.inquiryContent = inquiry.getInquiryContents();
+        this.inquiryContents = inquiry.getInquiryContents();
         this.inquiryCreatedDate = inquiryCreatedDate;
         this.replyContent = reply.getReplyContents();
     }
@@ -30,7 +30,7 @@ public class InquiryDetailAdminResponseDto {
     public InquiryDetailAdminResponseDto(Inquiry inquiry, String memberNickname,String inquiryCreatedDate) {
         this.inquiryTitle = inquiry.getInquiryTitle();
         this.memberNickname = memberNickname;
-        this.inquiryContent = inquiry.getInquiryContents();
+        this.inquiryContents = inquiry.getInquiryContents();
         this.inquiryCreatedDate = inquiryCreatedDate;
         this.replyContent = null;
     }

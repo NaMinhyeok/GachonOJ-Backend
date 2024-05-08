@@ -27,7 +27,7 @@ public class SubmissionController {
         return ResponseEntity.ok(CommonResponseDto.success(response));
     }
     @PostMapping("/submit/{problemId}")
-    public ResponseEntity<CommonResponseDto<SubmissionResultResponseDto>> submitCode(@PathVariable Long problemId, @RequestBody ExecuteRequestDto executeRequestDto, HttpServletRequest request) {
+    public ResponseEntity<CommonResponseDto<SubmissionResultResponseDto>> submitCode(HttpServletRequest request, @PathVariable Long problemId, @RequestBody ExecuteRequestDto executeRequestDto) {
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
         SubmissionResultResponseDto response = submissionService.submissionByProblemId(executeRequestDto, problemId, memberId);
         return ResponseEntity.ok(CommonResponseDto.success(response));
