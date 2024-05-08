@@ -33,4 +33,9 @@ public interface ProblemRepository extends JpaRepository<Problem,Long> {
     List<Problem> findTop6ByProblemStatusOrderByProblemCreatedDateDesc(ProblemStatus problemStatus);
     // 등록된 문제 전체 조회
     Page<Problem> findByProblemStatus(ProblemStatus problemStatus, Pageable pageable);
+    // 등록된 문제 전체 조회(비공개 문제 제외)
+    Page<Problem> findByProblemStatusNot(ProblemStatus problemStatus, Pageable pageable);
+
+    // 문제 제목으로 검색 (비공개 문제 제외)
+    Page<Problem> findByProblemTitleContainingAndProblemStatusNot(String search, ProblemStatus problemStatus, Pageable pageable);
 }

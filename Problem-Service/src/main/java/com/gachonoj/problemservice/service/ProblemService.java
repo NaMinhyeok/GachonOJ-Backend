@@ -219,9 +219,9 @@ public class ProblemService {
         Pageable pageable = PageRequest.of(pageNo - 1, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "problemId"));
         Page<Problem> problems;
         if(search != null){
-            problems = problemRepository.findByProblemTitleContainingAndProblemStatus(search, ProblemStatus.REGISTERED, pageable);
+            problems = problemRepository.findByProblemTitleContainingAndProblemStatusNot(search,ProblemStatus.PRIVATE, pageable);
         } else{
-            problems = problemRepository.findByProblemStatus(ProblemStatus.REGISTERED, pageable);
+            problems = problemRepository.findByProblemStatusNot(ProblemStatus.PRIVATE, pageable);
 
         }
         return problems.map(problem -> {
