@@ -1,5 +1,7 @@
 package com.gachonoj.submissionservice.feign.service;
 
+import com.gachonoj.submissionservice.domain.entity.Submission;
+import com.gachonoj.submissionservice.fegin.dto.response.SubmissionCodeInfoResponseDto;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionMemberInfoResponseDto;
 import com.gachonoj.submissionservice.repository.SubmissionRepository;
 import lombok.RequiredArgsConstructor;
@@ -55,5 +57,10 @@ public class SubmissionFeignService {
     // problemId로 총 제출 수 조회
     public Integer getProblemSubmitCount(Long problemId) {
         return submissionRepository.countTotalSubmissionsByProblemId(problemId);
+    }
+    // 제출 번호 통해서 제출 코드, 문제 ID 가져오기
+    public SubmissionCodeInfoResponseDto getSubmissionCodeInfo(Long submissionId) {
+        Submission submission = submissionRepository.findById(submissionId).orElseThrow(() -> new IllegalArgumentException("해당 제출이 존재하지 않습니다."));
+        return new SubmissionCodeInfoResponseDto(submission.getProblemId(), submission.getSubmissionCode());
     }
 }
