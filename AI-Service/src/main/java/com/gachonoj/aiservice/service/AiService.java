@@ -25,9 +25,9 @@ public class AiService {
     private String url;
     private final RestTemplate restTemplate;
 
-    private SubmissionServiceFeignClient submissionServiceFeignClient;
-    private ProblemServiceFeignClient problemServiceFeignClient;
-    private FeedbackRepository feedbackRepository;
+    private final SubmissionServiceFeignClient submissionServiceFeignClient;
+    private final ProblemServiceFeignClient problemServiceFeignClient;
+    private final FeedbackRepository feedbackRepository;
 
     public String chatGPT(FeedbackRequestDto feedbackRequestDto) {
         String code = feedbackRequestDto.getCode();
@@ -49,14 +49,16 @@ public class AiService {
         // 결과를 제출자에게 전달
         SubmissionCodeInfoResponseDto submissionCodeInfoResponseDto = submissionServiceFeignClient.getSubmissionCodeBySubmissionId(submissionId);
         String code = submissionCodeInfoResponseDto.getCode();
+        log.info("code : {}", code);
         Long problemId = submissionCodeInfoResponseDto.getProblemId();
+        log.info("problemId : {}", problemId);
         String prompt = problemServiceFeignClient.getProblemPromptByProblemId(problemId);
         String aiPrompt = code + "\n" + prompt;
         ChatGPTRequest request = new ChatGPTRequest(model, aiPrompt);
         ChatGPTResponse response = restTemplate.postForObject(url, request, ChatGPTResponse.class);
         String aiContents = response.getChoices().get(0).getMessage().getContent();
         Integer totalTokens = response.getUsage().getTotal_tokens();
-        Feedback feedback = new Feedback(submissionId, problemId, memberId, aiContents,totalTokens);
+        Feedback feedback = new Feedback(submissionId, memberId, problemId, aiContents,totalTokens);
         feedbackRepository.save(feedback);
         return new AiFeedbackResponseDto(aiContents);
     }
