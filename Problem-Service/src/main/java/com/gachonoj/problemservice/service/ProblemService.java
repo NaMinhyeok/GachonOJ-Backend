@@ -57,15 +57,15 @@ public class ProblemService {
                 requestDto.getProblemTimeLimit(),
                 requestDto.getProblemMemoryLimit(),
                 requestDto.getProblemPrompt(),
-                ProblemClass.fromLabel(requestDto.getProblemClass()),
-                ProblemStatus.fromLabel(requestDto.getProblemStatus())
+                ProblemClass.valueOf(requestDto.getProblemClass()),
+                ProblemStatus.valueOf(requestDto.getProblemStatus())
         );
 
         requestDto.getTestcases().forEach(testcaseDto -> {
             Testcase testcase = Testcase.builder()
                     .testcaseInput(testcaseDto.getTestcaseInput())
                     .testcaseOutput(testcaseDto.getTestcaseOutput())
-                    .testcaseStatus(TestcaseStatus.fromLabel(testcaseDto.getTestcaseStatus()))
+                    .testcaseStatus(TestcaseStatus.valueOf(testcaseDto.getTestcaseStatus()))
                     .build();
             problem.addTestcase(testcase);
         });
@@ -86,10 +86,10 @@ public class ProblemService {
                 requestDto.getProblemInputContents(),
                 requestDto.getProblemOutputContents(),
                 requestDto.getProblemDiff(),
-                ProblemClass.fromLabel(requestDto.getProblemClass()), // Enum 변환
+                ProblemClass.valueOf(requestDto.getProblemClass()), // Enum 변환
                 requestDto.getProblemTimeLimit(),
                 requestDto.getProblemMemoryLimit(),
-                ProblemStatus.fromLabel(requestDto.getProblemStatus()), // Enum 변환
+                ProblemStatus.valueOf(requestDto.getProblemStatus()), // Enum 변환
                 requestDto.getProblemPrompt()
         );
         return problemId;
