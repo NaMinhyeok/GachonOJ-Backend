@@ -252,20 +252,12 @@ public class ProblemService {
 
 
     // 문제 수정시 문제 상세 조회
-    @Transactional
+    @Transactional(readOnly = true)
     public ProblemDetailAdminResponseDto getProblemDetailAdmin(Long problemId) {
         Problem problem = problemRepository.findById(problemId)
-                .orElseThrow(() -> new IllegalArgumentException("Problem not found with id: " + problemId));
-        List<Testcase> visibleTestcases = problem.getTestcases().stream()
-                .filter(testcase -> testcase.getTestcaseStatus() == TestcaseStatus.VISIBLE)
-                .toList();
-        List<String> testcaseInputs = visibleTestcases.stream()
-                .map(Testcase::getTestcaseInput)
-                .collect(Collectors.toList());
-        List<String> testcaseOutputs = visibleTestcases.stream()
-                .map(Testcase::getTestcaseOutput)
-                .collect(Collectors.toList());
-        return new ProblemDetailAdminResponseDto(problem, testcaseInputs, testcaseOutputs);
+                .orElseThrow(() -> new RuntimeException("Problem with ID " + problemId + " not found"));
+
+        return new ProblemDetailAdminResponseDto(problem);
     }
 
     // DateFormatter를 사용하여 날짜 형식을 변경하는 메서드

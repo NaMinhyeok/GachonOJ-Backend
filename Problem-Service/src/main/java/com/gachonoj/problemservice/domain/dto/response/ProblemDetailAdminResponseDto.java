@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -22,10 +23,9 @@ public class ProblemDetailAdminResponseDto {
     private Integer problemMemoryLimit;
     private String problemStatus; // Enum 이름을 String으로 받습니다.
     private String problemPrompt;
-    private List<String> testcaseInputs;
-    private List<String> testcaseOutputs;
+    private List<TestcaseResponseDto> testcases;
 
-    public ProblemDetailAdminResponseDto(Problem problem, List<String> testcaseInputs, List<String> testcaseOutputs) {
+    public ProblemDetailAdminResponseDto(Problem problem) {
         this.problemId = problem.getProblemId();
         this.problemTitle = problem.getProblemTitle();
         this.problemContents = problem.getProblemContents();
@@ -37,7 +37,11 @@ public class ProblemDetailAdminResponseDto {
         this.problemMemoryLimit = problem.getProblemMemoryLimit();
         this.problemStatus = problem.getProblemStatus().name();
         this.problemPrompt = problem.getProblemPrompt();
-        this.testcaseInputs = testcaseInputs;
-        this.testcaseOutputs = testcaseOutputs;
+        this.testcases = problem.getTestcases().stream()
+                .map(tc -> new TestcaseResponseDto(
+                        tc.getTestcaseInput(),
+                        tc.getTestcaseOutput(),
+                        tc.getTestcaseStatus().name()))
+                .collect(Collectors.toList());
     }
 }
