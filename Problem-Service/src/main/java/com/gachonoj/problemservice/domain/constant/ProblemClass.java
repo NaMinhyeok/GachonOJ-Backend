@@ -4,7 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum ProblemClass {
-    BINARY_SERACH("이분 탐색"),
+    BINARY_SEARCH("이분 탐색"),
     GRAPH("그래프"),
     DYNAMIC_PROGRAMMING("동적 계획법"),
     GREEDY("그리디"),
