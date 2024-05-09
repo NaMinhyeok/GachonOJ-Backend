@@ -2,6 +2,7 @@ package com.gachonoj.memberservice.repository;
 
 import com.gachonoj.memberservice.domain.constant.Role;
 import com.gachonoj.memberservice.domain.dto.response.HoverResponseDto;
+import com.gachonoj.memberservice.domain.dto.response.MemberLangCountResponseDto;
 import com.gachonoj.memberservice.domain.entity.Member;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -32,4 +33,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     List<Member> findByMemberNumberContaining(String memberNumber);
     // 이메일검색으로 회원정보 조회
     List<Member> findByMemberEmailContaining(String memberEmail);
+    // 학생 선호 언어 현황(각 언어마다 갯수) 조회
+    @Query("SELECT new com.gachonoj.memberservice.domain.dto.response.MemberLangCountResponseDto(m.memberLang, COUNT(m.memberLang)) FROM Member m WHERE m.memberRole = 'ROLE_STUDENT' GROUP BY m.memberLang")
+    List<MemberLangCountResponseDto> findLangCountByRole();
 }
