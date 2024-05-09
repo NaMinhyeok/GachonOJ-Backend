@@ -14,6 +14,7 @@ import com.gachonoj.problemservice.domain.constant.ProblemStatus;
 import com.gachonoj.problemservice.domain.constant.TestcaseStatus;
 import com.gachonoj.problemservice.feign.client.MemberServiceFeignClient;
 import com.gachonoj.problemservice.feign.client.SubmissionServiceFeignClient;
+import com.gachonoj.problemservice.feign.dto.response.CorrectRateResponseDto;
 import com.gachonoj.problemservice.repository.BookmarkRepository;
 import com.gachonoj.problemservice.repository.ExamRepository;
 import com.gachonoj.problemservice.repository.ProblemRepository;
@@ -274,5 +275,18 @@ public class ProblemService {
             return null;
         }
         return date.format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
+    }
+
+    // 교수 대시보드 오답률 높은 알고리즘 TOP 5
+    @Transactional(readOnly = true)
+    public List<ProblemCardResponseDto> getTop5IncorrectProblem() {
+        List<CorrectRateResponseDto> correctRateResponseDtos = submissionServiceFeignClient.getTop5IncorrectProblemList();
+        return correctRateResponseDtos.stream().map(correctRateResponseDto -> {
+            Problem problem = problemRepository.findById(correctRateResponseDto.getProblemId())
+                    .orElseThrow(() -> new IllegalArgumentException("Problem not found with id: " + correctRateResponseDto.getProblemId()));
+            String problemDiff = problem.getProblemDiff() + "단계";
+            String correctRate = String.format("%.2f", correctRateResponseDto.getCorrectRate()) + "%";
+            return new ProblemCardResponseDto(problem, problemDiff, problem.getProblemClass().getLabel(), correctRate);
+        }).toList();
     }
 }

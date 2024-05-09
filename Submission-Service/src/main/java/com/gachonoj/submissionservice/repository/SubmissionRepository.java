@@ -1,6 +1,8 @@
 package com.gachonoj.submissionservice.repository;
 
+import com.gachonoj.submissionservice.domain.constant.Status;
 import com.gachonoj.submissionservice.domain.entity.Submission;
+import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -30,4 +32,7 @@ public interface SubmissionRepository extends JpaRepository<Submission,Long> {
     // 맞춘 문제 조회
     @Query("SELECT DISTINCT s.problemId FROM Submission s WHERE s.memberId = :memberId AND s.submissionStatus = com.gachonoj.submissionservice.domain.constant.Status.CORRECT")
     List<Long> findCorrectProblemIdsByMemberId(@Param("memberId") Long memberId);
+    // 오답률 높은 문제 Top 5
+    @Query("SELECT s.problemId FROM Submission s WHERE s.submissionStatus = 'INCORRECT' GROUP BY s.problemId ORDER BY COUNT(s.problemId) DESC LIMIT 5")
+    List<Long> findTop5IncorrectProblemIds();
 }

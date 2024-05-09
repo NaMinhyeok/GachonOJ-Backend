@@ -1,5 +1,6 @@
 package com.gachonoj.submissionservice.feign.controller;
 
+import com.gachonoj.submissionservice.feign.dto.response.CorrectRateResponseDto;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionMemberInfoResponseDto;
 import com.gachonoj.submissionservice.feign.service.SubmissionFeignService;
 import com.gachonoj.submissionservice.fegin.dto.response.SubmissionCodeInfoResponseDto;
@@ -60,5 +61,10 @@ public class SubmissionFeignController {
     @GetMapping("/code/{submissionId}")
     public SubmissionCodeInfoResponseDto getSubmissionCodeBySubmissionId(@PathVariable Long submissionId) {
         return submissionFeignService.getSubmissionCodeInfo(submissionId);
+    }
+    // 오답률 높은 문제 TOP 5
+    @GetMapping("/problem/incorrect/top5")
+    public List<CorrectRateResponseDto> getTop5IncorrectProblemList() {
+        return submissionFeignService.getTop5IncorrectProblemList();
     }
 }

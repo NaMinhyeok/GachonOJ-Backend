@@ -2,6 +2,7 @@ package com.gachonoj.submissionservice.feign.service;
 
 import com.gachonoj.submissionservice.domain.entity.Submission;
 import com.gachonoj.submissionservice.fegin.dto.response.SubmissionCodeInfoResponseDto;
+import com.gachonoj.submissionservice.feign.dto.response.CorrectRateResponseDto;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionMemberInfoResponseDto;
 import com.gachonoj.submissionservice.repository.SubmissionRepository;
 import lombok.RequiredArgsConstructor;
@@ -62,5 +63,13 @@ public class SubmissionFeignService {
     public SubmissionCodeInfoResponseDto getSubmissionCodeInfo(Long submissionId) {
         Submission submission = submissionRepository.findById(submissionId).orElseThrow(() -> new IllegalArgumentException("해당 제출이 존재하지 않습니다."));
         return new SubmissionCodeInfoResponseDto(submission.getProblemId(), submission.getSubmissionCode());
+    }
+    // 오답률 높은 문제 TOP 5
+    public List<CorrectRateResponseDto> getTop5IncorrectProblemList() {
+        List<Long> top5IncorrectProblemIds = submissionRepository.findTop5IncorrectProblemIds();
+        return top5IncorrectProblemIds.stream().map(problemId -> {
+            double correctRate = getProblemCorrectRate(problemId);
+            return new CorrectRateResponseDto(problemId, correctRate);
+        }).toList();
     }
 }

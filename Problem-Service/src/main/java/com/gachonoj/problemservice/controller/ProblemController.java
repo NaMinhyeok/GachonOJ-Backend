@@ -264,7 +264,6 @@ public class ProblemController {
     }
     // TODO :
     //  교수님 대시보드 API 구현
-    //  ㄴ 진행중인 시험
     //  ㄴ 최근 오답률 높은 문제 TOP 3
     //  ㄴ 오답률 높은 알고리즘 분류 TOP 5
     //  ㄴ 학생 선호 언어 현황(각 언어당 몇명인지)
@@ -277,6 +276,16 @@ public class ProblemController {
     public ResponseEntity<CommonResponseDto<List<ExamCardInfoResponseDto>>> getOngoingExam(HttpServletRequest request) {
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
         List<ExamCardInfoResponseDto> result = examService.getProfessorExamCardInfo(memberId);
+        return ResponseEntity.ok(CommonResponseDto.success(result));
+    }
+
+    // 교수 대시보드 최근 오답률 높은 문제 TOP 3
+
+
+    // 교수 대시보드 오답률 높은 알고리즘 TOP 5
+    @GetMapping("/professor/incorrect")
+    public ResponseEntity<CommonResponseDto<List<ProblemCardResponseDto>>> getIncorrectProblemList() {
+        List<ProblemCardResponseDto> result = problemService.getTop5IncorrectProblem();
         return ResponseEntity.ok(CommonResponseDto.success(result));
     }
 
