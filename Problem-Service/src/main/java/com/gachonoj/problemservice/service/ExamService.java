@@ -396,6 +396,23 @@ public class ExamService {
         }
         return date.format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
     }
+    // 교수 대시보드 진행중인 시험 목록 조회
+    public List<ExamCardInfoResponseDto> getProfessorExamCardInfo(Long memberId) {
+        List<Exam> exams = examRepository.findByExamStatusAndMemberId(ExamStatus.ONGOING, memberId);
+        return exams.stream()
+                .map(exam -> {
+                    String examStartDate = dateFormatter(exam.getExamStartDate());
+                    String examEndDate = dateFormatter(exam.getExamEndDate());
+                    return new ExamCardInfoResponseDto(
+                            exam.getExamId(),
+                            exam.getExamTitle(),
+                            examStartDate,
+                            examEndDate,
+                            exam.getExamStatus().getLabel()
+                    );
+                })
+                .collect(Collectors.toList());
+    }
 }
     /*@Transactional
     public void updateExam(Long examId, ExamRequestDto request, Long memberId) {

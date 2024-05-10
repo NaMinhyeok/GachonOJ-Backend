@@ -171,4 +171,9 @@ public class MemberController {
         memberService.sendPasswordEmail(emailRequestDto.getMemberEmail());
         return ResponseEntity.ok(CommonResponseDto.success());
     }
+    // 학생 선호 언어 현황
+    @GetMapping("/professor/lang/count")
+    public ResponseEntity<CommonResponseDto<List<MemberLangCountResponseDto>>> getLangCount() {
+        return ResponseEntity.ok(CommonResponseDto.success(memberService.getMemberLangCount()));
+    }
 }

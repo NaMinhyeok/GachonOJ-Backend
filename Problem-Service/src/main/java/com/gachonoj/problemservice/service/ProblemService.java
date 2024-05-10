@@ -1,19 +1,17 @@
 package com.gachonoj.problemservice.service;
 
 import com.gachonoj.problemservice.domain.dto.request.ProblemRequestDto;
-import com.gachonoj.problemservice.domain.dto.request.TestcaseRequestDto;
 import com.gachonoj.problemservice.domain.dto.response.ProblemDetailAdminResponseDto;
-import com.gachonoj.problemservice.domain.dto.response.TestcaseResponseDto;
 import com.gachonoj.problemservice.domain.dto.response.*;
 import com.gachonoj.problemservice.domain.entity.Bookmark;
-import com.gachonoj.problemservice.domain.entity.Exam;
 import com.gachonoj.problemservice.domain.entity.Problem;
 import com.gachonoj.problemservice.domain.entity.Testcase;
 import com.gachonoj.problemservice.domain.constant.ProblemClass;
 import com.gachonoj.problemservice.domain.constant.ProblemStatus;
 import com.gachonoj.problemservice.domain.constant.TestcaseStatus;
-import com.gachonoj.problemservice.feign.client.MemberServiceFeignClient;
 import com.gachonoj.problemservice.feign.client.SubmissionServiceFeignClient;
+import com.gachonoj.problemservice.feign.dto.response.CorrectRateResponseDto;
+import com.gachonoj.problemservice.feign.dto.response.SubmissionResultCountResponseDto;
 import com.gachonoj.problemservice.repository.BookmarkRepository;
 import com.gachonoj.problemservice.repository.ExamRepository;
 import com.gachonoj.problemservice.repository.ProblemRepository;
@@ -30,8 +28,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
@@ -267,4 +263,27 @@ public class ProblemService {
         }
         return date.format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
     }
+
+    // 교수 대시보드 오답률 높은 알고리즘 TOP 5
+    @Transactional(readOnly = true)
+    public List<ProblemCardResponseDto> getTop5IncorrectProblem() {
+        List<CorrectRateResponseDto> correctRateResponseDtos = submissionServiceFeignClient.getTop5IncorrectProblemList();
+        return correctRateResponseDtos.stream().map(correctRateResponseDto -> {
+            Problem problem = problemRepository.findById(correctRateResponseDto.getProblemId())
+                    .orElseThrow(() -> new IllegalArgumentException("Problem not found with id: " + correctRateResponseDto.getProblemId()));
+            String problemDiff = problem.getProblemDiff() + "단계";
+            String correctRate = String.format("%.2f", correctRateResponseDto.getCorrectRate()) + "%";
+            return new ProblemCardResponseDto(problem, problemDiff, problem.getProblemClass().getLabel(), correctRate);
+        }).toList();
+    }
+    // TODO : 교수 대시보드 최근 오답률 높은 문제 분류 TOP 3 구현
+    // 교수 대시보드 최근 오답률 높은 문제 분류 TOP 3
+//    @Transactional(readOnly = true)
+//    public List<ProblemCardResponseDto> getTop3IncorrectProblemClass() {
+//        List<SubmissionResultCountResponseDto> submissionResultCountResponseDtos = submissionServiceFeignClient.getIncorrectProblemClass();
+//        // 문제 id의 problemClass를 가져오고 각 problemClass에 대한 제출 수, 오답 수를 저장해야됨
+//        // problemClass로 쿼리날려서 problemId를 리스트에 저장하고
+//        // 리스트를 통해서 정답 수, 오답 수를 저장하도록 해야되나
+//        // 이렇게 해서 compareTo 써서 비교해서 밀어내기로 하면되나?
+//    }
 }

@@ -1,6 +1,8 @@
 package com.gachonoj.submissionservice.feign.controller;
 
+import com.gachonoj.submissionservice.feign.dto.response.CorrectRateResponseDto;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionMemberInfoResponseDto;
+import com.gachonoj.submissionservice.feign.dto.response.SubmissionResultCountResponseDto;
 import com.gachonoj.submissionservice.feign.service.SubmissionFeignService;
 import com.gachonoj.submissionservice.fegin.dto.response.SubmissionCodeInfoResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -60,5 +62,15 @@ public class SubmissionFeignController {
     @GetMapping("/code/{submissionId}")
     public SubmissionCodeInfoResponseDto getSubmissionCodeBySubmissionId(@PathVariable Long submissionId) {
         return submissionFeignService.getSubmissionCodeInfo(submissionId);
+    }
+    // 오답률 높은 문제 TOP 5
+    @GetMapping("/problem/incorrect/top5")
+    public List<CorrectRateResponseDto> getTop5IncorrectProblemList() {
+        return submissionFeignService.getTop5IncorrectProblemList();
+    }
+    //    // 오답률 높은 문제 분류 TOP 3를 가져오기 위한 문제 ID, 문제당 제출 개수, 오답 개수 조회
+    @GetMapping("/submission/problem/incorrect/class")
+    public List<SubmissionResultCountResponseDto> getIncorrectProblemClass() {
+        return submissionFeignService.getIncorrectProblemClass();
     }
 }

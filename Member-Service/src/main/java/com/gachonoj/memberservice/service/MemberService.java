@@ -445,4 +445,8 @@ public class MemberService {
         }
         return password.toString();
     }
+    // 학생 선호 언어 현황
+    public List<MemberLangCountResponseDto> getMemberLangCount() {
+        return memberRepository.findLangCountByRole();
+    }
 }
