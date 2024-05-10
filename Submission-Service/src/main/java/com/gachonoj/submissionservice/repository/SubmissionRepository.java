@@ -3,6 +3,7 @@ package com.gachonoj.submissionservice.repository;
 import com.gachonoj.submissionservice.domain.constant.Status;
 import com.gachonoj.submissionservice.domain.dto.response.TodaySubmissionCountResponseDto;
 import com.gachonoj.submissionservice.domain.entity.Submission;
+import com.gachonoj.submissionservice.feign.dto.response.SubmissionResultCountResponseDto;
 import org.springframework.beans.factory.parsing.Problem;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -44,4 +45,8 @@ public interface SubmissionRepository extends JpaRepository<Submission,Long> {
 
     // 금일 채점 결과 현황 조회
     List<Submission> findBySubmissionDateBetween(LocalDateTime start, LocalDateTime end);
+
+    // 오답률 높은 문제 분류 TOP 3를 가져오기 위한 문제 ID, 문제당 제출 개수, 오답 개수 조회
+    @Query("SELECT s.problemId, COUNT(s.problemId), SUM(CASE WHEN s.submissionStatus = 'INCORRECT' THEN 1 ELSE 0 END) FROM Submission s GROUP BY s.problemId ORDER BY COUNT(s.problemId) DESC")
+    List<SubmissionResultCountResponseDto> findIncorrectProblemClass();
 }

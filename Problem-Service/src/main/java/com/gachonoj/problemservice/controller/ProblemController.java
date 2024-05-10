@@ -262,14 +262,6 @@ public class ProblemController {
         ProblemDetailAdminResponseDto result = problemService.getProblemDetailAdmin(problemId);
         return ResponseEntity.ok(CommonResponseDto.success(result));
     }
-    // TODO :
-    //  교수님 대시보드 API 구현
-    //  ㄴ 최근 오답률 높은 문제 TOP 3
-    //  ㄴ 오답률 높은 알고리즘 분류 TOP 5
-    //  ㄴ 학생 선호 언어 현황(각 언어당 몇명인지)
-    //  관리자 대시보드 API 구현
-    //  ㄴ 서비스 헬스체크
-    //  ㄴ 금일 채점 결과 (정답, 오답)
 
     // 교수 대시보드 진행중인 시험 목록 조회
     @GetMapping("/professor/exam/ongoing")
@@ -279,8 +271,13 @@ public class ProblemController {
         return ResponseEntity.ok(CommonResponseDto.success(result));
     }
 
-    // 교수 대시보드 최근 오답률 높은 문제 TOP 3
-
+    // TODO : 교수 대시보드 최근 오답률 높은 문제 분류 TOP 3 서비스 로직 만들기
+    // 교수 대시보드 최근 오답률 높은 문제 분류 TOP 3
+//    @GetMapping("/professor/incorrect/class")
+//    public ResponseEntity<CommonResponseDto<List<ProblemCardResponseDto>>> getIncorrectProblemClassList() {
+//        List<ProblemCardResponseDto> result = problemService.getTop3IncorrectProblemClass();
+//        return ResponseEntity.ok(CommonResponseDto.success(result));
+//    }
 
     // 교수 대시보드 오답률 높은 알고리즘 TOP 5
     @GetMapping("/professor/incorrect")

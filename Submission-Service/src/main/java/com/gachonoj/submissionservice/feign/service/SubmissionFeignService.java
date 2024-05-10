@@ -4,6 +4,7 @@ import com.gachonoj.submissionservice.domain.entity.Submission;
 import com.gachonoj.submissionservice.fegin.dto.response.SubmissionCodeInfoResponseDto;
 import com.gachonoj.submissionservice.feign.dto.response.CorrectRateResponseDto;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionMemberInfoResponseDto;
+import com.gachonoj.submissionservice.feign.dto.response.SubmissionResultCountResponseDto;
 import com.gachonoj.submissionservice.repository.SubmissionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -71,5 +72,9 @@ public class SubmissionFeignService {
             double correctRate = getProblemCorrectRate(problemId);
             return new CorrectRateResponseDto(problemId, correctRate);
         }).toList();
+    }
+    // 오답률 높은 문제 분류 TOP 3를 가져오기 위한 문제 ID, 문제당 제출 개수, 오답 개수 조회
+    public List<SubmissionResultCountResponseDto> getIncorrectProblemClass() {
+        return submissionRepository.findIncorrectProblemClass();
     }
 }
