@@ -113,8 +113,10 @@ public class SubmissionService {
         }
         // Submission 엔티티 저장
         submissionRepository.save(submission);
+        // 저장된 submission 엔티티의 id를 반환하기 위해 저장
+        Long submissionId = submission.getSubmissionId();
         // 반환
-        return new SubmissionResultResponseDto(isCorrect,memberRank,problemScore,memberRank+problemScore,ratingChanged,rating,afterRating);
+        return new SubmissionResultResponseDto(isCorrect,memberRank,problemScore,memberRank+problemScore,ratingChanged,rating,afterRating,submissionId);
     }
 
     // 코드 실행하는 메소드
