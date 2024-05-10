@@ -5,6 +5,7 @@ import com.gachonoj.submissionservice.domain.constant.Status;
 import com.gachonoj.submissionservice.domain.dto.request.ExecuteRequestDto;
 import com.gachonoj.submissionservice.domain.dto.response.ExecuteResultResponseDto;
 import com.gachonoj.submissionservice.domain.dto.response.SubmissionResultResponseDto;
+import com.gachonoj.submissionservice.domain.dto.response.TodaySubmissionCountResponseDto;
 import com.gachonoj.submissionservice.domain.entity.Submission;
 import com.gachonoj.submissionservice.feign.client.MemberServiceFeignClient;
 import com.gachonoj.submissionservice.feign.client.ProblemServiceFeignClient;
@@ -20,6 +21,8 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Slf4j
@@ -233,5 +236,21 @@ public class SubmissionService {
             result.put(e.getMessage(), "Error");
             return result;
         }
+    }
+    // 금일 채점 결과 현황 조회
+    public TodaySubmissionCountResponseDto getTodaySubmissionCount() {
+        log.info("변환된 시간 확인하기" + LocalDate.now().atStartOfDay());
+        List<Submission> submissions = submissionRepository.findBySubmissionDateBetween(LocalDate.now().atStartOfDay(), LocalDate.now().atTime(23,59,59));
+        int total = submissions.size();
+        int correct = 0;
+        int incorrect = 0;
+        for (Submission submission : submissions) {
+            if (submission.getSubmissionStatus() == Status.CORRECT) {
+                correct++;
+            } else {
+                incorrect++;
+            }
+        }
+        return new TodaySubmissionCountResponseDto(total, correct, incorrect);
     }
 }

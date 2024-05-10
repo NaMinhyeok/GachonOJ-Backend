@@ -4,6 +4,7 @@ import com.gachonoj.submissionservice.common.response.CommonResponseDto;
 import com.gachonoj.submissionservice.domain.dto.request.ExecuteRequestDto;
 import com.gachonoj.submissionservice.domain.dto.response.ExecuteResultResponseDto;
 import com.gachonoj.submissionservice.domain.dto.response.SubmissionResultResponseDto;
+import com.gachonoj.submissionservice.domain.dto.response.TodaySubmissionCountResponseDto;
 import com.gachonoj.submissionservice.service.SubmissionService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -32,4 +33,11 @@ public class SubmissionController {
         SubmissionResultResponseDto response = submissionService.submissionByProblemId(executeRequestDto, problemId, memberId);
         return ResponseEntity.ok(CommonResponseDto.success(response));
     }
+    // 금일 채점 결과 현황 조회
+    @GetMapping("/admin/today")
+    public ResponseEntity<CommonResponseDto<TodaySubmissionCountResponseDto>> getTodaySubmissionCount() {
+        TodaySubmissionCountResponseDto response = submissionService.getTodaySubmissionCount();
+        return ResponseEntity.ok(CommonResponseDto.success(response));
+    }
+
 }
