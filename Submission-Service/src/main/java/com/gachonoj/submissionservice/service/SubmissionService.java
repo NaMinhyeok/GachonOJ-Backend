@@ -12,8 +12,10 @@ import com.gachonoj.submissionservice.feign.client.ProblemServiceFeignClient;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionMemberRankInfoResponseDto;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionProblemTestCaseResponseDto;
 import com.gachonoj.submissionservice.repository.SubmissionRepository;
+import com.netflix.discovery.converters.Auto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +35,16 @@ public class SubmissionService {
     private final MemberServiceFeignClient memberServiceFeignClient;
     private final SubmissionRepository submissionRepository;
 
+    // @Transactional 어노테이션을 사용하기 위해서 Self Injection 사용
+    // 다른 방안으로는 서비스를 분리해서 사용하는 방법이 있다.
+    // 참조 : https://blog.leaphop.co.kr/blogs/34/Spring__Transaction%EC%9D%84_%EC%9C%84%ED%95%9C_Self_Injection_%ED%99%9C%EC%9A%A9%ED%95%98%EA%B8%B0
+    private SubmissionService self;
+
+    @Autowired
+    public void setSelf(SubmissionService self) {
+        this.self = self;
+    }
+
     // 문제 코드 실행
     @Transactional
     public List<ExecuteResultResponseDto> executeCodeByProblemId(ExecuteRequestDto executeRequestDto, Long problemId) {
@@ -49,7 +61,7 @@ public class SubmissionService {
                 output.add(entry.getValue());
             }
         }
-        Map<String,String> result = executeCode(executeRequestDto, input,output,10);
+        Map<String,String> result = self.executeCode(executeRequestDto, input,output,10);
         List<ExecuteResultResponseDto> response = new ArrayList<>();
         for (Map.Entry<String, String> entry : result.entrySet()) {
             response.add(new ExecuteResultResponseDto(entry.getKey(),entry.getValue()));
@@ -57,7 +69,6 @@ public class SubmissionService {
         return response;
     }
     // 문제 채점 실행
-    // TODO: 채점은 비동기로 진행되어야 한다.
     @Transactional
     public SubmissionResultResponseDto submissionByProblemId(ExecuteRequestDto executeRequestDto, Long problemId, Long memberId) {
         List<String> input = problemServiceFeignClient.getTestCases(problemId).stream()
@@ -75,7 +86,7 @@ public class SubmissionService {
 
 
         // 코드 실행 결과
-        Map<String,String> result = executeCode(executeRequestDto, input,output,problemTimeLimit);
+        Map<String,String> result = self.executeCode(executeRequestDto, input,output,problemTimeLimit);
         int correctCount = 0;
         // 정답 개수 세기
         for (Map.Entry<String, String> entry : result.entrySet()) {
@@ -120,8 +131,6 @@ public class SubmissionService {
     }
 
     // 코드 실행하는 메소드
-    // TODO : 이상하게도 한번에 실행이 안된다.. 왜 그런지 모르겠다.
-    //  한번 에러를 나게 만든다음에 실행시키면 그 다음번에는 잘 진행된다 왜그럴까 ? 나중에 찾아서 고칠 수 있도록 해야한다.
     @Transactional
     public Map<String,String> executeCode(ExecuteRequestDto executeRequestDto, List<String> inputList, List<String> outputList,Integer timeLimit) {
         try {
