@@ -50,7 +50,12 @@ public class SubmissionFeignService {
 
     //memberId로 틀린 문제 리스트 받아옴
     public List<Long> getIncorrectProblemIdsByMemberId(Long memberId) {
-        return submissionRepository.findIncorrectProblemIdsByMemberId(memberId);
+        // 틀린 문제 리스트 조회, 맞은 문제 리스트 조회
+        // 그 후 틀린 문제id와 맞은 문제id를 비교하여 틀린 문제만 반환
+        List<Long> incorrectProblemIds = submissionRepository.findIncorrectProblemIdsByMemberId(memberId);
+        List<Long> correctProblemIds = submissionRepository.findCorrectProblemIdsByMemberId(memberId);
+        incorrectProblemIds.removeAll(correctProblemIds);
+        return incorrectProblemIds;
     }
     //맞춘 문제 리스트 조회
     public List<Long> getCorrectProblemIdsByMemberId(Long memberId) {

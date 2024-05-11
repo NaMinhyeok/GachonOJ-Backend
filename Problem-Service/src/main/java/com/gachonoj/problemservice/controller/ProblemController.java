@@ -231,7 +231,7 @@ public class ProblemController {
     // 사용자 문제 목록 조회
     @GetMapping("/problems/list/member")
     public ResponseEntity<CommonResponseDto<Page<ProblemListResponseDto>>> getProblemListByMember(@RequestParam(required = false,defaultValue = "1") int pageNo,
-                                                                                                  @RequestParam String type,
+                                                                                                  @RequestParam(required = false) String type,
                                                                                                   @RequestParam(required = false) String search,
                                                                                                   @RequestParam(required = false) String classType,
                                                                                                   @RequestParam(required = false) Integer diff,

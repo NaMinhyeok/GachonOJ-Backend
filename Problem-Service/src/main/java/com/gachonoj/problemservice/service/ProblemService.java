@@ -1,5 +1,6 @@
 package com.gachonoj.problemservice.service;
 
+import com.gachonoj.problemservice.domain.constant.ExamStatus;
 import com.gachonoj.problemservice.domain.dto.request.ProblemRequestDto;
 import com.gachonoj.problemservice.domain.dto.response.ProblemDetailAdminResponseDto;
 import com.gachonoj.problemservice.domain.dto.response.*;
@@ -123,17 +124,20 @@ public class ProblemService {
     }
 
     // 사용자 문제 목록 조회
+    // TODO : type -> wrong 일 시 틀린 문제 목록 조회 구현
     @Transactional(readOnly = true)
     public Page<ProblemListResponseDto> getProblemListByMember(String type, int pageNo, String search, String classType, Integer diff, String sortType, Long memberId) {
-        Sort sort = Sort.by(Sort.Direction.DESC, "problemId"); // 기본 정렬 설정
-        if (sortType != null && !sortType.isEmpty()) {
-            String[] parts = sortType.split("_");
-            if (parts.length == 2) {
-                Sort.Direction dir = "asc".equals(parts[1]) ? Sort.Direction.ASC : Sort.Direction.DESC;
-                sort = Sort.by(dir, parts[0]);
-            }
+        Pageable pageable = PageRequest.of(pageNo - 1, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "problemId"));
+        if(sortType != null){
+            pageable = switch (sortType) {
+                case "DESC" -> PageRequest.of(pageNo - 1, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "problemDiff"));
+                case "ASC" -> PageRequest.of(pageNo - 1, PAGE_SIZE, Sort.by(Sort.Direction.ASC, "problemDiff"));
+                default -> pageable;
+            };
         }
-        Pageable pageable = PageRequest.of(pageNo - 1, PAGE_SIZE, sort);
+        if (type == null) {
+            return getAllProblemList(memberId, pageable);
+        }
         return switch (type) {
             case "bookmark" -> getBookmarkProblemList(memberId, pageable);
             case "solved" -> getSolvedProblemList(memberId, pageable);
@@ -141,12 +145,22 @@ public class ProblemService {
             default -> throw new IllegalArgumentException("Invalid type: " + type);
         };
     }
+    // 전체 문제 목록 조회 메소드
+    private Page<ProblemListResponseDto> getAllProblemList(Long memberId,Pageable pageable) {
+        Page<Problem> problems = problemRepository.findByProblemStatus(ProblemStatus.REGISTERED, pageable);
+        return problems.map(problem -> {
+            Integer correctPeople = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
+            Double correctRate = submissionServiceFeignClient.getProblemCorrectRate(problem.getProblemId());
+            Boolean isBookmarked = bookmarkRepository.existsByMemberIdAndProblemProblemId(memberId, problem.getProblemId());
+            return new ProblemListResponseDto(problem, correctPeople, correctRate,isBookmarked);
+        });
+    }
 
     // 북마크 문제 조회 메서드
     private Page<ProblemListResponseDto> getBookmarkProblemList(Long memberId, Pageable pageable) {
         List<Long> problemIds = bookmarkRepository.findByMemberId(memberId).stream()
                 .map(bookmark -> bookmark.getProblem().getProblemId())
-                .collect(Collectors.toList());
+                .toList();
         return getProblemListResponseDtoPage(problemIds, pageable);
 
     }
@@ -168,9 +182,13 @@ public class ProblemService {
     }
     // 사용자 문제 목록 DTO 생성 메서드
     private ProblemListResponseDto createProblemListResponseDto(Problem problem) {
+        // 문제의 정답자 수
         Integer correctPeople = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
+        // 문제의 정답률
         Double correctRate = submissionServiceFeignClient.getProblemCorrectRate(problem.getProblemId());
-        return new ProblemListResponseDto(problem, correctPeople, correctRate);
+        // 북마크 여부 판단
+        Boolean isBookmarked = bookmarkRepository.existsBookmarkByProblemProblemId(problem.getProblemId());
+        return new ProblemListResponseDto(problem, correctPeople, correctRate,isBookmarked);
     }
 
     // 비로그인 문제 목록 조회
