@@ -15,6 +15,7 @@ public class SubmissionResultResponseDto {
     //4. 등급 상승여부
     //5. 이전 등급
     //6. 이후 등급 인데
+    //7. submissionId
     // 정답 여부
     private Boolean isCorrect;
     // 문제 풀기 전 경험치
@@ -29,4 +30,6 @@ public class SubmissionResultResponseDto {
     private Integer memberRating;
     // 이후 등급
     private Integer afterMemberRating;
+    // submissionId
+    private Long submissionId;
 }

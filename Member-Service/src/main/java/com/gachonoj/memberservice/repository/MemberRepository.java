@@ -29,10 +29,8 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     Page<Member> findByMemberRole(Role role, Pageable pageable);
     // 멤버 닉네임으로 학생 회원정보 조회
     Page<Member> findByMemberNicknameContainingAndMemberRole(String search, Role role, Pageable pageable);
-    // 학번검색으로 회원정보 조회
-    List<Member> findByMemberNumberContaining(String memberNumber);
-    // 이메일검색으로 회원정보 조회
-    List<Member> findByMemberEmailContaining(String memberEmail);
+    // 학번 또는 이메일 검색으로 회원정보 조회
+    List<Member> findByMemberEmailContainingOrMemberNumberContaining(String memberEmail, String memberNumber);
     // 학생 선호 언어 현황(각 언어마다 갯수) 조회
     @Query("SELECT new com.gachonoj.memberservice.domain.dto.response.MemberLangCountResponseDto(m.memberLang, COUNT(m.memberLang)) FROM Member m WHERE m.memberRole = 'ROLE_STUDENT' GROUP BY m.memberLang")
     List<MemberLangCountResponseDto> findLangCountByRole();
