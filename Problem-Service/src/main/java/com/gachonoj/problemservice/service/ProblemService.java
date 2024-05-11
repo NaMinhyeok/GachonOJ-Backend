@@ -124,8 +124,7 @@ public class ProblemService {
     }
 
     // 사용자 문제 목록 조회
-    // TODO : 북마크 여부 전송, SubmissionId 전송
-    //  Default로 type이 없으면 전체 문제 목록 조회
+    // TODO : type -> wrong 일 시 틀린 문제 목록 조회 구현
     @Transactional(readOnly = true)
     public Page<ProblemListResponseDto> getProblemListByMember(String type, int pageNo, String search, String classType, Integer diff, String sortType, Long memberId) {
         Pageable pageable = PageRequest.of(pageNo - 1, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "problemId"));

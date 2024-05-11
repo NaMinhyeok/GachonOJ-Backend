@@ -32,7 +32,6 @@ public interface SubmissionRepository extends JpaRepository<Submission,Long> {
     // 틀린 문제 조회
     @Query("SELECT DISTINCT s.problemId FROM Submission s WHERE s.memberId = :memberId AND s.submissionStatus = com.gachonoj.submissionservice.domain.constant.Status.INCORRECT")
     List<Long> findIncorrectProblemIdsByMemberId(@Param("memberId") Long memberId);
-
     // 맞춘 문제 조회
     @Query("SELECT DISTINCT s.problemId FROM Submission s WHERE s.memberId = :memberId AND s.submissionStatus = com.gachonoj.submissionservice.domain.constant.Status.CORRECT")
     List<Long> findCorrectProblemIdsByMemberId(@Param("memberId") Long memberId);
