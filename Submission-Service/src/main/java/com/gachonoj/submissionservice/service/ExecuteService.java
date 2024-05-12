@@ -17,7 +17,6 @@ import java.util.*;
 @RequiredArgsConstructor
 public class ExecuteService {
     // 코드 실행하는 메소드
-    @Transactional
     public Map<String,String> executeCode(ExecuteRequestDto executeRequestDto, List<String> inputList, List<String> outputList, Integer timeLimit) {
         try {
             Map<String,String> result = new HashMap<>();
@@ -27,7 +26,15 @@ public class ExecuteService {
             log.info("Directory created");
 
             // /home/exec 디렉토리에 Main.java 파일 저장
-            Path filePath = Paths.get(execDir.toString(), "Main." + executeRequestDto.getLanguage());
+            Path filePath = switch (executeRequestDto.getLanguage()) {
+                case "Java" -> Paths.get(execDir.toString(), "Main.java");
+                case "C++" -> Paths.get(execDir.toString(), "Main.cpp");
+                case "C" -> Paths.get(execDir.toString(), "Main.c");
+                case "Python" -> Paths.get(execDir.toString(), "Main.py");
+                case "JavaScript" -> Paths.get(execDir.toString(), "Main.js");
+                default ->
+                        throw new IllegalArgumentException("Unsupported language: " + executeRequestDto.getLanguage());
+            };
             Files.write(filePath, executeRequestDto.getCode().getBytes());
             log.info("Code saved");
 
