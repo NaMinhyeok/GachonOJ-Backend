@@ -70,14 +70,19 @@ public class ExamService {
     // 시험 문제 등록
     @Transactional
     public void registerExam(ExamRequestDto request, Long memberId) {
+        // 시간 변환 YYYY.MM.DD.HH.MM.SS -> LocalDateTime
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd.HH.mm.ss");
+        LocalDateTime startDate = LocalDateTime.parse(request.getExamStartDate(), formatter);
+        LocalDateTime endDate = LocalDateTime.parse(request.getExamEndDate(), formatter);
+
         Exam exam = new Exam();  // 실제 엔티티 클래스
         exam.setExamTitle(request.getExamTitle());
         exam.setMemberId(memberId);
         exam.setExamMemo(request.getExamMemo());
         exam.setExamContents(request.getExamContents());
         exam.setExamNotice(request.getExamNotice());
-        exam.setExamStartDate(LocalDateTime.parse(request.getExamStartDate()));
-        exam.setExamEndDate(LocalDateTime.parse(request.getExamEndDate()));
+        exam.setExamStartDate(startDate);
+        exam.setExamEndDate(endDate);
         exam.setExamDueTime(request.getExamDueTime());
         exam.setExamStatus(request.getExamStatus());
         exam.setExamType(request.getExamType());
