@@ -27,7 +27,7 @@ public class SecurityConfig {
                 .authorizeExchange(exchanges ->
                         exchanges
                                 // 아래 경로 패턴에 해당하는 요청은 모두 허용합니다.
-                                .pathMatchers("/api/member/**","/api/problem/**","/api/ai/**","/api/submission/**","/api/board/**","/api/auth/**").permitAll()
+                                .pathMatchers("/api/member/**","/api/problem/**","/api/ai/**","/api/submission/**","/api/board/**","/api/auth/**","/api/health/**").permitAll()
                                 // 그 외의 요청은 인증이 필요합니다.
                                 .anyExchange().authenticated()
                 )

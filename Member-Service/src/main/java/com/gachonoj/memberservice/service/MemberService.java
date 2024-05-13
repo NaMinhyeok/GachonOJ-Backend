@@ -361,18 +361,16 @@ public class MemberService {
     }
 
     // 응시자 추가를 위한 사용자 정보 조회
-    public List<MemberInfoTestResponseDto> getMemberInfoTest(String memberEmail, String memberNumber) {
+    public List<MemberInfoTestResponseDto> getMemberInfoTest(String search) {
         List<Member> members;
-        if(memberEmail != null) {
-            members = memberRepository.findByMemberEmailContaining(memberEmail);
-        } else if(memberNumber != null) {
-            members = memberRepository.findByMemberNumberContaining(memberNumber);
+        if(search != null) {
+            members = memberRepository.findByMemberEmailContainingOrMemberNumberContaining(search,search);
         } else {
             throw new IllegalArgumentException("이메일 또는 학번을 입력해주세요.");
         }
         return members.stream()
                 .map(member -> new MemberInfoTestResponseDto(member.getMemberId(), member.getMemberImg(), member.getMemberName(), member.getMemberNumber(), member.getMemberEmail()))
-                .collect(Collectors.toList());
+                .toList();
     }
     // 로그아웃
     @Transactional
@@ -444,5 +442,9 @@ public class MemberService {
             password.append(PASSWORD_ALLOW_BASE.charAt(index));
         }
         return password.toString();
+    }
+    // 학생 선호 언어 현황
+    public List<MemberLangCountResponseDto> getMemberLangCount() {
+        return memberRepository.findLangCountByRole();
     }
 }

@@ -1,5 +1,6 @@
 package com.gachonoj.problemservice.repository;
 
+import com.gachonoj.problemservice.domain.constant.ExamStatus;
 import com.gachonoj.problemservice.domain.constant.ExamType;
 import com.gachonoj.problemservice.domain.entity.Exam;
 import com.gachonoj.problemservice.domain.entity.Problem;
@@ -31,4 +32,6 @@ public interface ExamRepository extends JpaRepository<Exam,Long> {
     Page<Exam> findByMemberId(Long memberId, Pageable pageable);
 
     Page<Exam> findByExamType(ExamType examType, Pageable pageable);
+
+    List<Exam> findByExamStatusAndMemberId(ExamStatus examStatus, Long memberId);
 }

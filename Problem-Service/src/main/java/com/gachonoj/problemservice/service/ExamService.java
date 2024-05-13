@@ -74,13 +74,19 @@ public class ExamService {
     // 시험 문제 등록
     @Transactional
     public void registerExam(ExamRequestDto request, Long memberId) {
+        // 시간 변환 YYYY.MM.DD.HH.MM.SS -> LocalDateTime
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd.HH.mm.ss");
+        LocalDateTime startDate = LocalDateTime.parse(request.getExamStartDate(), formatter);
+        LocalDateTime endDate = LocalDateTime.parse(request.getExamEndDate(), formatter);
+
         Exam exam = new Exam();  // 실제 엔티티 클래스
         exam.setExamTitle(request.getExamTitle());
+        exam.setMemberId(memberId);
         exam.setExamMemo(request.getExamMemo());
         exam.setExamContents(request.getExamContents());
         exam.setExamNotice(request.getExamNotice());
-        exam.setExamStartDate(LocalDateTime.parse(request.getExamStartDate()));
-        exam.setExamEndDate(LocalDateTime.parse(request.getExamEndDate()));
+        exam.setExamStartDate(startDate);
+        exam.setExamEndDate(endDate);
         exam.setExamDueTime(request.getExamDueTime());
         exam.setExamStatus(request.getExamStatus());
         exam.setExamType(request.getExamType());
@@ -98,6 +104,7 @@ public class ExamService {
             problem.setProblemClass(ProblemClass.valueOf(problemRequestDto.getProblemClass()));
             problem.setProblemTimeLimit(problemRequestDto.getProblemTimeLimit());
             problem.setProblemMemoryLimit(problemRequestDto.getProblemMemoryLimit());
+            problem.setProblemStatus(ProblemStatus.PRIVATE);
             problem.setProblemPrompt(problemRequestDto.getProblemPrompt());
 
             List<Testcase> testcases = new ArrayList<>();
@@ -181,7 +188,7 @@ public class ExamService {
             problem.setProblemClass(ProblemClass.valueOf(problemRequestDto.getProblemClass()));
             problem.setProblemTimeLimit(problemRequestDto.getProblemTimeLimit());
             problem.setProblemMemoryLimit(problemRequestDto.getProblemMemoryLimit());
-            problem.setProblemStatus(ProblemStatus.valueOf(problemRequestDto.getProblemStatus()));
+            problem.setProblemStatus(ProblemStatus.PRIVATE);
             problem.setProblemPrompt(problemRequestDto.getProblemPrompt());
 
             // 테스트 케이스 업데이트
@@ -480,5 +487,22 @@ public class ExamService {
             return null;
         }
         return date.format(DateTimeFormatter.ofPattern("yyyy.MM.dd"));
+    }
+    // 교수 대시보드 진행중인 시험 목록 조회
+    public List<ExamCardInfoResponseDto> getProfessorExamCardInfo(Long memberId) {
+        List<Exam> exams = examRepository.findByExamStatusAndMemberId(ExamStatus.ONGOING, memberId);
+        return exams.stream()
+                .map(exam -> {
+                    String examStartDate = dateFormatter(exam.getExamStartDate());
+                    String examEndDate = dateFormatter(exam.getExamEndDate());
+                    return new ExamCardInfoResponseDto(
+                            exam.getExamId(),
+                            exam.getExamTitle(),
+                            examStartDate,
+                            examEndDate,
+                            exam.getExamStatus().getLabel()
+                    );
+                })
+                .collect(Collectors.toList());
     }
 }

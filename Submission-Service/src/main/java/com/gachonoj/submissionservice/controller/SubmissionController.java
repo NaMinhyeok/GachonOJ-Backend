@@ -6,6 +6,7 @@ import com.gachonoj.submissionservice.domain.dto.response.ExecuteResultResponseD
 import com.gachonoj.submissionservice.domain.dto.response.SubmissionResultResponseDto;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionDetailDto;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionExamResultInfoResponseDto;
+import com.gachonoj.submissionservice.domain.dto.response.TodaySubmissionCountResponseDto;
 import com.gachonoj.submissionservice.service.SubmissionService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -29,11 +30,18 @@ public class SubmissionController {
         return ResponseEntity.ok(CommonResponseDto.success(response));
     }
     @PostMapping("/submit/{problemId}")
-    public ResponseEntity<CommonResponseDto<SubmissionResultResponseDto>> submitCode(@PathVariable Long problemId, @RequestBody ExecuteRequestDto executeRequestDto, HttpServletRequest request) {
+    public ResponseEntity<CommonResponseDto<SubmissionResultResponseDto>> submitCode(HttpServletRequest request, @PathVariable Long problemId, @RequestBody ExecuteRequestDto executeRequestDto) {
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
         SubmissionResultResponseDto response = submissionService.submissionByProblemId(executeRequestDto, problemId, memberId);
         return ResponseEntity.ok(CommonResponseDto.success(response));
     }
+    // 금일 채점 결과 현황 조회
+    @GetMapping("/admin/today")
+    public ResponseEntity<CommonResponseDto<TodaySubmissionCountResponseDto>> getTodaySubmissionCount() {
+        TodaySubmissionCountResponseDto response = submissionService.getTodaySubmissionCount();
+        return ResponseEntity.ok(CommonResponseDto.success(response));
+    }
+
 
     @GetMapping("/results")
     public ResponseEntity<CommonResponseDto<SubmissionExamResultInfoResponseDto>> getSubmissionsInfo(

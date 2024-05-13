@@ -148,9 +148,8 @@ public class MemberController {
     }
     // 응시자 정보 조회 이메일 검색, 학번 검색
     @GetMapping("/info/test")
-    public ResponseEntity<CommonResponseDto<List<MemberInfoTestResponseDto>>> getMemberInfoTest(@RequestParam(required = false) String memberEmail,
-                                                                                           @RequestParam(required = false) String memberNumber) {
-        return ResponseEntity.ok(CommonResponseDto.success(memberService.getMemberInfoTest(memberEmail, memberNumber)));
+    public ResponseEntity<CommonResponseDto<List<MemberInfoTestResponseDto>>> getMemberInfoTest(@RequestParam(required = false) String search) {
+        return ResponseEntity.ok(CommonResponseDto.success(memberService.getMemberInfoTest(search)));
     }
     //로그아웃 구현
     @PostMapping("/logout")
@@ -170,5 +169,10 @@ public class MemberController {
     public ResponseEntity<CommonResponseDto<Void>> sendPasswordEmail(@RequestBody @Valid EmailRequestDto emailRequestDto) {
         memberService.sendPasswordEmail(emailRequestDto.getMemberEmail());
         return ResponseEntity.ok(CommonResponseDto.success());
+    }
+    // 학생 선호 언어 현황
+    @GetMapping("/professor/lang/count")
+    public ResponseEntity<CommonResponseDto<List<MemberLangCountResponseDto>>> getLangCount() {
+        return ResponseEntity.ok(CommonResponseDto.success(memberService.getMemberLangCount()));
     }
 }

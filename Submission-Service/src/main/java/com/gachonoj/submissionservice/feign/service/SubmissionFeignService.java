@@ -4,7 +4,11 @@ import com.gachonoj.submissionservice.domain.constant.Status;
 import com.gachonoj.submissionservice.domain.entity.Submission;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionDetailDto;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionExamResultInfoResponseDto;
+import com.gachonoj.submissionservice.domain.entity.Submission;
+import com.gachonoj.submissionservice.fegin.dto.response.SubmissionCodeInfoResponseDto;
+import com.gachonoj.submissionservice.feign.dto.response.CorrectRateResponseDto;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionMemberInfoResponseDto;
+import com.gachonoj.submissionservice.feign.dto.response.SubmissionResultCountResponseDto;
 import com.gachonoj.submissionservice.repository.SubmissionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +57,12 @@ public class SubmissionFeignService {
 
     //memberId로 틀린 문제 리스트 받아옴
     public List<Long> getIncorrectProblemIdsByMemberId(Long memberId) {
-        return submissionRepository.findIncorrectProblemIdsByMemberId(memberId);
+        // 틀린 문제 리스트 조회, 맞은 문제 리스트 조회
+        // 그 후 틀린 문제id와 맞은 문제id를 비교하여 틀린 문제만 반환
+        List<Long> incorrectProblemIds = submissionRepository.findIncorrectProblemIdsByMemberId(memberId);
+        List<Long> correctProblemIds = submissionRepository.findCorrectProblemIdsByMemberId(memberId);
+        incorrectProblemIds.removeAll(correctProblemIds);
+        return incorrectProblemIds;
     }
     //맞춘 문제 리스트 조회
     public List<Long> getCorrectProblemIdsByMemberId(Long memberId) {
@@ -63,5 +72,21 @@ public class SubmissionFeignService {
     public Integer getProblemSubmitCount(Long problemId) {
         return submissionRepository.countTotalSubmissionsByProblemId(problemId);
     }
-
+    // 제출 번호 통해서 제출 코드, 문제 ID 가져오기
+    public SubmissionCodeInfoResponseDto getSubmissionCodeInfo(Long submissionId) {
+        Submission submission = submissionRepository.findById(submissionId).orElseThrow(() -> new IllegalArgumentException("해당 제출이 존재하지 않습니다."));
+        return new SubmissionCodeInfoResponseDto(submission.getProblemId(), submission.getSubmissionCode());
+    }
+    // 오답률 높은 문제 TOP 5
+    public List<CorrectRateResponseDto> getTop5IncorrectProblemList() {
+        List<Long> top5IncorrectProblemIds = submissionRepository.findTop5IncorrectProblemIds();
+        return top5IncorrectProblemIds.stream().map(problemId -> {
+            double correctRate = getProblemCorrectRate(problemId);
+            return new CorrectRateResponseDto(problemId, correctRate);
+        }).toList();
+    }
+    // 오답률 높은 문제 분류 TOP 3를 가져오기 위한 문제 ID, 문제당 제출 개수, 오답 개수 조회
+    public List<SubmissionResultCountResponseDto> getIncorrectProblemClass() {
+        return submissionRepository.findIncorrectProblemClass();
+    }
 }

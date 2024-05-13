@@ -1,17 +1,15 @@
 package com.gachonoj.submissionservice.feign.controller;
 
-import com.gachonoj.submissionservice.domain.entity.Submission;
-import com.gachonoj.submissionservice.feign.dto.response.SubmissionDetailDto;
-import com.gachonoj.submissionservice.feign.dto.response.SubmissionExamResultInfoResponseDto;
+import com.gachonoj.submissionservice.feign.dto.response.CorrectRateResponseDto;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionMemberInfoResponseDto;
+import com.gachonoj.submissionservice.feign.dto.response.SubmissionResultCountResponseDto;
 import com.gachonoj.submissionservice.feign.service.SubmissionFeignService;
+import com.gachonoj.submissionservice.fegin.dto.response.SubmissionCodeInfoResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -58,5 +56,21 @@ public class SubmissionFeignController {
     @GetMapping("/problem/submitcount")
     public Integer getProblemSubmitCount(Long problemId) {
         return submissionFeignService.getProblemSubmitCount(problemId);
+    }
+
+    // 제출 번호 통해서 제출 코드, 문제 ID 가져오기
+    @GetMapping("/code/{submissionId}")
+    public SubmissionCodeInfoResponseDto getSubmissionCodeBySubmissionId(@PathVariable Long submissionId) {
+        return submissionFeignService.getSubmissionCodeInfo(submissionId);
+    }
+    // 오답률 높은 문제 TOP 5
+    @GetMapping("/problem/incorrect/top5")
+    public List<CorrectRateResponseDto> getTop5IncorrectProblemList() {
+        return submissionFeignService.getTop5IncorrectProblemList();
+    }
+    //    // 오답률 높은 문제 분류 TOP 3를 가져오기 위한 문제 ID, 문제당 제출 개수, 오답 개수 조회
+    @GetMapping("/submission/problem/incorrect/class")
+    public List<SubmissionResultCountResponseDto> getIncorrectProblemClass() {
+        return submissionFeignService.getIncorrectProblemClass();
     }
 }

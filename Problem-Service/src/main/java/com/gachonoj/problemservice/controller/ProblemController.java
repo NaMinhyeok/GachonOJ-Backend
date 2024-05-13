@@ -11,8 +11,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -208,7 +206,7 @@ public class ProblemController {
     // 사용자 문제 목록 조회
     @GetMapping("/problems/list/member")
     public ResponseEntity<CommonResponseDto<Page<ProblemListResponseDto>>> getProblemListByMember(@RequestParam(required = false,defaultValue = "1") int pageNo,
-                                                                                                  @RequestParam String type,
+                                                                                                  @RequestParam(required = false) String type,
                                                                                                   @RequestParam(required = false) String search,
                                                                                                   @RequestParam(required = false) String classType,
                                                                                                   @RequestParam(required = false) Integer diff,
@@ -255,4 +253,28 @@ public class ProblemController {
         Page<ExamResultListDto> results = examService.getExamResultList(examId, page);
         return ResponseEntity.ok(CommonResponseDto.success(results));
     }
+
+    // 교수 대시보드 진행중인 시험 목록 조회
+    @GetMapping("/professor/exam/ongoing")
+    public ResponseEntity<CommonResponseDto<List<ExamCardInfoResponseDto>>> getOngoingExam(HttpServletRequest request) {
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        List<ExamCardInfoResponseDto> result = examService.getProfessorExamCardInfo(memberId);
+        return ResponseEntity.ok(CommonResponseDto.success(result));
+    }
+
+    // TODO : 교수 대시보드 최근 오답률 높은 문제 분류 TOP 3 서비스 로직 만들기
+    // 교수 대시보드 최근 오답률 높은 문제 분류 TOP 3
+//    @GetMapping("/professor/incorrect/class")
+//    public ResponseEntity<CommonResponseDto<List<ProblemCardResponseDto>>> getIncorrectProblemClassList() {
+//        List<ProblemCardResponseDto> result = problemService.getTop3IncorrectProblemClass();
+//        return ResponseEntity.ok(CommonResponseDto.success(result));
+//    }
+
+    // 교수 대시보드 오답률 높은 알고리즘 TOP 5
+    @GetMapping("/professor/incorrect")
+    public ResponseEntity<CommonResponseDto<List<ProblemCardResponseDto>>> getIncorrectProblemList() {
+        List<ProblemCardResponseDto> result = problemService.getTop5IncorrectProblem();
+        return ResponseEntity.ok(CommonResponseDto.success(result));
+    }
+
 }
