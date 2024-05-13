@@ -19,6 +19,7 @@ public class ProblemRequestDto {
     private String problemClass; // Enum 이름을 String으로 받습니다.
     private Integer problemTimeLimit;
     private Integer problemMemoryLimit;
+    private String problemStatus; // Enum 이름을 String으로 받습니다.
     private String problemPrompt;
     private List<TestcaseRequestDto> testcases;
     private Integer questionScore;
