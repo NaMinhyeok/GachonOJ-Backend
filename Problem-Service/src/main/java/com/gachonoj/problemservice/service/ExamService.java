@@ -1,5 +1,6 @@
 package com.gachonoj.problemservice.service;
 
+import com.gachonoj.problemservice.common.codes.ErrorCode;
 import com.gachonoj.problemservice.domain.constant.*;
 import com.gachonoj.problemservice.domain.dto.request.ExamRequestDto;
 import com.gachonoj.problemservice.domain.dto.request.TestcaseRequestDto;
@@ -412,6 +413,20 @@ public class ExamService {
                     );
                 })
                 .collect(Collectors.toList());
+    }
+    // 시험 응시자 인지 확인 & 시험 시간 맞는지 확인 하기 위한 API
+    public ExamEnterResponseDto checkExamEnter(Long examId, Long memberId) {
+        Exam exam = examRepository.findById(examId)
+                .orElseThrow(() -> new IllegalArgumentException("Exam not found with id: " + examId));
+        if (exam.getExamStatus() == ExamStatus.ONGOING) {
+            Test test = testRepository.findByExamExamIdAndMemberId(examId, memberId);
+            if (test == null) {
+                throw new IllegalArgumentException("You are not allowed to enter this exam.");
+            }
+            return new ExamEnterResponseDto(true);
+        } else {
+            throw new IllegalArgumentException("This exam is not ongoing.");
+        }
     }
 }
     /*@Transactional

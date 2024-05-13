@@ -77,6 +77,11 @@ public enum ErrorCode {
     // Login Fail
     FAIL_LOGIN(401, "C001", "Login Fail"),
 
+    // Cannot Enter Exam
+    CANNOT_ENTER_EXAM(4033, "C003", "You are not allowed to enter this exam."),
+    // Cannot Enter Exam
+    CANNOT_ENTER_EXAM2(4033, "C004", "This exam is not ongoing."),
+
     // Business Exception Error
     BUSINESS_EXCEPTION_ERROR(200, "B999", "Business Exception Error"),
 

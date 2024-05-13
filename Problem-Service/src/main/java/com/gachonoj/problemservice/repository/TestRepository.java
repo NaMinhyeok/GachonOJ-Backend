@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface TestRepository extends JpaRepository<Test,Long> {
     List<Test> findByExamExamId(Long examId);
+
+    Test findByExamExamIdAndMemberId(Long examId, Long memberId);
 }
