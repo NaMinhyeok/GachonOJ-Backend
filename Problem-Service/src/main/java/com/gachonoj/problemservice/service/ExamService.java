@@ -185,7 +185,7 @@ public class ExamService {
             problem.setProblemClass(ProblemClass.valueOf(problemRequestDto.getProblemClass()));
             problem.setProblemTimeLimit(problemRequestDto.getProblemTimeLimit());
             problem.setProblemMemoryLimit(problemRequestDto.getProblemMemoryLimit());
-            problem.setProblemStatus(ProblemStatus.valueOf(problemRequestDto.getProblemStatus()));
+            problem.setProblemStatus(ProblemStatus.PRIVATE);
             problem.setProblemPrompt(problemRequestDto.getProblemPrompt());
 
             // 테스트 케이스 업데이트
