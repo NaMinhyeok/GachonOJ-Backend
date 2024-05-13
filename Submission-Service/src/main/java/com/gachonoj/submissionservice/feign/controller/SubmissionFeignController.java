@@ -1,15 +1,17 @@
 package com.gachonoj.submissionservice.feign.controller;
 
+import com.gachonoj.submissionservice.domain.entity.Submission;
+import com.gachonoj.submissionservice.feign.dto.response.SubmissionDetailDto;
+import com.gachonoj.submissionservice.feign.dto.response.SubmissionExamResultInfoResponseDto;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionMemberInfoResponseDto;
 import com.gachonoj.submissionservice.feign.service.SubmissionFeignService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -57,6 +59,4 @@ public class SubmissionFeignController {
     public Integer getProblemSubmitCount(Long problemId) {
         return submissionFeignService.getProblemSubmitCount(problemId);
     }
-    //
-
 }

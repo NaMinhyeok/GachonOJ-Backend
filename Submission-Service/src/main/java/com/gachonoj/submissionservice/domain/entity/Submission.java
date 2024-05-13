@@ -3,9 +3,7 @@ package com.gachonoj.submissionservice.domain.entity;
 import com.gachonoj.submissionservice.domain.constant.Language;
 import com.gachonoj.submissionservice.domain.constant.Status;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
@@ -16,6 +14,8 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 public class Submission {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -7,6 +7,9 @@ import com.gachonoj.problemservice.domain.dto.request.ProblemRequestDto;
 import com.gachonoj.problemservice.domain.dto.response.*;
 import com.gachonoj.problemservice.domain.entity.*;
 import com.gachonoj.problemservice.feign.client.MemberServiceFeignClient;
+import com.gachonoj.problemservice.feign.client.SubmissionServiceFeignClient;
+import com.gachonoj.problemservice.feign.dto.response.ProblemMemberInfoResponseDto;
+import com.gachonoj.problemservice.feign.dto.response.SubmissionExamResultInfoResponseDto;
 import com.gachonoj.problemservice.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +22,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -35,6 +39,7 @@ public class ExamService {
     private final ProblemRepository problemRepository;
     private final TestRepository testRepository;
     private final MemberServiceFeignClient memberServiceFeignClient;
+    private final SubmissionServiceFeignClient submissionServiceFeignClient;
 
     private static final int PAGE_SIZE = 10;
 
@@ -382,6 +387,59 @@ public class ExamService {
                 exam.getExamEndDate(),
                 examType.getLabel(),
                 exam.getExamNotice()
+        );
+    }
+
+    // 시험 결과 조회
+    @Transactional(readOnly = true)
+    public ExamResultDetailsResponseDto getExamResults(Long testId) {
+        Test test = testRepository.findById(testId)
+                .orElseThrow(() -> new IllegalArgumentException("Test not found with id: " + testId));
+
+        Exam exam = test.getExam();
+        ProblemMemberInfoResponseDto memberInfo = memberServiceFeignClient.getMemberInfo(test.getMemberId());
+
+        List<Question> questionsList = questionRepository.findByExamExamId(exam.getExamId());
+        List<Long> problemIds = questionsList.stream()
+                .map(question -> question.getProblem().getProblemId())
+                .collect(Collectors.toList());
+
+        SubmissionExamResultInfoResponseDto submissionsInfo = submissionServiceFeignClient.fetchSubmissionsInfo(problemIds, test.getMemberId());
+        Map<Long, Question> questionMap = questionsList.stream()
+                .collect(Collectors.toMap(question -> question.getProblem().getProblemId(), Function.identity()));
+
+        final int[] totalScore = {0};
+        List<QuestionResultDetailsResponseDto> questionDtos = submissionsInfo.getSubmissions().stream()
+                .map(submission -> {
+                    Question question = questionMap.get(submission.getProblemId());
+                    int questionScore = submission.isCorrect() ? question.getQuestionScore() : 0;
+                    totalScore[0] += questionScore;
+                    return new QuestionResultDetailsResponseDto(
+                            question.getQuestionSequence(),
+                            question.getQuestionScore(),
+                            submission.getProblemId(),
+                            question.getProblem().getProblemTitle(),
+                            question.getProblem().getProblemContents(),
+                            submission.isCorrect(),
+                            submission.getSubmissionCode()
+                    );
+                })
+                .collect(Collectors.toList());
+
+        test.setTestScore(totalScore[0]); // Update the test score
+        testRepository.save(test); // Save the updated test score
+
+        return new ExamResultDetailsResponseDto(
+                exam.getExamTitle(),
+                exam.getExamMemo(),
+                (int) testRepository.countByExamExamId(exam.getExamId()),
+                memberInfo.getMemberName(),
+                memberInfo.getMemberNumber(),
+                memberInfo.getMemberEmail(),
+                test.getTestScore(),
+                Duration.between(exam.getExamStartDate(), exam.getExamEndDate()).toString(),
+                test.getTestEndDate().toString(),
+                questionDtos
         );
     }
 

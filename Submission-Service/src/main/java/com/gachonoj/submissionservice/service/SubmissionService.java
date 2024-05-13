@@ -8,8 +8,10 @@ import com.gachonoj.submissionservice.domain.dto.response.SubmissionResultRespon
 import com.gachonoj.submissionservice.domain.entity.Submission;
 import com.gachonoj.submissionservice.feign.client.MemberServiceFeignClient;
 import com.gachonoj.submissionservice.feign.client.ProblemServiceFeignClient;
+import com.gachonoj.submissionservice.feign.dto.response.SubmissionDetailDto;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionMemberRankInfoResponseDto;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionProblemTestCaseResponseDto;
+import com.gachonoj.submissionservice.repository.SubmissionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -20,6 +22,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -27,6 +31,7 @@ import java.util.*;
 public class SubmissionService {
     private final ProblemServiceFeignClient problemServiceFeignClient;
     private final MemberServiceFeignClient memberServiceFeignClient;
+    private final SubmissionRepository submissionRepository;
 
     // 문제 코드 실행
     // TODO : 문제의 테스트케이스 추가된 경우 가져와서 실행하도록 한다.
@@ -219,5 +224,16 @@ public class SubmissionService {
             result.put(e.getMessage(), "Error");
             return result;
         }
+    }
+
+    public List<SubmissionDetailDto> getSubmissionsDetails(Long memberId, List<Long> problemIds) {
+        List<Submission> submissions = submissionRepository.findByMemberIdAndProblemIdIn(memberId, problemIds);
+        return submissions.stream()
+                .map(submission -> new SubmissionDetailDto(
+                        submission.getProblemId(),
+                        submission.getSubmissionStatus() == Status.CORRECT,
+                        submission.getSubmissionCode()
+                ))
+                .collect(Collectors.toList());
     }
 }

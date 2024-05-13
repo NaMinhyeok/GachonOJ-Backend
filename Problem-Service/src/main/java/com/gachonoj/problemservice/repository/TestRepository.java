@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface TestRepository extends JpaRepository<Test,Long> {
     List<Test> findByExamExamId(Long examId);
+    int countByExamExamId(Long examId);
 }

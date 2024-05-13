@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface SubmissionRepository extends JpaRepository<Submission,Long> {
     // 푼 문제수 조회
@@ -30,4 +31,8 @@ public interface SubmissionRepository extends JpaRepository<Submission,Long> {
     // 맞춘 문제 조회
     @Query("SELECT DISTINCT s.problemId FROM Submission s WHERE s.memberId = :memberId AND s.submissionStatus = com.gachonoj.submissionservice.domain.constant.Status.CORRECT")
     List<Long> findCorrectProblemIdsByMemberId(@Param("memberId") Long memberId);
+
+    // Member ID와 Problem IDs를 기반으로 제출 정보를 가져오는 메서드 추가
+    List<Submission> findByMemberIdAndProblemIdIn(Long memberId, List<Long> problemIds);
+
 }

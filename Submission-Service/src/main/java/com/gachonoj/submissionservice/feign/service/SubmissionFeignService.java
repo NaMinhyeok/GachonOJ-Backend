@@ -1,12 +1,19 @@
 package com.gachonoj.submissionservice.feign.service;
 
+import com.gachonoj.submissionservice.domain.constant.Status;
+import com.gachonoj.submissionservice.domain.entity.Submission;
+import com.gachonoj.submissionservice.feign.dto.response.SubmissionDetailDto;
+import com.gachonoj.submissionservice.feign.dto.response.SubmissionExamResultInfoResponseDto;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionMemberInfoResponseDto;
 import com.gachonoj.submissionservice.repository.SubmissionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -56,4 +63,5 @@ public class SubmissionFeignService {
     public Integer getProblemSubmitCount(Long problemId) {
         return submissionRepository.countTotalSubmissionsByProblemId(problemId);
     }
+
 }

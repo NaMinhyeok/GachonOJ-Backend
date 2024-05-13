@@ -18,4 +18,5 @@ public interface ProblemServiceFeignClient {
     // 문제 점수 조회
     @GetMapping("/problem/{problemId}/score")
     Integer getProblemScore(@PathVariable Long problemId);
+
 }

@@ -1,7 +1,7 @@
 package com.gachonoj.problemservice.feign.client;
 
 
-import com.gachonoj.memberservice.feign.dto.response.ProblemMemberInfoResponseDto;
+import com.gachonoj.problemservice.feign.dto.response.ProblemMemberInfoResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

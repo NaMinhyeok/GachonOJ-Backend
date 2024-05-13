@@ -4,6 +4,8 @@ import com.gachonoj.submissionservice.common.response.CommonResponseDto;
 import com.gachonoj.submissionservice.domain.dto.request.ExecuteRequestDto;
 import com.gachonoj.submissionservice.domain.dto.response.ExecuteResultResponseDto;
 import com.gachonoj.submissionservice.domain.dto.response.SubmissionResultResponseDto;
+import com.gachonoj.submissionservice.feign.dto.response.SubmissionDetailDto;
+import com.gachonoj.submissionservice.feign.dto.response.SubmissionExamResultInfoResponseDto;
 import com.gachonoj.submissionservice.service.SubmissionService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -31,5 +33,14 @@ public class SubmissionController {
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
         SubmissionResultResponseDto response = submissionService.submissionByProblemId(executeRequestDto, problemId, memberId);
         return ResponseEntity.ok(CommonResponseDto.success(response));
+    }
+
+    @GetMapping("/results")
+    public ResponseEntity<CommonResponseDto<SubmissionExamResultInfoResponseDto>> getSubmissionsInfo(
+            @RequestParam List<Long> problemIds,
+            @RequestParam Long memberId) {
+        List<SubmissionDetailDto> submissionDetails = submissionService.getSubmissionsDetails(memberId, problemIds);
+        SubmissionExamResultInfoResponseDto responseDto = new SubmissionExamResultInfoResponseDto(submissionDetails);
+        return ResponseEntity.ok(CommonResponseDto.success(responseDto));
     }
 }

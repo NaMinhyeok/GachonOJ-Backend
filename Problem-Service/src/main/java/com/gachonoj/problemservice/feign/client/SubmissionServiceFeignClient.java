@@ -1,5 +1,6 @@
 package com.gachonoj.problemservice.feign.client;
 
+import com.gachonoj.problemservice.feign.dto.response.SubmissionExamResultInfoResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,6 +24,10 @@ public interface SubmissionServiceFeignClient {
     // memberId로 맞춘 문제 조회
     @GetMapping("/submission/problem/correct")
     List<Long> getCorrectProblemIds(@RequestParam Long memberId);
+
+    // problemId로 제출 정보 조회
+    @GetMapping("/submission/exam/result")
+    SubmissionExamResultInfoResponseDto fetchSubmissionsInfo(@RequestParam("problemId") List<Long> problemIds, @RequestParam("memberId") Long memberId);
 }
 
 
