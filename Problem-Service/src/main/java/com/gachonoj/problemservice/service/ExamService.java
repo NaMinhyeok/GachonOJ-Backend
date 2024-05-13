@@ -426,13 +426,13 @@ public class ExamService {
                 })
                 .collect(Collectors.toList());
 
-        test.setTestScore(totalScore[0]); // Update the test score
-        testRepository.save(test); // Save the updated test score
+        test.setTestScore(totalScore[0]);
+        testRepository.save(test);
 
         return new ExamResultDetailsResponseDto(
                 exam.getExamTitle(),
                 exam.getExamMemo(),
-                (int) testRepository.countByExamExamId(exam.getExamId()),
+                testRepository.countByExamExamId(exam.getExamId()),
                 memberInfo.getMemberName(),
                 memberInfo.getMemberNumber(),
                 memberInfo.getMemberEmail(),
@@ -441,6 +441,37 @@ public class ExamService {
                 test.getTestEndDate().toString(),
                 questionDtos
         );
+    }
+
+    // 시험 결과 목록 조회
+    @Transactional(readOnly = true)
+    public Page<ExamResultListDto> getExamResultList(Long examId, int pageNo) {
+        Pageable pageable = PageRequest.of(pageNo - 1, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "testEndDate"));
+        Exam exam = examRepository.findById(examId)
+                .orElseThrow(() -> new IllegalArgumentException("Exam not found with id: " + examId));
+
+        Page<Test> tests = testRepository.findByExamExamId(examId, pageable);
+        int submissionTotal = (int) tests.getTotalElements();
+
+        return tests.map(test -> {
+            ProblemMemberInfoResponseDto memberInfo = memberServiceFeignClient.getMemberInfo(test.getMemberId());
+            int totalScore = test.getTestScore();
+            String examDueTime = Duration.between(exam.getExamStartDate(), exam.getExamEndDate()).toMinutes() + " minutes";
+            String submissionDate = test.getTestEndDate().toString();  // Format as needed
+
+            return new ExamResultListDto(
+                    exam.getExamTitle(),
+                    exam.getExamMemo(),
+                    submissionTotal,
+                    test.getMemberId(),
+                    memberInfo.getMemberName(),
+                    memberInfo.getMemberNumber(),
+                    memberInfo.getMemberEmail(),
+                    totalScore,
+                    examDueTime,
+                    submissionDate
+            );
+        });
     }
 
     // DateFormatter를 사용하여 날짜 형식을 변경하는 메서드

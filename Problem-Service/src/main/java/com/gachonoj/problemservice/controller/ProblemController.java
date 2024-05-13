@@ -11,6 +11,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -117,16 +119,9 @@ public class ProblemController {
 
     // 알고리즘 문제 삭제
     @DeleteMapping("/admin/{problemId}")
-    public ResponseEntity<Map<String, Object>> deleteProblem(@PathVariable Long problemId) {
+    public ResponseEntity<CommonResponseDto<Void>> deleteProblem(@PathVariable Long problemId) {
         problemService.deleteProblem(problemId);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("isSuccess", true);
-        response.put("code", HttpStatus.OK.value());
-        response.put("time", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        response.put("msg", "문제 삭제 성공");
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok(CommonResponseDto.success());
     }
 
 //    @GetMapping("/bookmark/list")
@@ -268,6 +263,14 @@ public class ProblemController {
     public ResponseEntity<CommonResponseDto<ExamResultDetailsResponseDto>> getExamResults(@PathVariable Long testId) {
             ExamResultDetailsResponseDto examResult = examService.getExamResults(testId);
             return ResponseEntity.ok(CommonResponseDto.success(examResult));
+    }
 
+    // 시험 결과 목록 조회
+    @GetMapping("/exams/{examId}/results")
+    public ResponseEntity<CommonResponseDto<Page<ExamResultListDto>>> getExamResultList(
+            @PathVariable Long examId,
+            @RequestParam(defaultValue = "1") int page) {
+        Page<ExamResultListDto> results = examService.getExamResultList(examId, page);
+        return ResponseEntity.ok(CommonResponseDto.success(results));
     }
 }
