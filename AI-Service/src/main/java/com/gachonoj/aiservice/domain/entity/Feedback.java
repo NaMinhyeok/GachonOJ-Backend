@@ -2,10 +2,15 @@ package com.gachonoj.aiservice.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table
+@Getter
 @NoArgsConstructor
 public class Feedback {
     @Id
@@ -21,6 +26,8 @@ public class Feedback {
     private String aiContents;
     @Column(nullable = false)
     private Integer totalTokens;
+    @CreatedDate
+    private LocalDateTime feedbackCreatedDate;
 
     @Builder
     public Feedback(Long submissionId, Long memberId, Long problemId, String aiContents, Integer totalTokens) {
