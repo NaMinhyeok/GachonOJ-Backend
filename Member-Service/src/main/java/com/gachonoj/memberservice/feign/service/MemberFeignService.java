@@ -1,6 +1,7 @@
 package com.gachonoj.memberservice.feign.service;
 
 import com.gachonoj.memberservice.domain.entity.Member;
+import com.gachonoj.memberservice.feign.dto.response.ProblemMemberInfoResponseDto;
 import com.gachonoj.memberservice.feign.dto.response.SubmissionMemberRankInfoResponseDto;
 import com.gachonoj.memberservice.repository.MemberRepository;
 import com.gachonoj.memberservice.service.MemberService;
@@ -34,5 +35,16 @@ public class MemberFeignService {
     public void updateMemberRank(Long memberId, Integer newRank) {
         Member member = memberRepository.findByMemberId(memberId);
         member.setMemberRank(newRank);
+    }
+
+    // memberId로 member 정보 조회
+    public ProblemMemberInfoResponseDto getMemberInfo(Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("Member not found with id: " + memberId));
+        return new ProblemMemberInfoResponseDto(
+                member.getMemberNumber(),
+                member.getMemberName(),
+                member.getMemberEmail()
+        );
     }
 }

@@ -85,48 +85,23 @@ public class ProblemController {
     }
     // 알고리즘 문제 등록
     @PostMapping("/admin/register")
-    public ResponseEntity<Map<String, Object>> registerProblem(@RequestBody ProblemRequestDto problemRequestDto) {
-        // ProblemService를 호출하여 요청 DTO에 기반하여 문제 등록
-        problemService.registerProblem(problemRequestDto); // 문제 ID 저장하지 않음
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("isSuccess", true);
-        response.put("code", HttpStatus.CREATED.value()); // 201
-        response.put("time", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))); // 현재 시간
-        response.put("msg", "문제 등록 성공");
-        // API 디자인 패턴: 성공적인 생성이 생성된 엔터티의 세부 정보를 반환하지 않는 패턴
-
-        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    public ResponseEntity<CommonResponseDto<Void>> registerProblem(@RequestBody ProblemRequestDto problemRequestDto) {
+        problemService.registerProblem(problemRequestDto);
+        return ResponseEntity.ok(CommonResponseDto.success());
     }
 
     // 알고리즘 문제 수정
     @PutMapping("/admin/register/{problemId}")
-    public ResponseEntity<Map<String, Object>> updateProblem(@PathVariable Long problemId, @RequestBody ProblemRequestDto problemRequestDto) {
-        // ProblemService를 호출하여 요청 DTO에 기반하여 문제 수정
+    public ResponseEntity<CommonResponseDto<Void>> updateProblem(@PathVariable Long problemId, @RequestBody ProblemRequestDto problemRequestDto) {
         problemService.updateProblem(problemId, problemRequestDto);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("isSuccess", true);
-        response.put("code", HttpStatus.OK.value()); // 200
-        response.put("time", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))); // 현재 시간
-        response.put("msg", "문제 수정 성공");
-        // 문제 수정 성공 응답에는 수정된 문제의 세부 정보를 반환하지 않음
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok(CommonResponseDto.success());
     }
 
     // 알고리즘 문제 삭제
     @DeleteMapping("/admin/{problemId}")
-    public ResponseEntity<Map<String, Object>> deleteProblem(@PathVariable Long problemId) {
+    public ResponseEntity<CommonResponseDto<Void>> deleteProblem(@PathVariable Long problemId) {
         problemService.deleteProblem(problemId);
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("isSuccess", true);
-        response.put("code", HttpStatus.OK.value());
-        response.put("time", LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
-        response.put("msg", "문제 삭제 성공");
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
+        return ResponseEntity.ok(CommonResponseDto.success());
     }
 
 //    @GetMapping("/bookmark/list")
@@ -261,6 +236,22 @@ public class ProblemController {
     public ResponseEntity<CommonResponseDto<ProblemDetailAdminResponseDto>> getProblemDetailAdmin(@PathVariable Long problemId) {
         ProblemDetailAdminResponseDto result = problemService.getProblemDetailAdmin(problemId);
         return ResponseEntity.ok(CommonResponseDto.success(result));
+    }
+
+    // 시험 결과 상세 조회
+    @GetMapping("/admin/result/{testId}")
+    public ResponseEntity<CommonResponseDto<ExamResultDetailsResponseDto>> getExamResults(@PathVariable Long testId) {
+            ExamResultDetailsResponseDto examResult = examService.getExamResults(testId);
+            return ResponseEntity.ok(CommonResponseDto.success(examResult));
+    }
+
+    // 시험 결과 목록 조회
+    @GetMapping("/exams/{examId}/results")
+    public ResponseEntity<CommonResponseDto<Page<ExamResultListDto>>> getExamResultList(
+            @PathVariable Long examId,
+            @RequestParam(defaultValue = "1") int page) {
+        Page<ExamResultListDto> results = examService.getExamResultList(examId, page);
+        return ResponseEntity.ok(CommonResponseDto.success(results));
     }
 
     // 교수 대시보드 진행중인 시험 목록 조회

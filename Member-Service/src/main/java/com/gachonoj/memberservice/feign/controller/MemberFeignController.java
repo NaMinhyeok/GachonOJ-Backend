@@ -1,5 +1,6 @@
 package com.gachonoj.memberservice.feign.controller;
 
+import com.gachonoj.memberservice.feign.dto.response.ProblemMemberInfoResponseDto;
 import com.gachonoj.memberservice.feign.dto.response.SubmissionMemberRankInfoResponseDto;
 import com.gachonoj.memberservice.feign.service.MemberFeignService;
 import lombok.RequiredArgsConstructor;
@@ -27,5 +28,9 @@ public class MemberFeignController {
     @PostMapping("/{memberId}/rank")
     public void updateMemberRank(@PathVariable Long memberId, @RequestBody Integer newRank) {
         memberFeignService.updateMemberRank(memberId, newRank);
+    }
+    @GetMapping("/{memberId}/info")
+    public ProblemMemberInfoResponseDto getMemberInfo(@PathVariable Long memberId) {
+        return memberFeignService.getMemberInfo(memberId);
     }
 }

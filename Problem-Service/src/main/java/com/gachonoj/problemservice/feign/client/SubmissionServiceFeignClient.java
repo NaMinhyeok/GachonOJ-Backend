@@ -1,5 +1,6 @@
 package com.gachonoj.problemservice.feign.client;
 
+import com.gachonoj.problemservice.feign.dto.response.SubmissionExamResultInfoResponseDto;
 import com.gachonoj.problemservice.feign.dto.response.CorrectRateResponseDto;
 import com.gachonoj.problemservice.feign.dto.response.SubmissionResultCountResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -25,6 +26,10 @@ public interface SubmissionServiceFeignClient {
     // memberId로 맞춘 문제 조회
     @GetMapping("/submission/problem/correct")
     List<Long> getCorrectProblemIds(@RequestParam Long memberId);
+
+    // problemId로 제출 정보 조회
+    @GetMapping("/submission/exam/result")
+    SubmissionExamResultInfoResponseDto fetchSubmissionsInfo(@RequestParam("problemId") List<Long> problemIds, @RequestParam("memberId") Long memberId);
     // 오답률 높은 문제 TOP 5
     @GetMapping("/submission/problem/incorrect/top5")
     List<CorrectRateResponseDto> getTop5IncorrectProblemList();
