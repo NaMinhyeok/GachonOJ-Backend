@@ -4,6 +4,7 @@ import com.gachonoj.submissionservice.domain.constant.Language;
 import com.gachonoj.submissionservice.domain.constant.Status;
 import com.gachonoj.submissionservice.domain.dto.request.ExecuteRequestDto;
 import com.gachonoj.submissionservice.domain.dto.response.ExecuteResultResponseDto;
+import com.gachonoj.submissionservice.domain.dto.response.MySubmissionResultResponseDto;
 import com.gachonoj.submissionservice.domain.dto.response.SubmissionResultResponseDto;
 import com.gachonoj.submissionservice.domain.dto.response.TodaySubmissionCountResponseDto;
 import com.gachonoj.submissionservice.domain.entity.Submission;
@@ -142,5 +143,14 @@ public class SubmissionService {
             }
         }
         return new TodaySubmissionCountResponseDto(total, correct, incorrect);
+    }
+    // 제출한 코드 확인하기
+    public MySubmissionResultResponseDto getSubmissionCodeBySubmissionId(Long submissionId) {
+        Submission submission = submissionRepository.findBySubmissionId(submissionId);
+        // 문제 제목 가져오기
+        String problemTitle = problemServiceFeignClient.getProblemTitle(submission.getProblemId());
+        // 닉네임 가져오기
+        String nickname = memberServiceFeignClient.getMemberNickname(submission.getMemberId());
+        return new MySubmissionResultResponseDto(nickname,problemTitle,submission.getSubmissionCode());
     }
 }
