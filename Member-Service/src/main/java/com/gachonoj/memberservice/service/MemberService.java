@@ -364,7 +364,7 @@ public class MemberService {
     public List<MemberInfoTestResponseDto> getMemberInfoTest(String search) {
         List<Member> members;
         if(search != null) {
-            members = memberRepository.findByMemberEmailContainingOrMemberNumberContaining(search,search);
+            members = memberRepository.findByMemberEmailContainingAndMemberRoleOrMemberNumberContainingAndMemberRole(search, Role.ROLE_STUDENT, search, Role.ROLE_STUDENT);
         } else {
             throw new IllegalArgumentException("이메일 또는 학번을 입력해주세요.");
         }

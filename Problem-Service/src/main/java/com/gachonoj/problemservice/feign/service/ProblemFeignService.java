@@ -71,4 +71,10 @@ public class ProblemFeignService {
                 .orElseThrow(()->new IllegalArgumentException("해당 문제가 존재하지 않습니다."));
         return problem.getProblemTimeLimit();
     }
+    // 문제 제목 가져오기
+    public String getProblemTitle(Long problemId){
+        Problem problem = problemRepository.findByProblemId(problemId)
+                .orElseThrow(()->new IllegalArgumentException("해당 문제가 존재하지 않습니다."));
+        return problem.getProblemTitle();
+    }
 }

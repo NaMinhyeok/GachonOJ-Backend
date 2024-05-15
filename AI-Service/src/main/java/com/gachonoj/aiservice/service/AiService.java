@@ -4,6 +4,7 @@ import com.gachonoj.aiservice.domain.dto.request.ChatGPTRequest;
 import com.gachonoj.aiservice.domain.dto.request.FeedbackRequestDto;
 import com.gachonoj.aiservice.domain.dto.response.AiFeedbackResponseDto;
 import com.gachonoj.aiservice.domain.dto.response.ChatGPTResponse;
+import com.gachonoj.aiservice.domain.dto.response.TokenUsageResponseDto;
 import com.gachonoj.aiservice.domain.entity.Feedback;
 import com.gachonoj.aiservice.feign.client.ProblemServiceFeignClient;
 import com.gachonoj.aiservice.feign.client.SubmissionServiceFeignClient;
@@ -14,6 +15,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -61,6 +65,13 @@ public class AiService {
         Feedback feedback = new Feedback(submissionId, memberId, problemId, aiContents,totalTokens);
         feedbackRepository.save(feedback);
         return new AiFeedbackResponseDto(aiContents);
+    }
+    // 토큰 사용량 조회
+    public TokenUsageResponseDto tokenUsage() {
+        List<Feedback> feedbacks= feedbackRepository.findByFeedbackCreatedDateBetween(LocalDate.now().atStartOfDay(), LocalDate.now().atTime(23,59,59));
+        Long todayTokenUsage = feedbacks.stream().mapToLong(Feedback::getTotalTokens).sum();
+        Long totalTokenUsage = feedbackRepository.findAll().stream().mapToLong(Feedback::getTotalTokens).sum();
+        return new TokenUsageResponseDto(todayTokenUsage, totalTokenUsage);
     }
 
 }

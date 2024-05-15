@@ -3,6 +3,7 @@ package com.gachonoj.aiservice.controller;
 import com.gachonoj.aiservice.common.response.CommonResponseDto;
 import com.gachonoj.aiservice.domain.dto.request.FeedbackRequestDto;
 import com.gachonoj.aiservice.domain.dto.response.AiFeedbackResponseDto;
+import com.gachonoj.aiservice.domain.dto.response.TokenUsageResponseDto;
 import com.gachonoj.aiservice.service.AiService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Getter;
@@ -30,6 +31,12 @@ public class AiController {
     public ResponseEntity<CommonResponseDto<AiFeedbackResponseDto>> feedback(@PathVariable Long submissionId, HttpServletRequest request) {
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
         AiFeedbackResponseDto response = aiService.feedback(submissionId, memberId);
+        return ResponseEntity.ok(CommonResponseDto.success(response));
+    }
+    // ai 사용 토큰 갯수 조회
+    @GetMapping("/admin/token")
+    public ResponseEntity<CommonResponseDto<TokenUsageResponseDto>> tokenUsage() {
+        TokenUsageResponseDto response = aiService.tokenUsage();
         return ResponseEntity.ok(CommonResponseDto.success(response));
     }
 }

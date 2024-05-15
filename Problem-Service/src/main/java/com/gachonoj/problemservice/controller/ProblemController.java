@@ -276,5 +276,12 @@ public class ProblemController {
         List<ProblemCardResponseDto> result = problemService.getTop5IncorrectProblem();
         return ResponseEntity.ok(CommonResponseDto.success(result));
     }
+    // 시험 응시자 인지 확인 & 시험 시간 맞는지 확인 하기 위한 API
+    @GetMapping("/exam/{examId}/enter")
+    public ResponseEntity<CommonResponseDto<ExamEnterResponseDto>> getExamEnter(@PathVariable Long examId, HttpServletRequest request) {
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        ExamEnterResponseDto responseDto = examService.checkExamEnter(examId, memberId);
+        return ResponseEntity.ok(CommonResponseDto.success(responseDto));
+    }
 
 }
