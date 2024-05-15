@@ -10,10 +10,12 @@ import com.gachonoj.submissionservice.domain.dto.response.TodaySubmissionCountRe
 import com.gachonoj.submissionservice.domain.entity.Submission;
 import com.gachonoj.submissionservice.feign.client.MemberServiceFeignClient;
 import com.gachonoj.submissionservice.feign.client.ProblemServiceFeignClient;
+import com.gachonoj.submissionservice.feign.dto.response.SubmissionDetailDto;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionMemberRankInfoResponseDto;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionProblemTestCaseResponseDto;
 import com.gachonoj.submissionservice.repository.SubmissionRepository;
 import com.netflix.discovery.converters.Auto;
+import com.gachonoj.submissionservice.repository.SubmissionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,8 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -143,6 +147,18 @@ public class SubmissionService {
             }
         }
         return new TodaySubmissionCountResponseDto(total, correct, incorrect);
+    }
+
+    // 시험 제출 정보 조회
+    public List<SubmissionDetailDto> getSubmissionsDetails(Long memberId, List<Long> problemIds) {
+        List<Submission> submissions = submissionRepository.findByMemberIdAndProblemIdIn(memberId, problemIds);
+        return submissions.stream()
+                .map(submission -> new SubmissionDetailDto(
+                        submission.getProblemId(),
+                        submission.getSubmissionStatus() == Status.CORRECT,
+                        submission.getSubmissionCode()
+                ))
+                .collect(Collectors.toList());
     }
     // 제출한 코드 확인하기
     public MySubmissionResultResponseDto getSubmissionCodeBySubmissionId(Long submissionId) {
