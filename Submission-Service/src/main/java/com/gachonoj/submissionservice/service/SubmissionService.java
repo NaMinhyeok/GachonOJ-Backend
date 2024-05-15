@@ -5,6 +5,7 @@ import com.gachonoj.submissionservice.domain.constant.Status;
 import com.gachonoj.submissionservice.domain.dto.request.ExecuteRequestDto;
 import com.gachonoj.submissionservice.domain.dto.response.ExecuteResultResponseDto;
 import com.gachonoj.submissionservice.domain.dto.response.MySubmissionResultResponseDto;
+import com.gachonoj.submissionservice.domain.dto.response.SubmissionRecordResponseDto;
 import com.gachonoj.submissionservice.domain.dto.response.SubmissionResultResponseDto;
 import com.gachonoj.submissionservice.domain.dto.response.TodaySubmissionCountResponseDto;
 import com.gachonoj.submissionservice.domain.entity.Submission;
@@ -168,5 +169,17 @@ public class SubmissionService {
         // 닉네임 가져오기
         String nickname = memberServiceFeignClient.getMemberNickname(submission.getMemberId());
         return new MySubmissionResultResponseDto(nickname,problemTitle,submission.getSubmissionCode());
+    }
+
+    // 제출 이력 조회
+    public List<SubmissionRecordResponseDto> getSubmissionRecordsByMemberAndProblemId(Long memberId, Long problemId) {
+        List<Submission> submissions = submissionRepository.findByMemberIdAndProblemId(memberId, problemId);
+        return submissions.stream()
+                .map(submission -> new SubmissionRecordResponseDto(
+                        submission.getSubmissionStatus(),
+                        submission.getSubmissionLang(),
+                        submission.getSubmissionDate()
+                ))
+                .collect(Collectors.toList());
     }
 }

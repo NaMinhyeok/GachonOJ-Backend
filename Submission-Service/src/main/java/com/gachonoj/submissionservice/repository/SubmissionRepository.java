@@ -53,5 +53,8 @@ public interface SubmissionRepository extends JpaRepository<Submission,Long> {
     @Query("SELECT s.problemId, COUNT(s.problemId), SUM(CASE WHEN s.submissionStatus = 'INCORRECT' THEN 1 ELSE 0 END) FROM Submission s GROUP BY s.problemId ORDER BY COUNT(s.problemId) DESC")
     List<SubmissionResultCountResponseDto> findIncorrectProblemClass();
 
+    // 제출 코드에 대한 ProblemId
+    List<Submission> findByMemberIdAndProblemId(Long memberId, Long problemId);
+
     Submission findBySubmissionId(Long submissionId);
 }
