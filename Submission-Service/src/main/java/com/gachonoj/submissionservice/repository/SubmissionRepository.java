@@ -52,4 +52,7 @@ public interface SubmissionRepository extends JpaRepository<Submission,Long> {
     // 오답률 높은 문제 분류 TOP 3를 가져오기 위한 문제 ID, 문제당 제출 개수, 오답 개수 조회
     @Query("SELECT s.problemId, COUNT(s.problemId), SUM(CASE WHEN s.submissionStatus = 'INCORRECT' THEN 1 ELSE 0 END) FROM Submission s GROUP BY s.problemId ORDER BY COUNT(s.problemId) DESC")
     List<SubmissionResultCountResponseDto> findIncorrectProblemClass();
+
+    //
+    List<Submission> findByMemberIdAndProblemId(Long memberId, Long problemId);
 }

@@ -246,7 +246,7 @@ public class ProblemController {
     }
 
     // 시험 결과 목록 조회
-    @GetMapping("/exams/{examId}/results")
+    @GetMapping("/exam/{examId}/results")
     public ResponseEntity<CommonResponseDto<Page<ExamResultListDto>>> getExamResultList(
             @PathVariable Long examId,
             @RequestParam(defaultValue = "1") int page) {

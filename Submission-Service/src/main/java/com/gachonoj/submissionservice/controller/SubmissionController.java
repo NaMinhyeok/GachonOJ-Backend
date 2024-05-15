@@ -3,6 +3,7 @@ package com.gachonoj.submissionservice.controller;
 import com.gachonoj.submissionservice.common.response.CommonResponseDto;
 import com.gachonoj.submissionservice.domain.dto.request.ExecuteRequestDto;
 import com.gachonoj.submissionservice.domain.dto.response.ExecuteResultResponseDto;
+import com.gachonoj.submissionservice.domain.dto.response.SubmissionRecordResponseDto;
 import com.gachonoj.submissionservice.domain.dto.response.SubmissionResultResponseDto;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionDetailDto;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionExamResultInfoResponseDto;
@@ -43,6 +44,7 @@ public class SubmissionController {
     }
 
 
+    // 시험 결과 목록 조회
     @GetMapping("/results")
     public ResponseEntity<CommonResponseDto<SubmissionExamResultInfoResponseDto>> getSubmissionsInfo(
             @RequestParam List<Long> problemIds,
@@ -50,5 +52,15 @@ public class SubmissionController {
         List<SubmissionDetailDto> submissionDetails = submissionService.getSubmissionsDetails(memberId, problemIds);
         SubmissionExamResultInfoResponseDto responseDto = new SubmissionExamResultInfoResponseDto(submissionDetails);
         return ResponseEntity.ok(CommonResponseDto.success(responseDto));
+    }
+
+    // 제출 이력 조회
+    @GetMapping("/record/{problemId}")
+    public ResponseEntity<CommonResponseDto<List<SubmissionRecordResponseDto>>> getSubmissionRecords(
+            HttpServletRequest request,
+            @RequestParam("problemId") Long problemId) {
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        List<SubmissionRecordResponseDto> records = submissionService.getSubmissionRecordsByMemberAndProblemId(memberId, problemId);
+        return ResponseEntity.ok(CommonResponseDto.success(records));
     }
 }
