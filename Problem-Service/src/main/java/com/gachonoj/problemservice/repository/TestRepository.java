@@ -9,6 +9,8 @@ import java.util.List;
 
 public interface TestRepository extends JpaRepository<Test,Long> {
     List<Test> findByExamExamId(Long examId);
+    // 시험아이디와 회원아이디로 응시테이블 가져오기
+    Test findByExamExamIdAndMemberId(Long examId, Long memberId);
     Integer countByExamExamId(Long examId);
     Page<Test> findByExamExamId(Long examId, Pageable pageable);
 }

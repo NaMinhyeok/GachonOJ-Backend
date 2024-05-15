@@ -15,4 +15,7 @@ public interface MemberServiceFeignClient {
     // memberRank 갱신
     @PostMapping("/member/{memberId}/rank")
     Void updateMemberRank(@PathVariable Long memberId,@RequestBody Integer newRank);
+    // 닉네임 가져오기
+    @GetMapping("/member/nickname/{memberId}")
+    String getMemberNickname(@PathVariable Long memberId);
 }

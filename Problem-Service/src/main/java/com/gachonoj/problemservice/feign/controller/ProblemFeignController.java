@@ -46,4 +46,9 @@ public class ProblemFeignController {
     public Integer getProblemTimeLimit(@PathVariable Long problemId) {
         return problemFeignService.getProblemTimeLimit(problemId);
     }
+    // 문제 제목 가져오기
+    @GetMapping("/{problemId}/title")
+    public String getProblemTitle(@PathVariable Long problemId) {
+        return problemFeignService.getProblemTitle(problemId);
+    }
 }

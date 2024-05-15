@@ -3,6 +3,7 @@ package com.gachonoj.submissionservice.controller;
 import com.gachonoj.submissionservice.common.response.CommonResponseDto;
 import com.gachonoj.submissionservice.domain.dto.request.ExecuteRequestDto;
 import com.gachonoj.submissionservice.domain.dto.response.ExecuteResultResponseDto;
+import com.gachonoj.submissionservice.domain.dto.response.MySubmissionResultResponseDto;
 import com.gachonoj.submissionservice.domain.dto.response.SubmissionResultResponseDto;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionDetailDto;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionExamResultInfoResponseDto;
@@ -39,6 +40,12 @@ public class SubmissionController {
     @GetMapping("/admin/today")
     public ResponseEntity<CommonResponseDto<TodaySubmissionCountResponseDto>> getTodaySubmissionCount() {
         TodaySubmissionCountResponseDto response = submissionService.getTodaySubmissionCount();
+        return ResponseEntity.ok(CommonResponseDto.success(response));
+    }
+    // 나의 제출 코드 조회
+    @GetMapping("/result/{submissionId}")
+    public ResponseEntity<CommonResponseDto<MySubmissionResultResponseDto>> getSubmissionResult(@PathVariable Long submissionId) {
+        MySubmissionResultResponseDto response = submissionService.getSubmissionCodeBySubmissionId(submissionId);
         return ResponseEntity.ok(CommonResponseDto.success(response));
     }
 
