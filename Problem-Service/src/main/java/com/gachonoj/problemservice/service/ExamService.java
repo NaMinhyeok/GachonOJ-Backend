@@ -245,6 +245,7 @@ public class ExamService {
         Exam exam = examRepository.findById(examId)
                 .orElseThrow(() -> new IllegalArgumentException("Exam not found with id: " + examId));
 
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
         // 문제 목록 가져오기
         List<Problem> problems = questionRepository.findProblemsByExamId(examId);
         List<ProblemDetailResponseDto> problemDetails = problems.stream()
@@ -270,8 +271,8 @@ public class ExamService {
                 exam.getExamId(),
                 exam.getExamTitle(),
                 exam.getExamContents(),
-                exam.getExamStartDate(),
-                exam.getExamEndDate(),
+                formatter.format(exam.getExamStartDate()),
+                formatter.format(exam.getExamEndDate()),
                 exam.getExamStatus().name(),
                 exam.getExamType().name(),
                 exam.getExamMemo(),

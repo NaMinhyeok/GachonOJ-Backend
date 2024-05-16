@@ -14,8 +14,8 @@ public class ExamDetailResponseDto {
     private Long examId;
     private String examTitle;
     private String examContents;
-    private LocalDateTime examStartDate;
-    private LocalDateTime examEndDate;
+    private String examStartDate;
+    private String examEndDate;
     private String examStatus;
     private String examType;
     private String examMemo;
