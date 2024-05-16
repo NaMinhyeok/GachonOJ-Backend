@@ -240,9 +240,11 @@ public class ProblemController {
 
     // 시험 결과 상세 조회
     @GetMapping("/admin/result/{testId}")
-    public ResponseEntity<CommonResponseDto<ExamResultDetailsResponseDto>> getExamResults(@PathVariable Long testId) {
-            ExamResultDetailsResponseDto examResult = examService.getExamResults(testId);
-            return ResponseEntity.ok(CommonResponseDto.success(examResult));
+    public ResponseEntity<CommonResponseDto<ExamResultDetailsResponseDto>> getExamResults(
+            HttpServletRequest request, @PathVariable Long testId) {
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        ExamResultDetailsResponseDto examResult = examService.getExamResults(testId);
+        return ResponseEntity.ok(CommonResponseDto.success(examResult));
     }
 
     // 시험 결과 목록 조회

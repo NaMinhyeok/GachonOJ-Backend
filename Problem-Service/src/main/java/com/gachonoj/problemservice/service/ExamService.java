@@ -423,6 +423,9 @@ public class ExamService {
                 .collect(Collectors.toMap(question -> question.getProblem().getProblemId(), Function.identity()));
 
         final int[] totalScore = {0};
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
+
         List<QuestionResultDetailsResponseDto> questionDtos = submissionsInfo.getSubmissions().stream()
                 .map(submission -> {
                     Question question = questionMap.get(submission.getProblemId());
@@ -443,6 +446,11 @@ public class ExamService {
         test.setTestScore(totalScore[0]);
         testRepository.save(test);
 
+        String examDueTime = Duration.between(exam.getExamStartDate(), exam.getExamEndDate()).toHoursPart() + ":"
+                + Duration.between(exam.getExamStartDate(), exam.getExamEndDate()).toMinutesPart() + ":"
+                + Duration.between(exam.getExamStartDate(), exam.getExamEndDate()).toSecondsPart();
+        String submissionDate = test.getTestEndDate().format(dateTimeFormatter);
+
         return new ExamResultDetailsResponseDto(
                 exam.getExamTitle(),
                 exam.getExamMemo(),
@@ -451,8 +459,8 @@ public class ExamService {
                 memberInfo.getMemberNumber(),
                 memberInfo.getMemberEmail(),
                 test.getTestScore(),
-                Duration.between(exam.getExamStartDate(), exam.getExamEndDate()).toString(),
-                test.getTestEndDate().toString(),
+                examDueTime,
+                submissionDate,
                 questionDtos
         );
     }
