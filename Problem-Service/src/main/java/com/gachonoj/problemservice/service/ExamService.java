@@ -299,6 +299,12 @@ public class ExamService {
         }
     }
 
+    // 시험 삭제 admin
+    @Transactional
+    public void deleteExamByAdmin(Long examId) {
+        examRepository.deleteById(examId);
+    }
+
     // 참가 예정 대회 조회
     public List<ScheduledContestResponseDto> getScheduledContests(Long memberId,String type) {
         ExamType examType = ExamType.fromLabel(type);

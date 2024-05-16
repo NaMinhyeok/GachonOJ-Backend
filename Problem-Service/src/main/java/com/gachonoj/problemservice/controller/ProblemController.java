@@ -60,28 +60,15 @@ public class ProblemController {
     // 시험 삭제
     @DeleteMapping("/exam/{examId}")
     public ResponseEntity<CommonResponseDto<Void>> deleteExam(@PathVariable Long examId, HttpServletRequest request) {
-        String memberIdStr = request.getHeader("X-Authorization-Id");
-        long memberId;
-        try {
-            memberId = Long.parseLong(memberIdStr);
-        } catch (NumberFormatException e) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(CommonResponseDto.fail(ErrorCode.BAD_REQUEST_ERROR, "Invalid member ID"));
-        }
-
-        try {
-            examService.deleteExam(examId, memberId);
-            return ResponseEntity.ok(CommonResponseDto.success());
-        } catch (SecurityException e) {
-            return ResponseEntity
-                    .status(HttpStatus.FORBIDDEN)
-                    .body(CommonResponseDto.fail(ErrorCode.FORBIDDEN_ERROR, "Access denied"));
-        } catch (Exception e) {
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(CommonResponseDto.fail(ErrorCode.INTERNAL_SERVER_ERROR, "Internal server error"));
-        }
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        examService.deleteExam(examId, memberId);
+        return ResponseEntity.ok(CommonResponseDto.success());
+    }
+    // 시험 삭제 admin
+    @DeleteMapping("/admin/exam/{examId}")
+    public ResponseEntity<CommonResponseDto<Void>> deleteExamByAdmin(@PathVariable Long examId) {
+        examService.deleteExamByAdmin(examId);
+        return ResponseEntity.ok(CommonResponseDto.success());
     }
     // 알고리즘 문제 등록
     @PostMapping("/admin/register")
