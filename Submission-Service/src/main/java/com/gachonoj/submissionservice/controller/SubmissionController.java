@@ -65,7 +65,7 @@ public class SubmissionController {
     @GetMapping("/record/{problemId}")
     public ResponseEntity<CommonResponseDto<List<SubmissionRecordResponseDto>>> getSubmissionRecords(
             HttpServletRequest request,
-            @RequestParam("problemId") Long problemId) {
+            @PathVariable Long problemId) {
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
         List<SubmissionRecordResponseDto> records = submissionService.getSubmissionRecordsByMemberAndProblemId(memberId, problemId);
         return ResponseEntity.ok(CommonResponseDto.success(records));

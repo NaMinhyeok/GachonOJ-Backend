@@ -29,6 +29,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -51,12 +52,14 @@ public class SubmissionService {
     // 문제 코드 실행
     @Transactional
     public List<ExecuteResultResponseDto> executeCodeByProblemId(ExecuteRequestDto executeRequestDto, Long problemId) {
-        List<String> input = problemServiceFeignClient.getVisibleTestCases(problemId).stream()
+        List<String> input = new ArrayList<>();
+        input = problemServiceFeignClient.getVisibleTestCases(problemId).stream()
                 .map(SubmissionProblemTestCaseResponseDto::getInput)
-                .toList();
-        List<String> output = problemServiceFeignClient.getVisibleTestCases(problemId).stream()
+                .collect(Collectors.toList());
+        List<String> output = new ArrayList<>();
+        output = problemServiceFeignClient.getVisibleTestCases(problemId).stream()
                 .map(SubmissionProblemTestCaseResponseDto::getOutput)
-                .toList();
+                .collect(Collectors.toList());
         // executeRequestDto에서 주는 testcase 추가하기
         if(executeRequestDto.getTestcase()!=null){
             for (Map.Entry<String, String> entry : executeRequestDto.getTestcase().entrySet()) {
@@ -76,10 +79,20 @@ public class SubmissionService {
     public SubmissionResultResponseDto submissionByProblemId(ExecuteRequestDto executeRequestDto, Long problemId, Long memberId) {
         List<String> input = problemServiceFeignClient.getTestCases(problemId).stream()
                 .map(SubmissionProblemTestCaseResponseDto::getInput)
-                .toList();
+                .collect(Collectors.toList());
         List<String> output = problemServiceFeignClient.getTestCases(problemId).stream()
                 .map(SubmissionProblemTestCaseResponseDto::getOutput)
-                .toList();
+                .collect(Collectors.toList());
+        // memberId 로 submission 엔티티 조회
+        List<Submission> submissions = submissionRepository.findByMemberIdAndProblemId(memberId, problemId);
+        Boolean isExist = false;
+        // 제출이력 중 정답이 있는지 확인
+        for (Submission submission : submissions) {
+            if(submission.getSubmissionStatus() == Status.CORRECT) {
+                isExist = true;
+                break;
+            }
+        }
         // 멤버 아이디로 memberRank,needRank,rating 조회
         SubmissionMemberRankInfoResponseDto submissionMemberRankInfoResponseDto = memberServiceFeignClient.getMemberRank(memberId);
         // 문제 아이디로 problemScore 조회
@@ -122,7 +135,7 @@ public class SubmissionService {
                 .submissionLang(Language.fromLabel(executeRequestDto.getLanguage()))
                 .build();
         // Member 엔티티에 memberRank 반영
-        if(isCorrect){
+        if(isCorrect && isExist){
             memberServiceFeignClient.updateMemberRank(memberId,memberRank+problemScore);
         }
         // Submission 엔티티 저장
@@ -176,10 +189,16 @@ public class SubmissionService {
         List<Submission> submissions = submissionRepository.findByMemberIdAndProblemId(memberId, problemId);
         return submissions.stream()
                 .map(submission -> new SubmissionRecordResponseDto(
-                        submission.getSubmissionStatus(),
+                        submission.getSubmissionId(),
+                        submission.getSubmissionStatus().getLabel(),
                         submission.getSubmissionLang(),
-                        submission.getSubmissionDate()
+                        changeTimeFormat(submission.getSubmissionDate())
                 ))
-                .collect(Collectors.toList());
+                .toList();
+    }
+    // 시간 포맷 변경 함수(YYYY-MM-MM HH:MM:SS)
+    public String changeTimeFormat(LocalDateTime localDateTime){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return localDateTime.format(formatter);
     }
 }

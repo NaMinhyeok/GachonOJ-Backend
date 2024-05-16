@@ -1,6 +1,5 @@
 package com.gachonoj.problemservice.service;
 
-import com.gachonoj.problemservice.domain.constant.ExamStatus;
 import com.gachonoj.problemservice.domain.dto.request.ProblemRequestDto;
 import com.gachonoj.problemservice.domain.dto.response.ProblemDetailAdminResponseDto;
 import com.gachonoj.problemservice.domain.dto.response.*;
@@ -12,7 +11,6 @@ import com.gachonoj.problemservice.domain.constant.ProblemStatus;
 import com.gachonoj.problemservice.domain.constant.TestcaseStatus;
 import com.gachonoj.problemservice.feign.client.SubmissionServiceFeignClient;
 import com.gachonoj.problemservice.feign.dto.response.CorrectRateResponseDto;
-import com.gachonoj.problemservice.feign.dto.response.SubmissionResultCountResponseDto;
 import com.gachonoj.problemservice.repository.BookmarkRepository;
 import com.gachonoj.problemservice.repository.ExamRepository;
 import com.gachonoj.problemservice.repository.ProblemRepository;
@@ -28,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
@@ -73,7 +70,7 @@ public class ProblemService {
 
     // 문제 수정
     @Transactional
-    public Long updateProblem(Long problemId, ProblemRequestDto requestDto) {
+    public void updateProblem(Long problemId, ProblemRequestDto requestDto) {
         Problem problem = problemRepository.findById(problemId)
                 .orElseThrow(() -> new IllegalArgumentException("Problem not found with id: " + problemId));
 
@@ -89,7 +86,16 @@ public class ProblemService {
                 ProblemStatus.valueOf(requestDto.getProblemStatus()), // Enum 변환
                 requestDto.getProblemPrompt()
         );
-        return problemId;
+        List<Testcase> testcases = problem.getTestcases();
+        testcases.clear();
+        requestDto.getTestcases().forEach(testcaseDto -> {
+            Testcase testcase = Testcase.builder()
+                    .testcaseInput(testcaseDto.getTestcaseInput())
+                    .testcaseOutput(testcaseDto.getTestcaseOutput())
+                    .testcaseStatus(TestcaseStatus.valueOf(testcaseDto.getTestcaseStatus()))
+                    .build();
+            problem.addTestcase(testcase);
+        });
     }
 
     // 문제 삭제

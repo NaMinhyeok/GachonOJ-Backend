@@ -18,20 +18,12 @@ public interface ExamRepository extends JpaRepository<Exam,Long> {
     int deleteByIdAndMemberId(Long examId, Long memberId);
 
     // 회원 ID로 시험 목록 조회
-    @Query("SELECT e FROM Exam e WHERE e.memberId = :memberId AND e.examType = com.gachonoj.problemservice.domain.constant.ExamType.CONTEST AND e.examStartDate > CURRENT_TIMESTAMP")
-    List<Exam> findScheduledContestsByMemberId(Long memberId);
-    // 회원 ID로 예정된 시험 목록 조회
-    @Query("SELECT e FROM Exam e WHERE e.memberId = :memberId AND e.examType = 'EXAM' AND e.examStartDate > CURRENT_TIMESTAMP")
-    List<Exam> findScheduledExamByMemberId(Long memberId);
-    @Query("SELECT e FROM Exam e WHERE e.memberId = :memberId AND e.examType = com.gachonoj.problemservice.domain.constant.ExamType.CONTEST AND e.examStartDate < CURRENT_TIMESTAMP")
-    List<Exam> findPastContestsByMemberId(Long memberId);
-    // 회원 ID로 지난 시험 목록 조회
-    @Query("SELECT e FROM Exam e WHERE e.memberId = :memberId AND e.examType = 'EXAM' AND e.examStartDate < CURRENT_TIMESTAMP")
-    List<Exam> findPastExamByMemberId(Long memberId);
-    // 회원 ID로 시험 목록 조회
     Page<Exam> findByMemberId(Long memberId, Pageable pageable);
 
     Page<Exam> findByExamType(ExamType examType, Pageable pageable);
 
     List<Exam> findByExamStatusAndMemberId(ExamStatus examStatus, Long memberId);
+
+    // 작성중인 것 제외하고 exam 조회
+    List<Exam> findByExamStatusNot(ExamStatus examStatus);
 }
