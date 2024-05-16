@@ -51,12 +51,14 @@ public class SubmissionService {
     // 문제 코드 실행
     @Transactional
     public List<ExecuteResultResponseDto> executeCodeByProblemId(ExecuteRequestDto executeRequestDto, Long problemId) {
-        List<String> input = problemServiceFeignClient.getVisibleTestCases(problemId).stream()
+        List<String> input = new ArrayList<>();
+        input = problemServiceFeignClient.getVisibleTestCases(problemId).stream()
                 .map(SubmissionProblemTestCaseResponseDto::getInput)
-                .toList();
-        List<String> output = problemServiceFeignClient.getVisibleTestCases(problemId).stream()
+                .collect(Collectors.toList());
+        List<String> output = new ArrayList<>();
+        output = problemServiceFeignClient.getVisibleTestCases(problemId).stream()
                 .map(SubmissionProblemTestCaseResponseDto::getOutput)
-                .toList();
+                .collect(Collectors.toList());
         // executeRequestDto에서 주는 testcase 추가하기
         if(executeRequestDto.getTestcase()!=null){
             for (Map.Entry<String, String> entry : executeRequestDto.getTestcase().entrySet()) {
@@ -76,10 +78,10 @@ public class SubmissionService {
     public SubmissionResultResponseDto submissionByProblemId(ExecuteRequestDto executeRequestDto, Long problemId, Long memberId) {
         List<String> input = problemServiceFeignClient.getTestCases(problemId).stream()
                 .map(SubmissionProblemTestCaseResponseDto::getInput)
-                .toList();
+                .collect(Collectors.toList());
         List<String> output = problemServiceFeignClient.getTestCases(problemId).stream()
                 .map(SubmissionProblemTestCaseResponseDto::getOutput)
-                .toList();
+                .collect(Collectors.toList());
         // 멤버 아이디로 memberRank,needRank,rating 조회
         SubmissionMemberRankInfoResponseDto submissionMemberRankInfoResponseDto = memberServiceFeignClient.getMemberRank(memberId);
         // 문제 아이디로 problemScore 조회
