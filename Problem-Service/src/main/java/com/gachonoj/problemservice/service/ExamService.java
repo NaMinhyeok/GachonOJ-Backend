@@ -446,9 +446,9 @@ public class ExamService {
         test.setTestScore(totalScore[0]);
         testRepository.save(test);
 
-        String examDueTime = Duration.between(exam.getExamStartDate(), exam.getExamEndDate()).toHoursPart() + ":"
-                + Duration.between(exam.getExamStartDate(), exam.getExamEndDate()).toMinutesPart() + ":"
-                + Duration.between(exam.getExamStartDate(), exam.getExamEndDate()).toSecondsPart();
+        String testDueTime = Duration.between(test.getTestStartDate(), test.getTestEndDate()).toHoursPart() + ":"
+                + Duration.between(test.getTestStartDate(), test.getTestEndDate()).toMinutesPart() + ":"
+                + Duration.between(test.getTestStartDate(), test.getTestEndDate()).toSecondsPart();
         String submissionDate = test.getTestEndDate().format(dateTimeFormatter);
 
         return new ExamResultDetailsResponseDto(
@@ -459,7 +459,7 @@ public class ExamService {
                 memberInfo.getMemberNumber(),
                 memberInfo.getMemberEmail(),
                 test.getTestScore(),
-                examDueTime,
+                testDueTime,
                 submissionDate,
                 questionDtos
         );
@@ -481,9 +481,9 @@ public class ExamService {
         return tests.map(test -> {
             ProblemMemberInfoResponseDto memberInfo = memberServiceFeignClient.getMemberInfo(test.getMemberId());
             int totalScore = test.getTestScore();
-            String examDueTime = Duration.between(exam.getExamStartDate(), exam.getExamEndDate()).toHoursPart() + ":"
-                    + Duration.between(exam.getExamStartDate(), exam.getExamEndDate()).toMinutesPart() + ":"
-                    + Duration.between(exam.getExamStartDate(), exam.getExamEndDate()).toSecondsPart();
+            String testDueTime = Duration.between(test.getTestStartDate(), test.getTestEndDate()).toHoursPart() + ":"
+                    + Duration.between(test.getTestStartDate(), test.getTestEndDate()).toMinutesPart() + ":"
+                    + Duration.between(test.getTestStartDate(), test.getTestEndDate()).toSecondsPart();
             String submissionDate = test.getTestEndDate().format(dateTimeFormatter);
 
             return new ExamResultListDto(
@@ -495,7 +495,7 @@ public class ExamService {
                     memberInfo.getMemberNumber(),
                     memberInfo.getMemberEmail(),
                     totalScore,
-                    examDueTime,
+                    testDueTime,
                     submissionDate
             );
         });

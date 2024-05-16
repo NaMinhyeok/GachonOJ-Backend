@@ -17,7 +17,7 @@ public class ExamResultDetailsResponseDto {
     private String memberNumber;
     private String memberEmail;
     private int testTotalScore;
-    private String examDueTime;
+    private String testDueTime;
     private String submissionDate;
     private List<QuestionResultDetailsResponseDto> examQuestions;
 }
