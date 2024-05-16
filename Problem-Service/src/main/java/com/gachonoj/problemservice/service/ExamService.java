@@ -513,11 +513,17 @@ public class ExamService {
                 .collect(Collectors.toList());
     }
     // 시험 응시자 인지 확인 & 시험 시간 맞는지 확인 하기 위한 API
+    @Transactional
     public ExamEnterResponseDto checkExamEnter(Long examId, Long memberId) {
         Exam exam = examRepository.findById(examId)
                 .orElseThrow(() -> new IllegalArgumentException("Exam not found with id: " + examId));
         if (exam.getExamStatus() == ExamStatus.ONGOING) {
             Test test = testRepository.findByExamExamIdAndMemberId(examId, memberId);
+            // 응시 시작 시간 TestStartDate에 저장
+            if (test.getTestStartDate() == null) {
+                test.setTestStartDate(LocalDateTime.now());
+                testRepository.save(test);
+            }
             if (test == null) {
                 throw new IllegalArgumentException("You are not allowed to enter this exam.");
             }
