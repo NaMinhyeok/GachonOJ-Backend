@@ -248,9 +248,11 @@ public class ProblemController {
     // 시험 결과 목록 조회
     @GetMapping("/exam/{examId}/results")
     public ResponseEntity<CommonResponseDto<Page<ExamResultListDto>>> getExamResultList(
+            HttpServletRequest request,
             @PathVariable Long examId,
             @RequestParam(defaultValue = "1") int page) {
-        Page<ExamResultListDto> results = examService.getExamResultList(examId, page);
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        Page<ExamResultListDto> results = examService.getExamResultList(examId, memberId, page);
         return ResponseEntity.ok(CommonResponseDto.success(results));
     }
 
