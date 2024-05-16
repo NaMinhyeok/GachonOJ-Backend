@@ -364,8 +364,9 @@ public class ExamService {
         }
 
         String memberNickname = memberServiceFeignClient.getNicknames(exam.getMemberId());
-        String formattedStartDate = dateFormatter(exam.getExamStartDate());
-        String formattedEndDate = dateFormatter(exam.getExamEndDate());
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
+        String formattedStartDate = exam.getExamStartDate().format(dateTimeFormatter);
+        String formattedEndDate = exam.getExamEndDate().format(dateTimeFormatter);
 
         return new ExamOrContestInfoResponseDto(
                 exam.getExamId(),
