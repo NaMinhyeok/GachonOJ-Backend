@@ -83,6 +83,16 @@ public class SubmissionService {
         List<String> output = problemServiceFeignClient.getTestCases(problemId).stream()
                 .map(SubmissionProblemTestCaseResponseDto::getOutput)
                 .collect(Collectors.toList());
+        // memberId 로 submission 엔티티 조회
+        List<Submission> submissions = submissionRepository.findByMemberIdAndProblemId(memberId, problemId);
+        Boolean isExist = false;
+        // 제출이력 중 정답이 있는지 확인
+        for (Submission submission : submissions) {
+            if(submission.getSubmissionStatus() == Status.CORRECT) {
+                isExist = true;
+                break;
+            }
+        }
         // 멤버 아이디로 memberRank,needRank,rating 조회
         SubmissionMemberRankInfoResponseDto submissionMemberRankInfoResponseDto = memberServiceFeignClient.getMemberRank(memberId);
         // 문제 아이디로 problemScore 조회
@@ -125,7 +135,7 @@ public class SubmissionService {
                 .submissionLang(Language.fromLabel(executeRequestDto.getLanguage()))
                 .build();
         // Member 엔티티에 memberRank 반영
-        if(isCorrect){
+        if(isCorrect && isExist){
             memberServiceFeignClient.updateMemberRank(memberId,memberRank+problemScore);
         }
         // Submission 엔티티 저장
