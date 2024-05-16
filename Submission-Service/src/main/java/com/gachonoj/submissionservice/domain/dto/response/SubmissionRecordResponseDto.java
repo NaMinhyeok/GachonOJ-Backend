@@ -12,7 +12,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SubmissionRecordResponseDto {
-    private Status submissionStatus;
+    // 제출 번호
+    // 제출 일시 (YYYY-MM-MM HH:MM:SS)
+    // 정답 여부
+    // 언어
+    private Long submissionId;
+    private String submissionStatus;
     private Language submissionLang;
-    private LocalDateTime submissionDate;
+    private String submissionDate;
 }

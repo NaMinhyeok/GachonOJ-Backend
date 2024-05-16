@@ -29,6 +29,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -178,10 +179,16 @@ public class SubmissionService {
         List<Submission> submissions = submissionRepository.findByMemberIdAndProblemId(memberId, problemId);
         return submissions.stream()
                 .map(submission -> new SubmissionRecordResponseDto(
-                        submission.getSubmissionStatus(),
+                        submission.getSubmissionId(),
+                        submission.getSubmissionStatus().getLabel(),
                         submission.getSubmissionLang(),
-                        submission.getSubmissionDate()
+                        changeTimeFormat(submission.getSubmissionDate())
                 ))
-                .collect(Collectors.toList());
+                .toList();
+    }
+    // 시간 포맷 변경 함수(YYYY-MM-MM HH:MM:SS)
+    public String changeTimeFormat(LocalDateTime localDateTime){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return localDateTime.format(formatter);
     }
 }
