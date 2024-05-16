@@ -13,4 +13,6 @@ public interface TestRepository extends JpaRepository<Test,Long> {
     Test findByExamExamIdAndMemberId(Long examId, Long memberId);
     Integer countByExamExamId(Long examId);
     Page<Test> findByExamExamId(Long examId, Pageable pageable);
+    // MemberId로 응시한 시험 확인
+    List<Test> findByMemberId(Long memberId);
 }

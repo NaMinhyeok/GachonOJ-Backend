@@ -134,21 +134,31 @@ public class ProblemController {
 //        return ResponseEntity.ok(CommonResponseDto.success(result));
 //    }
 
-    // 참가 대회&시험 예정 조회
-    @GetMapping("/exam/scheduled")
-    public ResponseEntity<CommonResponseDto<List<ScheduledContestResponseDto>>> getScheduledContests(@RequestHeader("X-Authorization-Id") String authorizationId,
-                                                                                                     @RequestParam(required = false) String type) {
-        Long memberId = Long.parseLong(authorizationId);
-        List<ScheduledContestResponseDto> result = examService.getScheduledContests(memberId,type);
-        return ResponseEntity.ok(CommonResponseDto.success(result));
-    }
-
-    // 지난 대회&시험 조회
-    @GetMapping("/exam/past")
-    public ResponseEntity<CommonResponseDto<List<PastContestResponseDto>>> getPastContests(@RequestHeader("X-Authorization-Id") String authorizationId,
-                                                                                           @RequestParam(required = false) String type){
-        Long memberId = Long.parseLong(authorizationId);
-        List<PastContestResponseDto> result = examService.getPastContests(memberId,type);
+//    // 참가 대회&시험 예정 조회
+//    @GetMapping("/exam/scheduled")
+//    public ResponseEntity<CommonResponseDto<List<ScheduledContestResponseDto>>> getScheduledContests(@RequestHeader("X-Authorization-Id") String authorizationId,
+//                                                                                                     @RequestParam(required = false) String type) {
+//        Long memberId = Long.parseLong(authorizationId);
+//        List<ScheduledContestResponseDto> result = examService.getScheduledContests(memberId,type);
+//        return ResponseEntity.ok(CommonResponseDto.success(result));
+//    }
+//
+//    // 지난 대회&시험 조회
+//    @GetMapping("/exam/past")
+//    public ResponseEntity<CommonResponseDto<List<PastContestResponseDto>>> getPastContests(@RequestHeader("X-Authorization-Id") String authorizationId,
+//                                                                                           @RequestParam String type){
+//        Long memberId = Long.parseLong(authorizationId);
+//        List<PastContestResponseDto> result = examService.getPastContests(memberId,type);
+//        return ResponseEntity.ok(CommonResponseDto.success(result));
+//    }
+    // 참가예정 대회 & 시험 조회
+    // 지난 대회 & 시험 조회
+    @GetMapping("/exam/list")
+    public ResponseEntity<CommonResponseDto<List<ExamCardInfoResponseDto>>> getExamList(HttpServletRequest request,
+                                                                                        @RequestParam String type,
+                                                                                        @RequestParam String status) {
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        List<ExamCardInfoResponseDto> result = examService.getExamList(memberId, type, status);
         return ResponseEntity.ok(CommonResponseDto.success(result));
     }
 

@@ -49,20 +49,9 @@ public class ExamService {
     @Transactional
     @Async
     public void updateExamStatusBasedOnCurrentTime() {
-        List<Exam> exams = examRepository.findAll();
+        // WRITING 상태를 제외하고 exam 가져오기
+        List<Exam> exams = examRepository.findByExamStatusNot(ExamStatus.WRITING);
         LocalDateTime now = LocalDateTime.now();
-        //TODO: RESERVATION 과 WIRITING을 구분해야함
-//      예약중이랑 작성중이랑 차이가 확실해지면 그거에 따라서 변경할 수 있게 해야 할 듯 지금은 시간에 따라서만 하게 되면 다 예약 중으로 됨
-//        for(Exam exam : exams) {
-//            if (exam.getExamStartDate().isAfter(now)) {
-//                exam.setExamStatus(ExamStatus.RESERVATION);
-//            } else if (exam.getExamStartDate().isBefore(now) && exam.getExamEndDate().isAfter(now)) {
-//                exam.setExamStatus(ExamStatus.ONGOING);
-//            } else if (exam.getExamEndDate().isBefore(now)) {
-//                exam.setExamStatus(ExamStatus.TERMINATED);
-//            }
-//        }
-
         for(Exam exam : exams) {
             if (exam.getExamStartDate().isBefore(now) && exam.getExamEndDate().isAfter(now)) {
                 exam.setExamStatus(ExamStatus.ONGOING);
@@ -304,53 +293,32 @@ public class ExamService {
     public void deleteExamByAdmin(Long examId) {
         examRepository.deleteById(examId);
     }
+    // 시험 목록 조회 & 대회 목록 조회
+    @Transactional(readOnly = true)
+    public List<ExamCardInfoResponseDto> getExamList(Long memberId, String type, String status) {
+        ExamType examType = ExamType.fromLabel(type);
+        ExamStatus examStatus = ExamStatus.fromLabel(status);
+        return getContests(memberId, examType, examStatus);
+    }
+    // 시험 목록 조회 & 대회 목록 조회
+    private List<ExamCardInfoResponseDto> getContests(Long memberId, ExamType examType, ExamStatus status) {
+        List<Long> examIds = new ArrayList<>();
+        List<Test> tests = testRepository.findByMemberId(memberId);
+        for (Test test : tests) {
+            if (test.getExam().getExamStatus() == status && test.getExam().getExamType() == examType) {
+                examIds.add(test.getExam().getExamId());
+            }
+        }
+        return examIds.stream()
+                .map(examId -> {
+                    Exam exam = examRepository.findById(examId)
+                            .orElseThrow(() -> new IllegalArgumentException("Exam not found with id: " + examId));
+                    String memberNickname = memberServiceFeignClient.getNicknames(exam.getMemberId());
+                    return new ExamCardInfoResponseDto(exam.getExamId(),exam.getExamTitle(),memberNickname,dateFormatter(exam.getExamStartDate()),dateFormatter(exam.getExamEndDate()),exam.getExamStatus().getLabel());
+                })
+                .toList();
+    }
 
-    // 참가 예정 대회 조회
-    public List<ScheduledContestResponseDto> getScheduledContests(Long memberId,String type) {
-        ExamType examType = ExamType.fromLabel(type);
-        if (examType == ExamType.CONTEST) {
-            List<Exam> exams = examRepository.findScheduledContestsByMemberId(memberId);
-            return exams.stream()
-                    .map(exam -> {
-                        String memberNickname = memberServiceFeignClient.getNicknames(exam.getMemberId());
-                        return new ScheduledContestResponseDto(exam, memberNickname);
-                    })
-                    .collect(Collectors.toList());
-        } else if (examType == ExamType.EXAM) {
-            List<Exam> exams = examRepository.findScheduledExamByMemberId(memberId);
-            return exams.stream()
-                    .map(exam -> {
-                        String memberNickname = memberServiceFeignClient.getNicknames(exam.getMemberId());
-                        return new ScheduledContestResponseDto(exam, memberNickname);
-                    })
-                    .collect(Collectors.toList());
-        } else {
-            throw new IllegalArgumentException("Invalid exam type: " + type);
-        }
-    }
-    // 지난 대회 & 시험 목록 조회
-    public List<PastContestResponseDto> getPastContests(Long memberId, String type) {
-        ExamType examType = ExamType.fromLabel(type);
-        if (examType == ExamType.CONTEST) {
-            List<Exam> exams = examRepository.findPastContestsByMemberId(memberId);
-            return exams.stream()
-                    .map(exam -> {
-                        String memberNickname = memberServiceFeignClient.getNicknames(exam.getMemberId());
-                        return new PastContestResponseDto(exam, memberNickname);
-                    })
-                    .collect(Collectors.toList());
-        } else if (examType == ExamType.EXAM) {
-            List<Exam> exams = examRepository.findPastExamByMemberId(memberId);
-            return exams.stream()
-                    .map(exam -> {
-                        String memberNickname = memberServiceFeignClient.getNicknames(exam.getMemberId());
-                        return new PastContestResponseDto(exam, memberNickname);
-                    })
-                    .collect(Collectors.toList());
-        } else {
-            throw new IllegalArgumentException("Invalid exam type: " + type);
-        }
-    }
     // 교수님 시험 목록 조회
     public Page<ProfessorExamListResponseDto> getProfessorExamList(Long memberId, int pageNo) {
         Pageable pageable = PageRequest.of(pageNo - 1, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "examUpdateDate"));
