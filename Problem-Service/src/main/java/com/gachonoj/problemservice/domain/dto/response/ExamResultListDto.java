@@ -16,6 +16,6 @@ public class ExamResultListDto {
     private String memberNumber;
     private String memberEmail;
     private Integer totalScore;
-    private String examDueTime;
+    private String testDueTime;
     private String submissionDate;
 }

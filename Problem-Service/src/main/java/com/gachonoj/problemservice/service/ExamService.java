@@ -14,6 +14,7 @@ import com.gachonoj.problemservice.feign.dto.response.SubmissionExamResultInfoRe
 import com.gachonoj.problemservice.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.http.impl.cookie.DateUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -387,12 +388,17 @@ public class ExamService {
             throw new IllegalStateException("지금은 참가할 수 없습니다.");
         }
 
+        String memberNickname = memberServiceFeignClient.getNicknames(exam.getMemberId());
+        String formattedStartDate = dateFormatter(exam.getExamStartDate());
+        String formattedEndDate = dateFormatter(exam.getExamEndDate());
+
         return new ExamOrContestInfoResponseDto(
                 exam.getExamId(),
                 exam.getExamTitle(),
+                memberNickname,
                 exam.getExamContents(),
-                exam.getExamStartDate(),
-                exam.getExamEndDate(),
+                formattedStartDate,
+                formattedEndDate,
                 examType.getLabel(),
                 exam.getExamNotice()
         );
@@ -417,6 +423,9 @@ public class ExamService {
                 .collect(Collectors.toMap(question -> question.getProblem().getProblemId(), Function.identity()));
 
         final int[] totalScore = {0};
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
+
         List<QuestionResultDetailsResponseDto> questionDtos = submissionsInfo.getSubmissions().stream()
                 .map(submission -> {
                     Question question = questionMap.get(submission.getProblemId());
@@ -437,6 +446,11 @@ public class ExamService {
         test.setTestScore(totalScore[0]);
         testRepository.save(test);
 
+        String testDueTime = Duration.between(test.getTestStartDate(), test.getTestEndDate()).toHoursPart() + ":"
+                + Duration.between(test.getTestStartDate(), test.getTestEndDate()).toMinutesPart() + ":"
+                + Duration.between(test.getTestStartDate(), test.getTestEndDate()).toSecondsPart();
+        String submissionDate = test.getTestEndDate().format(dateTimeFormatter);
+
         return new ExamResultDetailsResponseDto(
                 exam.getExamTitle(),
                 exam.getExamMemo(),
@@ -445,15 +459,15 @@ public class ExamService {
                 memberInfo.getMemberNumber(),
                 memberInfo.getMemberEmail(),
                 test.getTestScore(),
-                Duration.between(exam.getExamStartDate(), exam.getExamEndDate()).toString(),
-                test.getTestEndDate().toString(),
+                testDueTime,
+                submissionDate,
                 questionDtos
         );
     }
 
     // 시험 결과 목록 조회
     @Transactional(readOnly = true)
-    public Page<ExamResultListDto> getExamResultList(Long examId, int pageNo) {
+    public Page<ExamResultListDto> getExamResultList(Long examId, Long memberId, int pageNo) {
         Pageable pageable = PageRequest.of(pageNo - 1, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "testEndDate"));
         Exam exam = examRepository.findById(examId)
                 .orElseThrow(() -> new IllegalArgumentException("Exam not found with id: " + examId));
@@ -461,11 +475,16 @@ public class ExamService {
         Page<Test> tests = testRepository.findByExamExamId(examId, pageable);
         int submissionTotal = (int) tests.getTotalElements();
 
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
+
         return tests.map(test -> {
             ProblemMemberInfoResponseDto memberInfo = memberServiceFeignClient.getMemberInfo(test.getMemberId());
             int totalScore = test.getTestScore();
-            String examDueTime = Duration.between(exam.getExamStartDate(), exam.getExamEndDate()).toMinutes() + " minutes";
-            String submissionDate = test.getTestEndDate().toString();  // Format as needed
+            String testDueTime = Duration.between(test.getTestStartDate(), test.getTestEndDate()).toHoursPart() + ":"
+                    + Duration.between(test.getTestStartDate(), test.getTestEndDate()).toMinutesPart() + ":"
+                    + Duration.between(test.getTestStartDate(), test.getTestEndDate()).toSecondsPart();
+            String submissionDate = test.getTestEndDate().format(dateTimeFormatter);
 
             return new ExamResultListDto(
                     exam.getExamTitle(),
@@ -476,12 +495,11 @@ public class ExamService {
                     memberInfo.getMemberNumber(),
                     memberInfo.getMemberEmail(),
                     totalScore,
-                    examDueTime,
+                    testDueTime,
                     submissionDate
             );
         });
     }
-
     // DateFormatter를 사용하여 날짜 형식을 변경하는 메서드
     private String dateFormatter (LocalDateTime date) {
         if (date == null) {
