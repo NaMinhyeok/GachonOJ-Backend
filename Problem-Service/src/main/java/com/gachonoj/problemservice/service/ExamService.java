@@ -387,12 +387,17 @@ public class ExamService {
             throw new IllegalStateException("지금은 참가할 수 없습니다.");
         }
 
+        String memberNickname = memberServiceFeignClient.getNicknames(exam.getMemberId());
+        String formattedStartDate = dateFormatter(exam.getExamStartDate());
+        String formattedEndDate = dateFormatter(exam.getExamEndDate());
+
         return new ExamOrContestInfoResponseDto(
                 exam.getExamId(),
                 exam.getExamTitle(),
+                memberNickname,
                 exam.getExamContents(),
-                exam.getExamStartDate(),
-                exam.getExamEndDate(),
+                formattedStartDate,
+                formattedEndDate,
                 examType.getLabel(),
                 exam.getExamNotice()
         );
