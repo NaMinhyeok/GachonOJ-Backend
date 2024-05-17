@@ -9,6 +9,7 @@ import com.gachonoj.submissionservice.domain.dto.response.SubmissionResultRespon
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionDetailDto;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionExamResultInfoResponseDto;
 import com.gachonoj.submissionservice.domain.dto.response.TodaySubmissionCountResponseDto;
+import com.gachonoj.submissionservice.service.LoveService;
 import com.gachonoj.submissionservice.service.SubmissionService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ import java.util.List;
 @RequestMapping("/submission")
 public class SubmissionController {
     private final SubmissionService submissionService;
+    private final LoveService loveService;
 
     // 코드 실행
     @PostMapping("/execute/{problemId}")
@@ -70,4 +72,14 @@ public class SubmissionController {
         List<SubmissionRecordResponseDto> records = submissionService.getSubmissionRecordsByMemberAndProblemId(memberId, problemId);
         return ResponseEntity.ok(CommonResponseDto.success(records));
     }
+
+    // 좋아요 토글 기능
+    @PostMapping("/love/{submissionId}")
+    public ResponseEntity<CommonResponseDto<Void>> toggleLove(@PathVariable Long submissionId,
+                                        HttpServletRequest request) {
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        loveService.toggleLove(submissionId, memberId);
+        return ResponseEntity.ok(CommonResponseDto.success());
+    }
+
 }
