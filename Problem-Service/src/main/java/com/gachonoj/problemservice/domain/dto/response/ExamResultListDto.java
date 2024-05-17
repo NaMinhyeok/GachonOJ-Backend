@@ -11,7 +11,7 @@ public class ExamResultListDto {
     private String memberName;
     private String memberNumber;
     private String memberEmail;
-    private int totalScore;
-    private String examDueTime; // "HH:mm:ss" 포맷
+    private Integer totalScore;
+    private String examDueTime;
     private String submissionDate;
 }
