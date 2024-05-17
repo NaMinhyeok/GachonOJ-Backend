@@ -1,6 +1,5 @@
 package com.gachonoj.problemservice.controller;
 
-import com.gachonoj.problemservice.common.codes.ErrorCode;
 import com.gachonoj.problemservice.common.response.CommonResponseDto;
 import com.gachonoj.problemservice.domain.dto.request.ExamRequestDto;
 import com.gachonoj.problemservice.domain.dto.request.ProblemRequestDto;
@@ -11,15 +10,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 // Lombok 어노테이션 - 코드 간결하게 작성
 @Slf4j  // Slf4j를 이용한 간편 로깅
@@ -247,11 +241,9 @@ public class ProblemController {
     // 시험 결과 목록 조회
     @GetMapping("/exam/{examId}/results")
     public ResponseEntity<CommonResponseDto<Page<ExamResultListDto>>> getExamResultList(
-            HttpServletRequest request,
             @PathVariable Long examId,
             @RequestParam(defaultValue = "1") int page) {
-        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
-        Page<ExamResultListDto> results = examService.getExamResultList(examId, memberId, page);
+        Page<ExamResultListDto> results = (Page<ExamResultListDto>) examService.getExamResultList(examId, page - 1);
         return ResponseEntity.ok(CommonResponseDto.success(results));
     }
 

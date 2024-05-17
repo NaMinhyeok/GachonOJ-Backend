@@ -1,6 +1,5 @@
 package com.gachonoj.problemservice.service;
 
-import com.gachonoj.problemservice.common.codes.ErrorCode;
 import com.gachonoj.problemservice.domain.constant.*;
 import com.gachonoj.problemservice.domain.dto.request.ExamRequestDto;
 import com.gachonoj.problemservice.domain.dto.request.TestcaseRequestDto;
@@ -14,7 +13,6 @@ import com.gachonoj.problemservice.feign.dto.response.SubmissionExamResultInfoRe
 import com.gachonoj.problemservice.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.http.impl.cookie.DateUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -441,41 +439,49 @@ public class ExamService {
         );
     }
 
+
     // 시험 결과 목록 조회
     @Transactional(readOnly = true)
-    public Page<ExamResultListDto> getExamResultList(Long examId, Long memberId, int pageNo) {
+    public ExamResultPageDto getExamResultList(Long examId, int pageNo) {
         Pageable pageable = PageRequest.of(pageNo - 1, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "testEndDate"));
         Exam exam = examRepository.findById(examId)
                 .orElseThrow(() -> new IllegalArgumentException("Exam not found with id: " + examId));
 
         Page<Test> tests = testRepository.findByExamExamId(examId, pageable);
-        int submissionTotal = (int) tests.getTotalElements();
+        List<ExamResultListDto> results = tests.getContent().stream().map(this::convertToDto).collect(Collectors.toList());
 
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+        ExamResultPageDto examResultPage = new ExamResultPageDto();
+        examResultPage.setExamTitle(exam.getExamTitle());
+        examResultPage.setExamMemo(exam.getExamMemo());
+        examResultPage.setSubmissionTotal((int) tests.getTotalElements());
+        examResultPage.setResults(results);
+
+        return examResultPage;
+    }
+
+    // Test 엔티티를 ExamResultListDto로 변환
+    private ExamResultListDto convertToDto(Test test) {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
 
-        return tests.map(test -> {
-            ProblemMemberInfoResponseDto memberInfo = memberServiceFeignClient.getMemberInfo(test.getMemberId());
-            int totalScore = test.getTestScore();
-            String testDueTime = Duration.between(test.getTestStartDate(), test.getTestEndDate()).toHoursPart() + ":"
-                    + Duration.between(test.getTestStartDate(), test.getTestEndDate()).toMinutesPart() + ":"
-                    + Duration.between(test.getTestStartDate(), test.getTestEndDate()).toSecondsPart();
-            String submissionDate = test.getTestEndDate().format(dateTimeFormatter);
+        String testDueTime = Duration.between(test.getTestStartDate(), test.getTestEndDate()).toHoursPart() + ":"
+                + Duration.between(test.getTestStartDate(), test.getTestEndDate()).toMinutesPart() + ":"
+                + Duration.between(test.getTestStartDate(), test.getTestEndDate()).toSecondsPart();
+        String submissionDate = test.getTestEndDate().format(dateTimeFormatter);
 
-            return new ExamResultListDto(
-                    exam.getExamTitle(),
-                    exam.getExamMemo(),
-                    submissionTotal,
-                    test.getMemberId(),
-                    memberInfo.getMemberName(),
-                    memberInfo.getMemberNumber(),
-                    memberInfo.getMemberEmail(),
-                    totalScore,
-                    testDueTime,
-                    submissionDate
-            );
-        });
+
+        ProblemMemberInfoResponseDto memberInfo = memberServiceFeignClient.getMemberInfo(test.getMemberId());
+
+        return new ExamResultListDto(
+                test.getMemberId(),
+                memberInfo.getMemberName(),
+                memberInfo.getMemberNumber(),
+                memberInfo.getMemberEmail(),
+                test.getTestScore(),
+                testDueTime,
+                submissionDate
+        );
     }
+
     // DateFormatter를 사용하여 날짜 형식을 변경하는 메서드
     private String dateFormatter (LocalDateTime date) {
         if (date == null) {
