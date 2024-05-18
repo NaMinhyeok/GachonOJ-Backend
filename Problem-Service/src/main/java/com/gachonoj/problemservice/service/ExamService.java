@@ -11,8 +11,13 @@ import com.gachonoj.problemservice.feign.client.SubmissionServiceFeignClient;
 import com.gachonoj.problemservice.feign.dto.response.ProblemMemberInfoResponseDto;
 import com.gachonoj.problemservice.feign.dto.response.SubmissionExamResultInfoResponseDto;
 import com.gachonoj.problemservice.repository.*;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -38,9 +44,12 @@ public class ExamService {
     private final QuestionRepository questionRepository;
     private final ProblemRepository problemRepository;
     private final TestRepository testRepository;
+    private final TestcaseRepository testcaseRepository;
     private final MemberServiceFeignClient memberServiceFeignClient;
     private final SubmissionServiceFeignClient submissionServiceFeignClient;
 
+    @PersistenceContext
+    private EntityManager entityManager;
     private static final int PAGE_SIZE = 10;
 
     // 스케쥴링으로 시험 상태 변경
@@ -132,6 +141,7 @@ public class ExamService {
     }
 
     // 시험 문제 수정
+// 시험 문제 수정
     @Transactional
     public void updateExam(Long examId, ExamRequestDto request) {
         if (examId == null) {
@@ -140,16 +150,19 @@ public class ExamService {
 
         Exam existingExam = examRepository.findById(examId)
                 .orElseThrow(() -> new IllegalArgumentException("Exam not found with id: " + examId));
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd.HH.mm.ss");
+        LocalDateTime startDate = LocalDateTime.parse(request.getExamStartDate(), formatter);
+        LocalDateTime endDate = LocalDateTime.parse(request.getExamEndDate(), formatter);
 
         existingExam.setExamTitle(request.getExamTitle());
         existingExam.setExamMemo(request.getExamMemo());
-        existingExam.setExamNotice(request.getExamNotice());
         existingExam.setExamContents(request.getExamContents());
-        existingExam.setExamStartDate(LocalDateTime.parse(request.getExamStartDate()));
-        existingExam.setExamEndDate(LocalDateTime.parse(request.getExamEndDate()));
+        existingExam.setExamNotice(request.getExamNotice());
+        existingExam.setExamStartDate(startDate);
+        existingExam.setExamEndDate(endDate);
         existingExam.setExamDueTime(request.getExamDueTime());
+        existingExam.setExamStatus(request.getExamStatus());
         existingExam.setExamType(request.getExamType());
-        examRepository.save(existingExam);
 
         if (request.getTests() == null || request.getTests().isEmpty()) {
             throw new IllegalArgumentException("No problems provided for the exam.");
@@ -161,14 +174,9 @@ public class ExamService {
             }
         });
 
-        updateQuestions(existingExam, request.getTests());
-        updateCandidateTests(existingExam, request.getCandidateList());
-
         for (ProblemRequestDto problemRequestDto : request.getTests()) {
             Problem problem = problemRepository.findById(problemRequestDto.getProblemId())
                     .orElseThrow(() -> new IllegalArgumentException("Problem not found with id: " + problemRequestDto.getProblemId()));
-
-
 
             problem.setProblemTitle(problemRequestDto.getProblemTitle());
             problem.setProblemContents(problemRequestDto.getProblemContents());
@@ -180,8 +188,9 @@ public class ExamService {
             problem.setProblemStatus(ProblemStatus.PRIVATE);
             problem.setProblemPrompt(problemRequestDto.getProblemPrompt());
 
-            // 테스트 케이스 업데이트
+            testcaseRepository.deleteAll(problem.getTestcases());
             problem.getTestcases().clear();
+
             for (TestcaseRequestDto testcaseDto : problemRequestDto.getTestcases()) {
                 Testcase testcase = new Testcase();
                 testcase.setTestcaseInput(testcaseDto.getTestcaseInput());
@@ -193,16 +202,25 @@ public class ExamService {
 
             problemRepository.save(problem);
         }
+
+        examRepository.save(existingExam);
+        updateQuestions(existingExam, request.getTests());
+        updateCandidateTests(existingExam, request.getCandidateList());
     }
 
-    // 그 안의 문제들 수정
     private void updateQuestions(Exam exam, List<ProblemRequestDto> problemRequestDtos) {
         List<Question> existingQuestions = questionRepository.findByExamExamId(exam.getExamId());
         Map<Long, Question> questionMap = existingQuestions.stream()
                 .collect(Collectors.toMap(q -> q.getProblem().getProblemId(), Function.identity()));
 
+        // 중복 제거를 위해 먼저 기존의 Question 엔티티 삭제
+        for (Question question : existingQuestions) {
+            questionRepository.delete(question);
+        }
+
+        // 새로운 Question 엔티티 삽입
         for (ProblemRequestDto dto : problemRequestDtos) {
-            Question question = questionMap.getOrDefault(dto.getProblemId(), new Question());
+            Question question = new Question();
             question.setExam(exam);
             Problem problem = problemRepository.findById(dto.getProblemId())
                     .orElseThrow(() -> new IllegalArgumentException("Problem not found with id: " + dto.getProblemId()));
@@ -211,31 +229,41 @@ public class ExamService {
             question.setQuestionSequence(dto.getQuestionSequence());
             questionRepository.save(question);
         }
-
-        existingQuestions.removeIf(q -> !problemRequestDtos.stream().map(ProblemRequestDto::getProblemId).collect(Collectors.toSet()).contains(q.getProblem().getProblemId()));
-        existingQuestions.forEach(questionRepository::delete);
     }
-    // 응시자 리스트 수정
+
     private void updateCandidateTests(Exam exam, List<Long> candidateIds) {
-        List<Test> existingTests = testRepository.findByExamExamId(exam.getExamId());
+        // Exam 엔티티를 관리 상태로 가져옵니다.
+        Exam managedExam = examRepository.findById(exam.getExamId())
+                .orElseThrow(() -> new IllegalArgumentException("Exam not found with id: " + exam.getExamId()));
+
+        List<Test> existingTests = testRepository.findByExamExamId(managedExam.getExamId());
         Map<Long, Test> existingTestsMap = existingTests.stream()
                 .collect(Collectors.toMap(Test::getMemberId, test -> test));
 
-        // Add or update existing candidate tests
-        candidateIds.forEach(candidateId -> {
+        // 중복된 candidateId 제거
+        Set<Long> uniqueCandidateIds = new HashSet<>(candidateIds);
+
+        uniqueCandidateIds.forEach(candidateId -> {
             Test test = existingTestsMap.getOrDefault(candidateId, new Test());
-            test.setExam(exam);
+            test.setExam(managedExam);
             test.setMemberId(candidateId);
-            testRepository.save(test);
+
+            if (test.getTestId() == null) {
+                // New entity, persist it
+                testRepository.save(test);
+            } else {
+                // Existing entity, merge it
+                testRepository.save(test);
+            }
         });
 
-        // Remove tests for candidates not listed anymore
         existingTests.forEach(test -> {
-            if (!candidateIds.contains(test.getMemberId())) {
+            if (!uniqueCandidateIds.contains(test.getMemberId())) {
                 testRepository.delete(test);
             }
         });
     }
+    private static final Logger logger = LoggerFactory.getLogger(ExamService.class);
 
     // 시험 문제 조회
     @Transactional(readOnly = true)
@@ -244,27 +272,24 @@ public class ExamService {
                 .orElseThrow(() -> new IllegalArgumentException("Exam not found with id: " + examId));
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
+
         // 문제 목록 가져오기
         List<Problem> problems = questionRepository.findProblemsByExamId(examId);
-        List<ProblemDetailResponseDto> problemDetails = problems.stream()
-                .map(problem -> {
-                    List<String> inputs = problem.getTestcases().stream()
-                            .map(Testcase::getTestcaseInput)
-                            .collect(Collectors.toList());
-                    List<String> outputs = problem.getTestcases().stream()
-                            .map(Testcase::getTestcaseOutput)
-                            .collect(Collectors.toList());
-                    return new ProblemDetailResponseDto(
-                            problem.getProblemTitle(),
-                            problem.getProblemContents(),
-                            problem.getProblemInputContents(),
-                            problem.getProblemOutputContents(),
-                            inputs,
-                            outputs
-                    );
-                })
+
+        // ProblemDetailAdminResponseDto로 변환
+        List<ProblemDetailAdminResponseDto> problemDetails = problems.stream()
+                .map(ProblemDetailAdminResponseDto::new)
                 .collect(Collectors.toList());
 
+        // 후보자 목록 가져오기
+        List<Long> candidateList = testRepository.findByExamExamId(examId).stream()
+                .map(Test::getMemberId)
+                .collect(Collectors.toList());
+
+        logger.info("Candidate List: " + candidateList);
+
+
+        // ExamDetailResponseDto 생성 및 반환
         return new ExamDetailResponseDto(
                 exam.getExamId(),
                 exam.getExamTitle(),
@@ -275,10 +300,11 @@ public class ExamService {
                 exam.getExamType().name(),
                 exam.getExamMemo(),
                 exam.getExamNotice(),
+                candidateList, // CandidateList 추가
                 problemDetails
+
         );
     }
-
     // 시험 삭제
     @Transactional
     public void deleteExam(Long examId, Long requestingMemberId) {
