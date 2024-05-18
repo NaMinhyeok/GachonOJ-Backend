@@ -32,6 +32,7 @@ public class SubmissionController {
         List<ExecuteResultResponseDto> response = submissionService.executeCodeByProblemId(executeRequestDto, problemId);
         return ResponseEntity.ok(CommonResponseDto.success(response));
     }
+    // 코드 제출
     @PostMapping("/submit/{problemId}")
     public ResponseEntity<CommonResponseDto<SubmissionResultResponseDto>> submitCode(HttpServletRequest request, @PathVariable Long problemId, @RequestBody ExecuteRequestDto executeRequestDto) {
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
@@ -76,6 +77,13 @@ public class SubmissionController {
     public ResponseEntity<CommonResponseDto<SubmissionResultResponseDto>> submitExamCode(HttpServletRequest request, @PathVariable Long examId, @RequestBody List<ExamSubmitRequestDto> executeRequestDtos) {
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
         submissionService.submitExam(executeRequestDtos, examId, memberId);
+        return ResponseEntity.ok(CommonResponseDto.success());
+    }
+    // 코드 저장
+    @PostMapping("/save/{problemId}")
+    public ResponseEntity<CommonResponseDto<SubmissionResultResponseDto>> saveCode(HttpServletRequest request, @PathVariable Long problemId, @RequestBody ExecuteRequestDto executeRequestDto) {
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        submissionService.saveCodeByProblemId(executeRequestDto, problemId, memberId);
         return ResponseEntity.ok(CommonResponseDto.success());
     }
 }

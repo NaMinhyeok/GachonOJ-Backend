@@ -234,10 +234,22 @@ public class SubmissionService {
             submissionRepository.save(submission);
         }
     }
+    // 코드 저장
+    public void saveCodeByProblemId(ExecuteRequestDto executeRequestDto, Long problemId, Long memberId) {
+        Submission submission = Submission.builder()
+                .memberId(memberId)
+                .problemId(problemId)
+                .submissionCode(executeRequestDto.getCode())
+                .submissionStatus(Status.INCORRECT)
+                .submissionLang(Language.fromLabel(executeRequestDto.getLanguage()))
+                .build();
+        submissionRepository.save(submission);
+    }
 
     // 시간 포맷 변경 함수(YYYY-MM-MM HH:MM:SS)
     public String changeTimeFormat(LocalDateTime localDateTime){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         return localDateTime.format(formatter);
     }
+
 }
