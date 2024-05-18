@@ -14,7 +14,7 @@ public class Love {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long loveId;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinColumn(name = "submission_id")
     private Submission submission;
     private Long memberId;
