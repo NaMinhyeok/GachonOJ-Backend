@@ -235,6 +235,7 @@ public class SubmissionService {
         }
     }
     // 코드 저장
+    @Transactional
     public void saveCodeByProblemId(ExecuteRequestDto executeRequestDto, Long problemId, Long memberId) {
         Submission submission = Submission.builder()
                 .memberId(memberId)
