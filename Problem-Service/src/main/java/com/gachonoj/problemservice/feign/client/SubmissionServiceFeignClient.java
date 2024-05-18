@@ -37,6 +37,9 @@ public interface SubmissionServiceFeignClient {
     // 오답률 높은 문제 분류 TOP 3를 가져오기 위한 문제 ID, 문제당 제출 개수, 오답 개수 조회
     @GetMapping("/submission/problem/incorrect/class")
     List<SubmissionResultCountResponseDto> getIncorrectProblemClass();
+    // memberId와 problemId로 제출 정보 조회
+    @GetMapping("/submission/recent/problem")
+    Long getRecentSubmissionId(@RequestParam("problemId") Long problemId,@RequestParam("memberId") Long memberId);
 }
 
 

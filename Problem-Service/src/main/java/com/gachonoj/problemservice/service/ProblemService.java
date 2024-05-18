@@ -158,7 +158,7 @@ public class ProblemService {
             Integer correctPeople = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
             Double correctRate = submissionServiceFeignClient.getProblemCorrectRate(problem.getProblemId());
             Boolean isBookmarked = bookmarkRepository.existsByMemberIdAndProblemProblemId(memberId, problem.getProblemId());
-            return new ProblemListResponseDto(problem, correctPeople, correctRate,isBookmarked);
+            return new ProblemListResponseDto(problem, correctPeople, correctRate,isBookmarked,null);
         });
     }
 
@@ -167,34 +167,40 @@ public class ProblemService {
         List<Long> problemIds = bookmarkRepository.findByMemberId(memberId).stream()
                 .map(bookmark -> bookmark.getProblem().getProblemId())
                 .toList();
-        return getProblemListResponseDtoPage(problemIds, pageable);
+        return getProblemListResponseDtoPage(problemIds, pageable,memberId);
 
     }
     // 맞은 문제 조회 메서드
     private Page<ProblemListResponseDto> getSolvedProblemList(Long memberId, Pageable pageable) {
         List<Long> problemIds = submissionServiceFeignClient.getCorrectProblemIds(memberId);
-        return getProblemListResponseDtoPage(problemIds, pageable);
+        log.info("Number of problems the user has submitted answers to: {}", problemIds.size());
+        for (Long problemId : problemIds) {
+            log.info("Problem ID: {}", problemId);
+        }
+        return getProblemListResponseDtoPage(problemIds, pageable,memberId);
     }
     // 틀린 문제 조회 메서드
     private Page<ProblemListResponseDto> getWrongProblemList(Long memberId, Pageable pageable) {
         List<Long> problemIds = submissionServiceFeignClient.getIncorrectProblemIds(memberId);
-        return getProblemListResponseDtoPage(problemIds, pageable);
+        return getProblemListResponseDtoPage(problemIds, pageable,memberId);
     }
 
     // 문제 목록 조회 메서드
-    private Page<ProblemListResponseDto> getProblemListResponseDtoPage(List<Long> problemIds, Pageable pageable) {
+    private Page<ProblemListResponseDto> getProblemListResponseDtoPage(List<Long> problemIds, Pageable pageable,Long memberId) {
         Page<Problem> problems = problemRepository.findAllByProblemIdInAndProblemStatus(problemIds, ProblemStatus.REGISTERED, pageable);
-        return problems.map(this::createProblemListResponseDto);
+        return problems.map(problem -> createProblemListResponseDto(problem,memberId));
     }
     // 사용자 문제 목록 DTO 생성 메서드
-    private ProblemListResponseDto createProblemListResponseDto(Problem problem) {
+    private ProblemListResponseDto createProblemListResponseDto(Problem problem,Long memberId) {
         // 문제의 정답자 수
         Integer correctPeople = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
         // 문제의 정답률
         Double correctRate = submissionServiceFeignClient.getProblemCorrectRate(problem.getProblemId());
         // 북마크 여부 판단
         Boolean isBookmarked = bookmarkRepository.existsBookmarkByProblemProblemId(problem.getProblemId());
-        return new ProblemListResponseDto(problem, correctPeople, correctRate,isBookmarked);
+        // 제출 ID 가져오기
+        Long submissionId = submissionServiceFeignClient.getRecentSubmissionId(problem.getProblemId(),memberId);
+        return new ProblemListResponseDto(problem, correctPeople, correctRate,isBookmarked,submissionId);
     }
 
     // 비로그인 문제 목록 조회
