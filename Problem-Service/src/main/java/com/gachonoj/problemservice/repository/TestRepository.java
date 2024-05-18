@@ -1,5 +1,6 @@
 package com.gachonoj.problemservice.repository;
 
+import com.gachonoj.problemservice.domain.entity.Exam;
 import com.gachonoj.problemservice.domain.entity.Test;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,4 +16,5 @@ public interface TestRepository extends JpaRepository<Test,Long> {
     Page<Test> findByExamExamId(Long examId, Pageable pageable);
     // MemberId로 응시한 시험 확인
     List<Test> findByMemberId(Long memberId);
+
 }
