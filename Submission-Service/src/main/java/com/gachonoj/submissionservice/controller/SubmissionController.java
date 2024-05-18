@@ -10,6 +10,7 @@ import com.gachonoj.submissionservice.domain.dto.response.SubmissionResultRespon
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionDetailDto;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionExamResultInfoResponseDto;
 import com.gachonoj.submissionservice.domain.dto.response.TodaySubmissionCountResponseDto;
+import com.gachonoj.submissionservice.service.LoveService;
 import com.gachonoj.submissionservice.service.SubmissionService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +26,7 @@ import java.util.List;
 @RequestMapping("/submission")
 public class SubmissionController {
     private final SubmissionService submissionService;
+    private final LoveService loveService;
 
     // 코드 실행
     @PostMapping("/execute/{problemId}")
@@ -74,16 +76,26 @@ public class SubmissionController {
     }
     // 시험 문제 답안 제출
     @PostMapping("/exam/submit/{examId}")
-    public ResponseEntity<CommonResponseDto<SubmissionResultResponseDto>> submitExamCode(HttpServletRequest request, @PathVariable Long examId, @RequestBody List<ExamSubmitRequestDto> executeRequestDtos) {
+    public ResponseEntity<CommonResponseDto<Void>> submitExamCode(HttpServletRequest request, @PathVariable Long examId, @RequestBody List<ExamSubmitRequestDto> executeRequestDtos) {
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
         submissionService.submitExam(executeRequestDtos, examId, memberId);
         return ResponseEntity.ok(CommonResponseDto.success());
     }
     // 코드 저장
     @PostMapping("/save/{problemId}")
-    public ResponseEntity<CommonResponseDto<SubmissionResultResponseDto>> saveCode(HttpServletRequest request, @PathVariable Long problemId, @RequestBody ExecuteRequestDto executeRequestDto) {
+    public ResponseEntity<CommonResponseDto<Void>> saveCode(HttpServletRequest request, @PathVariable Long problemId, @RequestBody ExecuteRequestDto executeRequestDto) {
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
         submissionService.saveCodeByProblemId(executeRequestDto, problemId, memberId);
         return ResponseEntity.ok(CommonResponseDto.success());
     }
+
+    // 좋아요 토글 기능
+    @PostMapping("/love/{submissionId}")
+    public ResponseEntity<CommonResponseDto<Void>> toggleLove(@PathVariable Long submissionId,
+                                        HttpServletRequest request) {
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        loveService.toggleLove(submissionId, memberId);
+        return ResponseEntity.ok(CommonResponseDto.success());
+    }
+
 }
