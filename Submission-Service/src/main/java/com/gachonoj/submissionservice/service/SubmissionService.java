@@ -2,6 +2,7 @@ package com.gachonoj.submissionservice.service;
 
 import com.gachonoj.submissionservice.domain.constant.Language;
 import com.gachonoj.submissionservice.domain.constant.Status;
+import com.gachonoj.submissionservice.domain.dto.request.ExamSubmitRequestDto;
 import com.gachonoj.submissionservice.domain.dto.request.ExecuteRequestDto;
 import com.gachonoj.submissionservice.domain.dto.response.ExecuteResultResponseDto;
 import com.gachonoj.submissionservice.domain.dto.response.MySubmissionResultResponseDto;
@@ -196,9 +197,60 @@ public class SubmissionService {
                 ))
                 .toList();
     }
+    // 시험 문제 답안 제출
+    @Transactional
+    public void submitExam(List<ExamSubmitRequestDto> examSubmitRequestDtos, Long memberId, Long examId) {
+        // 각 문제 채점
+        for (ExamSubmitRequestDto examSubmitRequestDto : examSubmitRequestDtos) {
+            List<String> input = problemServiceFeignClient.getTestCases(examSubmitRequestDto.getProblemId()).stream()
+                    .map(SubmissionProblemTestCaseResponseDto::getInput)
+                    .collect(Collectors.toList());
+            List<String> output = problemServiceFeignClient.getTestCases(examSubmitRequestDto.getProblemId()).stream()
+                    .map(SubmissionProblemTestCaseResponseDto::getOutput)
+                    .collect(Collectors.toList());
+            // 문제의 timelimit 가져오기
+            Integer problemTimeLimit = problemServiceFeignClient.getProblemTimeLimit(examSubmitRequestDto.getProblemId());
+            // 코드 실행 결과
+            Map<String,String> result = executeService.executeCode(new ExecuteRequestDto(examSubmitRequestDto.getCode(),examSubmitRequestDto.getLanguage(),null), input,output,problemTimeLimit);
+            int correctCount = 0;
+            // 정답 개수 세기
+            for (Map.Entry<String, String> entry : result.entrySet()) {
+                if(entry.getValue().equals("정답")){
+                    correctCount++;
+                }
+            }
+            // 반환하기 위한 변수들
+            // isCorrect: 모든 테스트 케이스를 통과했는지 여부
+            boolean isCorrect = correctCount==result.size();
+            // submission 엔티티 생성
+            Submission submission = Submission.builder()
+                    .memberId(memberId)
+                    .problemId(examSubmitRequestDto.getProblemId())
+                    .submissionCode(examSubmitRequestDto.getCode())
+                    .submissionStatus(isCorrect ? Status.CORRECT : Status.INCORRECT)
+                    .submissionLang(Language.fromLabel(examSubmitRequestDto.getLanguage()))
+                    .build();
+            // Submission 엔티티 저장
+            submissionRepository.save(submission);
+        }
+    }
+    // 코드 저장
+    @Transactional
+    public void saveCodeByProblemId(ExecuteRequestDto executeRequestDto, Long problemId, Long memberId) {
+        Submission submission = Submission.builder()
+                .memberId(memberId)
+                .problemId(problemId)
+                .submissionCode(executeRequestDto.getCode())
+                .submissionStatus(Status.INCORRECT)
+                .submissionLang(Language.fromLabel(executeRequestDto.getLanguage()))
+                .build();
+        submissionRepository.save(submission);
+    }
+
     // 시간 포맷 변경 함수(YYYY-MM-MM HH:MM:SS)
     public String changeTimeFormat(LocalDateTime localDateTime){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         return localDateTime.format(formatter);
     }
+
 }

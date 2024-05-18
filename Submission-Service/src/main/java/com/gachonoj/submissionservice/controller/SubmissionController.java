@@ -1,6 +1,7 @@
 package com.gachonoj.submissionservice.controller;
 
 import com.gachonoj.submissionservice.common.response.CommonResponseDto;
+import com.gachonoj.submissionservice.domain.dto.request.ExamSubmitRequestDto;
 import com.gachonoj.submissionservice.domain.dto.request.ExecuteRequestDto;
 import com.gachonoj.submissionservice.domain.dto.response.ExecuteResultResponseDto;
 import com.gachonoj.submissionservice.domain.dto.response.MySubmissionResultResponseDto;
@@ -33,6 +34,7 @@ public class SubmissionController {
         List<ExecuteResultResponseDto> response = submissionService.executeCodeByProblemId(executeRequestDto, problemId);
         return ResponseEntity.ok(CommonResponseDto.success(response));
     }
+    // 코드 제출
     @PostMapping("/submit/{problemId}")
     public ResponseEntity<CommonResponseDto<SubmissionResultResponseDto>> submitCode(HttpServletRequest request, @PathVariable Long problemId, @RequestBody ExecuteRequestDto executeRequestDto) {
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
@@ -71,6 +73,20 @@ public class SubmissionController {
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
         List<SubmissionRecordResponseDto> records = submissionService.getSubmissionRecordsByMemberAndProblemId(memberId, problemId);
         return ResponseEntity.ok(CommonResponseDto.success(records));
+    }
+    // 시험 문제 답안 제출
+    @PostMapping("/exam/submit/{examId}")
+    public ResponseEntity<CommonResponseDto<Void>> submitExamCode(HttpServletRequest request, @PathVariable Long examId, @RequestBody List<ExamSubmitRequestDto> executeRequestDtos) {
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        submissionService.submitExam(executeRequestDtos, examId, memberId);
+        return ResponseEntity.ok(CommonResponseDto.success());
+    }
+    // 코드 저장
+    @PostMapping("/save/{problemId}")
+    public ResponseEntity<CommonResponseDto<Void>> saveCode(HttpServletRequest request, @PathVariable Long problemId, @RequestBody ExecuteRequestDto executeRequestDto) {
+        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+        submissionService.saveCodeByProblemId(executeRequestDto, problemId, memberId);
+        return ResponseEntity.ok(CommonResponseDto.success());
     }
 
     // 좋아요 토글 기능
