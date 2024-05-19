@@ -141,7 +141,6 @@ public class ExamService {
     }
 
     // 시험 문제 수정
-// 시험 문제 수정
     @Transactional
     public void updateExam(Long examId, ExamRequestDto request) {
         if (examId == null) {
