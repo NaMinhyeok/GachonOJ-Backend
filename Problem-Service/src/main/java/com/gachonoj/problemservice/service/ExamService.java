@@ -300,6 +300,7 @@ public class ExamService {
                 exam.getExamType().name(),
                 exam.getExamMemo(),
                 exam.getExamNotice(),
+                exam.getExamDueTime(),
                 candidateList, // CandidateList 추가
                 problemDetails
 
