@@ -17,6 +17,7 @@ public class ProblemListResponseDto {
     private Integer correctPeople;
     private String correctRate;
     private Boolean isBookmarked;
+    private Long submissionId;
 
     // 비로그인
     public ProblemListResponseDto(Problem problem, Integer correctPeople, Double correctRate) {
@@ -25,18 +26,20 @@ public class ProblemListResponseDto {
         this.problemDiff = problem.getProblemDiff().toString() + "단계";
         this.problemClass = problem.getProblemClass().getLabel();
         this.correctPeople = correctPeople;
-        this.correctRate = String.format("%.2f", correctRate);
+        this.correctRate = String.format("%.2f%%", correctRate);
         this.isBookmarked = false;
+        this.submissionId = null;
     }
     // 로그인
-    public ProblemListResponseDto(Problem problem, Integer correctPeople, Double correctRate,Boolean isBookmarked) {
+    public ProblemListResponseDto(Problem problem, Integer correctPeople, Double correctRate,Boolean isBookmarked,Long submissionId) {
         this.problemId = problem.getProblemId();
         this.problemTitle = problem.getProblemTitle();
         this.problemDiff = problem.getProblemDiff().toString() + "단계";
         this.problemClass = problem.getProblemClass().getLabel();
         this.correctPeople = correctPeople;
-        this.correctRate = String.format("%.2f", correctRate);
+        this.correctRate = String.format("%.2f%%", correctRate);
         this.isBookmarked = isBookmarked;
+        this.submissionId = submissionId;
     }
 
 }

@@ -29,12 +29,9 @@ public interface SubmissionRepository extends JpaRepository<Submission,Long> {
     @Query("SELECT COUNT(s) FROM Submission s WHERE s.problemId = :problemId")
     Integer countTotalSubmissionsByProblemId(@Param("problemId") Long problemId);
 
-    // 틀린 문제 조회
-    @Query("SELECT DISTINCT s.problemId FROM Submission s WHERE s.memberId = :memberId AND s.submissionStatus = com.gachonoj.submissionservice.domain.constant.Status.INCORRECT")
-    List<Long> findIncorrectProblemIdsByMemberId(@Param("memberId") Long memberId);
-    // 맞춘 문제 조회
-    @Query("SELECT DISTINCT s.problemId FROM Submission s WHERE s.memberId = :memberId AND s.submissionStatus = com.gachonoj.submissionservice.domain.constant.Status.CORRECT")
-    List<Long> findCorrectProblemIdsByMemberId(@Param("memberId") Long memberId);
+    // 문제 ID와 제출 상태를 기반으로 제출 정보를 가져오기
+    @Query("select distinct s.problemId from Submission s where s.memberId = ?1 and s.submissionStatus = ?2")
+    List<Long> findProblemIdByMemberIdAndSubmissionStatus(Long memberId, Status status);
 
     // Member ID와 Problem IDs를 기반으로 제출 정보를 가져오는 메서드 추가
     List<Submission> findByMemberIdAndProblemIdIn(Long memberId, List<Long> problemIds);

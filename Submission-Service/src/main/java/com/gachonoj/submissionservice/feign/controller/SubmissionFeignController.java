@@ -73,4 +73,9 @@ public class SubmissionFeignController {
     public List<SubmissionResultCountResponseDto> getIncorrectProblemClass() {
         return submissionFeignService.getIncorrectProblemClass();
     }
+    // memberId와 problemId로 제출 정보 조회
+    @GetMapping("/recent/problem")
+    public Long getRecentSubmissionId(@RequestParam("memberId") Long memberId, @RequestParam("problemId") Long problemId) {
+        return submissionFeignService.getRecentSubmissionId(memberId, problemId);
+    }
 }

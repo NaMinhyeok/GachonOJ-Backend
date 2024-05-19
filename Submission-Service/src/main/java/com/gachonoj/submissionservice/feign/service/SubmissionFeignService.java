@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
@@ -45,6 +46,7 @@ public class SubmissionFeignService {
     }
     // 특정 문제의 정답률 계산
     public double getProblemCorrectRate(Long problemId) {
+        log.info("problemId : " + problemId);
         Integer totalSubmissions = submissionRepository.countTotalSubmissionsByProblemId(problemId);
         Integer correctSubmissions = submissionRepository.countCorrectSubmissionsByProblemId(problemId);
 
@@ -54,19 +56,18 @@ public class SubmissionFeignService {
 
         return (double) correctSubmissions / totalSubmissions * 100.0; // 정답률 계산
     }
-
-    //memberId로 틀린 문제 리스트 받아옴
+    // 맞은 문제 리스트 조회
+    public List<Long> getCorrectProblemIdsByMemberId(Long memberId) {
+        return submissionRepository.findProblemIdByMemberIdAndSubmissionStatus(memberId, Status.CORRECT);
+    }
+    // 틀린 문제 조회
     public List<Long> getIncorrectProblemIdsByMemberId(Long memberId) {
-        // 틀린 문제 리스트 조회, 맞은 문제 리스트 조회
-        // 그 후 틀린 문제id와 맞은 문제id를 비교하여 틀린 문제만 반환
-        List<Long> incorrectProblemIds = submissionRepository.findIncorrectProblemIdsByMemberId(memberId);
-        List<Long> correctProblemIds = submissionRepository.findCorrectProblemIdsByMemberId(memberId);
+        // 맞은 문제 리스트 조회 후 틀린 문제 리스트 조회
+        // 맞은 문제 리스트와 틀린 문제 리스트를 비교하여 틀린 문제 리스트만 반환
+        List<Long> correctProblemIds = submissionRepository.findProblemIdByMemberIdAndSubmissionStatus(memberId, Status.CORRECT);
+        List<Long> incorrectProblemIds = submissionRepository.findProblemIdByMemberIdAndSubmissionStatus(memberId, Status.INCORRECT);
         incorrectProblemIds.removeAll(correctProblemIds);
         return incorrectProblemIds;
-    }
-    //맞춘 문제 리스트 조회
-    public List<Long> getCorrectProblemIdsByMemberId(Long memberId) {
-        return submissionRepository.findCorrectProblemIdsByMemberId(memberId);
     }
     // problemId로 총 제출 수 조회
     public Integer getProblemSubmitCount(Long problemId) {
@@ -88,5 +89,18 @@ public class SubmissionFeignService {
     // 오답률 높은 문제 분류 TOP 3를 가져오기 위한 문제 ID, 문제당 제출 개수, 오답 개수 조회
     public List<SubmissionResultCountResponseDto> getIncorrectProblemClass() {
         return submissionRepository.findIncorrectProblemClass();
+    }
+    // memberId와 problemId로 제출 정보 조회
+    @Transactional(readOnly = true)
+    public Long getRecentSubmissionId(Long memberId, Long problemId) {
+        List<Submission> submissions = submissionRepository.findByMemberIdAndProblemId(memberId, problemId);
+        submissions = submissions.stream()
+                .filter(submission -> submission.getSubmissionStatus() == Status.CORRECT)
+                .sorted(Comparator.comparing(Submission::getSubmissionDate).reversed())
+                .toList();
+        if (submissions.isEmpty()) {
+            return null;
+        }
+        return submissions.get(0).getSubmissionId();
     }
 }
