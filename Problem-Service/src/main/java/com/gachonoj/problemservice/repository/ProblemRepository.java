@@ -17,6 +17,7 @@ public interface ProblemRepository extends JpaRepository<Problem,Long> {
     @Query("SELECT COUNT(b) FROM Bookmark b WHERE b.memberId = :memberId")
     Integer getBookmarkCountByMemberId(Long memberId);
 
+
     // 문제 검색
     Optional<Problem> findByProblemId(Long problemId);
 

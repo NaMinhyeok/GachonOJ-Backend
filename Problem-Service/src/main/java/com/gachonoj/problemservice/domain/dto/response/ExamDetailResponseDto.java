@@ -20,6 +20,7 @@ public class ExamDetailResponseDto {
     private String examType;
     private String examMemo;
     private String examNotice;
+    private Integer examDueTime;
     private List<Long> candidateList;
-    private List<ProblemDetailAdminResponseDto> problems;
+    private List<ProblemDetailAdminResponseDto> tests;
 }
