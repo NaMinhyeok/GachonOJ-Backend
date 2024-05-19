@@ -229,6 +229,15 @@ public class ProblemController {
         return ResponseEntity.ok(CommonResponseDto.success(result));
     }
 
+    // 시험 결과 목록 조회
+    @GetMapping("/exam/{examId}/results")
+    public ResponseEntity<CommonResponseDto<Page<ExamResultListDto>>> getExamResultList(
+            @PathVariable Long examId,
+            @RequestParam(defaultValue = "1") int page) {
+        Page<ExamResultListDto> results = examService.getExamResultList(examId, page - 1);
+        return ResponseEntity.ok(CommonResponseDto.success(results));
+    }
+
     // 시험 결과 상세 조회
     @GetMapping("/admin/result/{testId}")
     public ResponseEntity<CommonResponseDto<ExamResultDetailsResponseDto>> getExamResults(
@@ -236,15 +245,6 @@ public class ProblemController {
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
         ExamResultDetailsResponseDto examResult = examService.getExamResults(testId);
         return ResponseEntity.ok(CommonResponseDto.success(examResult));
-    }
-
-    // 시험 결과 목록 조회
-    @GetMapping("/exam/{examId}/results")
-    public ResponseEntity<CommonResponseDto<Page<ExamResultListDto>>> getExamResultList(
-            @PathVariable Long examId,
-            @RequestParam(defaultValue = "1") int page) {
-        Page<ExamResultListDto> results = (Page<ExamResultListDto>) examService.getExamResultList(examId, page - 1);
-        return ResponseEntity.ok(CommonResponseDto.success(results));
     }
 
     // 교수 대시보드 진행중인 시험 목록 조회
