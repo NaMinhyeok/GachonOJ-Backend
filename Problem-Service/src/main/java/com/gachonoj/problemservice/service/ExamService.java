@@ -32,6 +32,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -167,15 +168,16 @@ public class ExamService {
             throw new IllegalArgumentException("No problems provided for the exam.");
         }
 
-        request.getTests().forEach(dto -> {
-            if (dto.getProblemId() == null) {
-                throw new IllegalArgumentException("Problem ID must not be null for problem title: " + dto.getProblemTitle());
-            }
-        });
-
         for (ProblemRequestDto problemRequestDto : request.getTests()) {
-            Problem problem = problemRepository.findById(problemRequestDto.getProblemId())
-                    .orElseThrow(() -> new IllegalArgumentException("Problem not found with id: " + problemRequestDto.getProblemId()));
+            Problem problem;
+            if (problemRequestDto.getProblemId() == null) {
+                // 새로운 문제 추가
+                problem = new Problem();
+            } else {
+                // 기존 문제 업데이트
+                problem = problemRepository.findByProblemId(problemRequestDto.getProblemId())
+                        .orElseThrow(() -> new IllegalArgumentException("Problem not found with id: " + problemRequestDto.getProblemId()));
+            }
 
             problem.setProblemTitle(problemRequestDto.getProblemTitle());
             problem.setProblemContents(problemRequestDto.getProblemContents());
@@ -187,6 +189,7 @@ public class ExamService {
             problem.setProblemStatus(ProblemStatus.PRIVATE);
             problem.setProblemPrompt(problemRequestDto.getProblemPrompt());
 
+            // 기존의 테스트 케이스를 삭제하고 새로 추가
             testcaseRepository.deleteAll(problem.getTestcases());
             problem.getTestcases().clear();
 
@@ -207,29 +210,95 @@ public class ExamService {
         updateCandidateTests(existingExam, request.getCandidateList());
     }
 
-    private void updateQuestions(Exam exam, List<ProblemRequestDto> problemRequestDtos) {
+    // 질문 업데이트 메서드
+    @Transactional
+    public void updateQuestions(Exam exam, List<ProblemRequestDto> problemRequestDtos) {
         List<Question> existingQuestions = questionRepository.findByExamExamId(exam.getExamId());
-        Map<Long, Question> questionMap = existingQuestions.stream()
+        Map<Long, Question> existingQuestionsMap = existingQuestions.stream()
                 .collect(Collectors.toMap(q -> q.getProblem().getProblemId(), Function.identity()));
 
-        // 중복 제거를 위해 먼저 기존의 Question 엔티티 삭제
-        for (Question question : existingQuestions) {
-            questionRepository.delete(question);
+        Set<Long> updatedProblemIds = problemRequestDtos.stream()
+                .map(ProblemRequestDto::getProblemId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        // 기존 질문을 업데이트하거나 삭제
+        for (Question existingQuestion : existingQuestions) {
+            Long problemId = existingQuestion.getProblem().getProblemId();
+            if (updatedProblemIds.contains(problemId)) {
+                ProblemRequestDto dto = problemRequestDtos.stream()
+                        .filter(p -> p.getProblemId().equals(problemId))
+                        .findFirst()
+                        .orElseThrow(() -> new IllegalArgumentException("Problem not found in request DTOs"));
+                existingQuestion.setQuestionScore(dto.getQuestionScore() != null ? dto.getQuestionScore() : 10);
+                existingQuestion.setQuestionSequence(dto.getQuestionSequence());
+                questionRepository.save(existingQuestion);
+            } else {
+                questionRepository.delete(existingQuestion);
+            }
         }
 
-        // 새로운 Question 엔티티 삽입
+        // 새로운 질문을 삽입
         for (ProblemRequestDto dto : problemRequestDtos) {
-            Question question = new Question();
-            question.setExam(exam);
-            Problem problem = problemRepository.findById(dto.getProblemId())
-                    .orElseThrow(() -> new IllegalArgumentException("Problem not found with id: " + dto.getProblemId()));
-            question.setProblem(problem);
-            question.setQuestionScore(dto.getQuestionScore() != null ? dto.getQuestionScore() : 10);
-            question.setQuestionSequence(dto.getQuestionSequence());
-            questionRepository.save(question);
+            if (dto.getProblemId() == null || !existingQuestionsMap.containsKey(dto.getProblemId())) {
+                Problem problem;
+                if (dto.getProblemId() != null) {
+                    problem = problemRepository.findById(dto.getProblemId())
+                            .orElseThrow(() -> new IllegalArgumentException("Problem not found with id: " + dto.getProblemId()));
+                } else {
+                    problem = new Problem();
+                }
+
+                problem.setProblemTitle(dto.getProblemTitle());
+                problem.setProblemContents(dto.getProblemContents());
+                problem.setProblemInputContents(dto.getProblemInputContents());
+                problem.setProblemOutputContents(dto.getProblemOutputContents());
+                problem.setProblemClass(ProblemClass.valueOf(dto.getProblemClass()));
+                problem.setProblemTimeLimit(dto.getProblemTimeLimit());
+                problem.setProblemMemoryLimit(dto.getProblemMemoryLimit());
+                problem.setProblemStatus(ProblemStatus.PRIVATE);
+                problem.setProblemPrompt(dto.getProblemPrompt());
+
+                // 기존의 테스트 케이스를 삭제하고 새로 추가
+                testcaseRepository.deleteAll(problem.getTestcases());
+                problem.getTestcases().clear();
+
+                for (TestcaseRequestDto testcaseDto : dto.getTestcases()) {
+                    Testcase testcase = new Testcase();
+                    testcase.setTestcaseInput(testcaseDto.getTestcaseInput());
+                    testcase.setTestcaseOutput(testcaseDto.getTestcaseOutput());
+                    testcase.setTestcaseStatus(TestcaseStatus.valueOf(testcaseDto.getTestcaseStatus()));
+                    testcase.setProblem(problem);
+                    problem.getTestcases().add(testcase);
+                }
+
+                problemRepository.save(problem);
+
+                Question question = new Question();
+                question.setExam(exam);
+                question.setProblem(problem);
+                question.setQuestionScore(dto.getQuestionScore() != null ? dto.getQuestionScore() : 10);
+                question.setQuestionSequence(dto.getQuestionSequence());
+                questionRepository.save(question);
+            }
+        }
+
+        // 문제 삭제
+        List<Long> currentProblemIds = problemRequestDtos.stream()
+                .map(ProblemRequestDto::getProblemId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        List<Problem> existingProblems = existingQuestions.stream()
+                .map(Question::getProblem)
+                .collect(Collectors.toList());
+
+        for (Problem existingProblem : existingProblems) {
+            if (!currentProblemIds.contains(existingProblem.getProblemId())) {
+                questionRepository.deleteByProblem(existingProblem);
+                problemRepository.delete(existingProblem);
+            }
         }
     }
-
     private void updateCandidateTests(Exam exam, List<Long> candidateIds) {
         // Exam 엔티티를 관리 상태로 가져옵니다.
         Exam managedExam = examRepository.findById(exam.getExamId())
@@ -270,7 +339,7 @@ public class ExamService {
         Exam exam = examRepository.findById(examId)
                 .orElseThrow(() -> new IllegalArgumentException("Exam not found with id: " + examId));
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd.HH.mm.ss");
 
         // 문제 목록 가져오기
         List<Problem> problems = questionRepository.findProblemsByExamId(examId);
@@ -404,7 +473,41 @@ public class ExamService {
         );
     }
 
-    // 시험 결과 조회
+    // 시험 목록 조회
+    @Transactional(readOnly = true)
+    public Page<ExamResultListDto> getExamResultList(Long examId, int pageNo) {
+        Pageable pageable = PageRequest.of(pageNo, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "testEndDate"));
+        Exam exam = examRepository.findById(examId)
+                .orElseThrow(() -> new IllegalArgumentException("Exam not found with id: " + examId));
+
+        Page<Test> tests = testRepository.findByExamExamId(examId, pageable);
+        return tests.map(this::convertToDto);
+    }
+
+    // Test 엔티티를 ExamResultListDto로 변환
+    private ExamResultListDto convertToDto(Test test) {
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
+
+        String testDueTime = Duration.between(test.getTestStartDate(), test.getTestEndDate()).toHoursPart() + ":"
+                + Duration.between(test.getTestStartDate(), test.getTestEndDate()).toMinutesPart() + ":"
+                + Duration.between(test.getTestStartDate(), test.getTestEndDate()).toSecondsPart();
+        String submissionDate = test.getTestEndDate().format(dateTimeFormatter);
+
+        ProblemMemberInfoResponseDto memberInfo = memberServiceFeignClient.getMemberInfo(test.getMemberId());
+
+        return new ExamResultListDto(
+                test.getTestId(),  // 추가: Test 엔티티의 ID (testId)
+                test.getMemberId(),
+                memberInfo.getMemberName(),
+                memberInfo.getMemberNumber(),
+                memberInfo.getMemberEmail(),
+                test.getTestScore(),
+                testDueTime,
+                submissionDate
+        );
+    }
+
+    // 시험 결과 상세 조회
     @Transactional(readOnly = true)
     public ExamResultDetailsResponseDto getExamResults(Long testId) {
         Test test = testRepository.findById(testId)
@@ -462,49 +565,6 @@ public class ExamService {
                 testDueTime,
                 submissionDate,
                 questionDtos
-        );
-    }
-
-
-    // 시험 결과 목록 조회
-    @Transactional(readOnly = true)
-    public ExamResultPageDto getExamResultList(Long examId, int pageNo) {
-        Pageable pageable = PageRequest.of(pageNo - 1, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "testEndDate"));
-        Exam exam = examRepository.findById(examId)
-                .orElseThrow(() -> new IllegalArgumentException("Exam not found with id: " + examId));
-
-        Page<Test> tests = testRepository.findByExamExamId(examId, pageable);
-        List<ExamResultListDto> results = tests.getContent().stream().map(this::convertToDto).collect(Collectors.toList());
-
-        ExamResultPageDto examResultPage = new ExamResultPageDto();
-        examResultPage.setExamTitle(exam.getExamTitle());
-        examResultPage.setExamMemo(exam.getExamMemo());
-        examResultPage.setSubmissionTotal((int) tests.getTotalElements());
-        examResultPage.setResults(results);
-
-        return examResultPage;
-    }
-
-    // Test 엔티티를 ExamResultListDto로 변환
-    private ExamResultListDto convertToDto(Test test) {
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
-
-        String testDueTime = Duration.between(test.getTestStartDate(), test.getTestEndDate()).toHoursPart() + ":"
-                + Duration.between(test.getTestStartDate(), test.getTestEndDate()).toMinutesPart() + ":"
-                + Duration.between(test.getTestStartDate(), test.getTestEndDate()).toSecondsPart();
-        String submissionDate = test.getTestEndDate().format(dateTimeFormatter);
-
-
-        ProblemMemberInfoResponseDto memberInfo = memberServiceFeignClient.getMemberInfo(test.getMemberId());
-
-        return new ExamResultListDto(
-                test.getMemberId(),
-                memberInfo.getMemberName(),
-                memberInfo.getMemberNumber(),
-                memberInfo.getMemberEmail(),
-                test.getTestScore(),
-                testDueTime,
-                submissionDate
         );
     }
 

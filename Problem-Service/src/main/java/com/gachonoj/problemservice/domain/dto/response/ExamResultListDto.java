@@ -7,6 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 
 public class ExamResultListDto {
+    private Long testId;
     private Long memberId;
     private String memberName;
     private String memberNumber;
