@@ -79,8 +79,8 @@ public class ExamService {
         LocalDateTime endDate = LocalDateTime.parse(request.getExamEndDate(), formatter);
 
         Exam exam = new Exam();  // 실제 엔티티 클래스
-        exam.setExamTitle(request.getExamTitle());
         exam.setMemberId(memberId);
+        exam.setExamTitle(request.getExamTitle());
         exam.setExamMemo(request.getExamMemo());
         exam.setExamContents(request.getExamContents());
         exam.setExamNotice(request.getExamNotice());
@@ -143,7 +143,7 @@ public class ExamService {
 
     // 시험 문제 수정
     @Transactional
-    public void updateExam(Long examId, ExamRequestDto request) {
+    public void updateExam(Long examId, Long memberId, ExamRequestDto request) {
         if (examId == null) {
             throw new IllegalArgumentException("Exam ID must not be null");
         }
@@ -153,6 +153,10 @@ public class ExamService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd.HH.mm.ss");
         LocalDateTime startDate = LocalDateTime.parse(request.getExamStartDate(), formatter);
         LocalDateTime endDate = LocalDateTime.parse(request.getExamEndDate(), formatter);
+
+        if (!existingExam.getMemberId().equals(memberId)) {
+            throw new IllegalArgumentException("Member ID does not match the exam owner.");
+        }
 
         existingExam.setExamTitle(request.getExamTitle());
         existingExam.setExamMemo(request.getExamMemo());
