@@ -2,8 +2,7 @@ package com.gachonoj.submissionservice.feign.client;
 
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionProblemTestCaseResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -24,4 +23,10 @@ public interface ProblemServiceFeignClient {
     // 문제 제목 가져오기
     @GetMapping("/problem/{problemId}/title")
     String getProblemTitle(@PathVariable Long problemId);
+    // 시험 문제의 점수 조회
+    @GetMapping("/problem/qustion/{problemId}/score")
+    Integer getQuestionScore(@PathVariable Long problemId);
+    // Test 엔티티에 TestScore 저장
+    @PostMapping("/problem/test/{examId}/score")
+    Void saveTestScore(@PathVariable Long examId, @RequestParam Long memberId, @RequestBody Integer testScore);
 }

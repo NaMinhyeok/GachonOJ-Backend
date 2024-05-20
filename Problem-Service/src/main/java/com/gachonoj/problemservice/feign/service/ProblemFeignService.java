@@ -2,14 +2,20 @@ package com.gachonoj.problemservice.feign.service;
 
 import com.gachonoj.problemservice.domain.constant.TestcaseStatus;
 import com.gachonoj.problemservice.domain.entity.Problem;
+import com.gachonoj.problemservice.domain.entity.Question;
+import com.gachonoj.problemservice.domain.entity.Test;
 import com.gachonoj.problemservice.domain.entity.Testcase;
 import com.gachonoj.problemservice.feign.dto.response.SubmissionProblemTestCaseResponseDto;
 import com.gachonoj.problemservice.repository.ProblemRepository;
+import com.gachonoj.problemservice.repository.QuestionRepository;
+import com.gachonoj.problemservice.repository.TestRepository;
 import com.gachonoj.problemservice.repository.TestcaseRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j
@@ -19,6 +25,8 @@ public class ProblemFeignService {
 
     private final ProblemRepository problemRepository;
     private final TestcaseRepository testcaseRepository;
+    private final QuestionRepository questionRepository;
+    private final TestRepository testRepository;
 
     // 북마크 갯수 조회
     public Integer getBookmarkCountByMemberId(Long memberId) {
@@ -76,5 +84,18 @@ public class ProblemFeignService {
         Problem problem = problemRepository.findByProblemId(problemId)
                 .orElseThrow(()->new IllegalArgumentException("해당 문제가 존재하지 않습니다."));
         return problem.getProblemTitle();
+    }
+    // 시험 문제의 점수 조회
+    public Integer getQuestionScore(Long problemId){
+        Question question = questionRepository.findByProblemProblemId(problemId);
+        return question.getQuestionScore();
+    }
+    // Test 엔티티에 TestScore 저장
+    @Transactional
+    public Void getTestScore(Long examId,Long memberId,Integer testScore){
+        Test test = testRepository.findByExamExamIdAndMemberId(examId, memberId);
+        test.setTestScore(testScore);
+        test.setTestEndDate(LocalDateTime.now());
+        return null;
     }
 }

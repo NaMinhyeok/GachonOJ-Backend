@@ -200,6 +200,8 @@ public class SubmissionService {
     // 시험 문제 답안 제출
     @Transactional
     public void submitExam(List<ExamSubmitRequestDto> examSubmitRequestDtos, Long memberId, Long examId) {
+        // 총점
+        int totalScore = 0;
         // 각 문제 채점
         for (ExamSubmitRequestDto examSubmitRequestDto : examSubmitRequestDtos) {
             List<String> input = problemServiceFeignClient.getTestCases(examSubmitRequestDto.getProblemId()).stream()
@@ -208,6 +210,8 @@ public class SubmissionService {
             List<String> output = problemServiceFeignClient.getTestCases(examSubmitRequestDto.getProblemId()).stream()
                     .map(SubmissionProblemTestCaseResponseDto::getOutput)
                     .collect(Collectors.toList());
+            // question의 점수 가져오기
+            Integer problemScore = problemServiceFeignClient.getProblemScore(examSubmitRequestDto.getProblemId());
             // 문제의 timelimit 가져오기
             Integer problemTimeLimit = problemServiceFeignClient.getProblemTimeLimit(examSubmitRequestDto.getProblemId());
             // 코드 실행 결과
@@ -222,6 +226,9 @@ public class SubmissionService {
             // 반환하기 위한 변수들
             // isCorrect: 모든 테스트 케이스를 통과했는지 여부
             boolean isCorrect = correctCount==result.size();
+            if(isCorrect){
+                totalScore += problemScore;
+            }
             // submission 엔티티 생성
             Submission submission = Submission.builder()
                     .memberId(memberId)
@@ -233,6 +240,8 @@ public class SubmissionService {
             // Submission 엔티티 저장
             submissionRepository.save(submission);
         }
+        // Test 엔티티에 점수 반영 및 종료시간 반영
+        problemServiceFeignClient.saveTestScore(examId, memberId, totalScore);
     }
     // 코드 저장
     @Transactional
