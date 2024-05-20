@@ -34,13 +34,9 @@ public class ProblemController {
 
     // 시험 수정
     @PutMapping("/exam/{examId}")
-    public ResponseEntity<CommonResponseDto<Void>> updateExam(
-            @PathVariable Long examId,
-            @RequestBody ExamRequestDto examDto,
-            HttpServletRequest request) {
-
-        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
-        examService.updateExam(examId, examDto);
+    public ResponseEntity<CommonResponseDto<Void>> updateExam(@PathVariable Long examId, @RequestBody ExamRequestDto request, HttpServletRequest httpRequest) {
+        Long memberId = Long.parseLong(httpRequest.getHeader("X-Authorization-Id"));
+        examService.updateExam(examId, memberId, request);
         return ResponseEntity.ok(CommonResponseDto.success());
     }
 
