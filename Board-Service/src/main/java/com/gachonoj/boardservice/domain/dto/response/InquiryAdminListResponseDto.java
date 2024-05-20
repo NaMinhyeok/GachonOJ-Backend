@@ -35,5 +35,12 @@ public class InquiryAdminListResponseDto {
         this.inquiryCreatedDate = inquiryCreatedDate;
         this.inquiryStatus = null;
     }
+    public InquiryAdminListResponseDto(Inquiry inquiry, String memberNickname, String inquiryCreatedDate, InquiryStatus inquiryStatus) {
+        this.inquiryId = inquiry.getInquiryId();
+        this.inquiryTitle = inquiry.getInquiryTitle();
+        this.memberNickname = memberNickname;
+        this.inquiryCreatedDate = inquiryCreatedDate;
+        this.inquiryStatus = inquiryStatus.getLabel();
+    }
 }
 

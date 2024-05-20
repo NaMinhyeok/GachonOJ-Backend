@@ -172,6 +172,18 @@ public class BoardService {
         }
         return new InquiryDetailAdminResponseDto(inquiry, memberNickname,inquiryCreatedDate);
     }
+    // 관리자 대시보드 최근 답변되지않은 문의사항 목록 조회
+    public List<InquiryAdminListResponseDto> getRecentInquiryList() {
+        List<Inquiry> inquiries = inquiryRepository.findTop5ByInquiryStatusOrderByInquiryCreatedDateDesc(InquiryStatus.NONE);
+        List<InquiryAdminListResponseDto> inquiryAdminListResponseDtos = new ArrayList<>();
+        for (Inquiry inquiry : inquiries) {
+            String memberNickname = memberServiceFeignClient.getNicknames(inquiry.getMemberId());
+            String createdDate = dateFormatter(inquiry.getInquiryCreatedDate());
+            InquiryAdminListResponseDto responseDto = new InquiryAdminListResponseDto(inquiry, memberNickname, createdDate, InquiryStatus.NONE);
+            inquiryAdminListResponseDtos.add(responseDto);
+        }
+        return inquiryAdminListResponseDtos;
+    }
     // 시간 포맷 변경
     private String dateFormatter(LocalDateTime time){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");

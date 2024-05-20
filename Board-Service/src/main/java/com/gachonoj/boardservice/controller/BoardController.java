@@ -123,5 +123,11 @@ public class BoardController {
         InquiryDetailAdminResponseDto inquiryDetail = boardService.getInquiryDetailAdmin(inquiryId);
         return ResponseEntity.ok(CommonResponseDto.success(inquiryDetail));
     }
+    // 관리자 대시보드 최근 답변되지않은 문의사항 목록 조회
+    @GetMapping("/admin/inquiry/list/recent")
+    public ResponseEntity<CommonResponseDto<List<InquiryAdminListResponseDto>>> getRecentInquiryList(){
+        List<InquiryAdminListResponseDto> inquiryList = boardService.getRecentInquiryList();
+        return ResponseEntity.ok(CommonResponseDto.success(inquiryList));
+    }
 }
 
