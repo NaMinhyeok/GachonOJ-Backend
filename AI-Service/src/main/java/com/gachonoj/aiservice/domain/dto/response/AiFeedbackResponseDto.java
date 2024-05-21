@@ -8,5 +8,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AiFeedbackResponseDto {
+    private Long problemId;
+    private String problemTitle;
+    private String memberNickname;
+    private String code;
     private String aiContents;
 }

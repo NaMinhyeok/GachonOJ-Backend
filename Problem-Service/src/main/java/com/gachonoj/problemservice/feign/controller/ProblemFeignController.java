@@ -51,4 +51,14 @@ public class ProblemFeignController {
     public String getProblemTitle(@PathVariable Long problemId) {
         return problemFeignService.getProblemTitle(problemId);
     }
+    // 시험 문제의 점수 조회
+    @GetMapping("/question/{problemId}/score")
+    public Integer getQuestionScore(@PathVariable Long problemId) {
+        return problemFeignService.getQuestionScore(problemId);
+    }
+    // Test 엔티티에 TestScore 저장
+    @PostMapping("/test/{examId}/score")
+    public Void getTestScore(@PathVariable Long examId,@RequestParam Long memberId,@RequestBody Integer testScore) {
+        return problemFeignService.getTestScore(examId, memberId, testScore);
+    }
 }
