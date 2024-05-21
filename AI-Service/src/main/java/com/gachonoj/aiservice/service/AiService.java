@@ -6,6 +6,7 @@ import com.gachonoj.aiservice.domain.dto.response.AiFeedbackResponseDto;
 import com.gachonoj.aiservice.domain.dto.response.ChatGPTResponse;
 import com.gachonoj.aiservice.domain.dto.response.TokenUsageResponseDto;
 import com.gachonoj.aiservice.domain.entity.Feedback;
+import com.gachonoj.aiservice.feign.client.MemberServiceFeignClient;
 import com.gachonoj.aiservice.feign.client.ProblemServiceFeignClient;
 import com.gachonoj.aiservice.feign.client.SubmissionServiceFeignClient;
 import com.gachonoj.aiservice.feign.dto.response.SubmissionCodeInfoResponseDto;
@@ -31,6 +32,7 @@ public class AiService {
 
     private final SubmissionServiceFeignClient submissionServiceFeignClient;
     private final ProblemServiceFeignClient problemServiceFeignClient;
+    private final MemberServiceFeignClient memberServiceFeignClient;
     private final FeedbackRepository feedbackRepository;
 
     public String chatGPT(FeedbackRequestDto feedbackRequestDto) {
@@ -53,6 +55,8 @@ public class AiService {
         // 결과를 제출자에게 전달
         SubmissionCodeInfoResponseDto submissionCodeInfoResponseDto = submissionServiceFeignClient.getSubmissionCodeBySubmissionId(submissionId);
         String code = submissionCodeInfoResponseDto.getCode();
+        String problemTitle = problemServiceFeignClient.getProblemTitle(submissionCodeInfoResponseDto.getProblemId());
+        String memberNickname = memberServiceFeignClient.getNickname(memberId);
         log.info("code : {}", code);
         Long problemId = submissionCodeInfoResponseDto.getProblemId();
         log.info("problemId : {}", problemId);
@@ -64,7 +68,7 @@ public class AiService {
         Integer totalTokens = response.getUsage().getTotal_tokens();
         Feedback feedback = new Feedback(submissionId, memberId, problemId, aiContents,totalTokens);
         feedbackRepository.save(feedback);
-        return new AiFeedbackResponseDto(aiContents);
+        return new AiFeedbackResponseDto(problemId,problemTitle,memberNickname,code,aiContents);
     }
     // 토큰 사용량 조회
     public TokenUsageResponseDto tokenUsage() {

@@ -9,4 +9,7 @@ public interface ProblemServiceFeignClient {
     // 문제 ID로 문제 프롬프트 가져오기
     @GetMapping("/problem/prompt/{problemId}")
     String getProblemPromptByProblemId(@PathVariable Long problemId);
+    // 문제 제목 가져오기
+    @GetMapping("/problem/{problemId}/title")
+    String getProblemTitle(@PathVariable Long problemId);
 }
