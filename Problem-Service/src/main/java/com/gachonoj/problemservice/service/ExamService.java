@@ -527,11 +527,11 @@ public class ExamService {
         ProblemMemberInfoResponseDto memberInfo = memberServiceFeignClient.getMemberInfo(test.getMemberId());
 
         List<Question> questionsList = questionRepository.findByExamExamId(exam.getExamId());
-        List<Long> problemIds = questionsList.stream()
+        List<Long> problemId = questionsList.stream()
                 .map(question -> question.getProblem().getProblemId())
                 .collect(Collectors.toList());
 
-        SubmissionExamResultInfoResponseDto submissionsInfo = submissionServiceFeignClient.fetchSubmissionsInfo(problemIds, test.getMemberId());
+        SubmissionExamResultInfoResponseDto submissionsInfo = submissionServiceFeignClient.fetchSubmissionsInfo(problemId, test.getMemberId());
 
         if (submissionsInfo == null || submissionsInfo.getSubmissions() == null) {
             throw new IllegalStateException("Submissions information is missing for the given test.");
@@ -571,7 +571,7 @@ public class ExamService {
         return new ExamResultDetailsResponseDto(
                 exam.getExamTitle(),
                 exam.getExamMemo(),
-                testRepository.countByExamExamId(exam.getExamId()),
+                (int) testRepository.countByExamExamId(exam.getExamId()),
                 memberInfo.getMemberName(),
                 memberInfo.getMemberNumber(),
                 memberInfo.getMemberEmail(),
@@ -581,6 +581,7 @@ public class ExamService {
                 questionDtos
         );
     }
+
 
     // DateFormatter를 사용하여 날짜 형식을 변경하는 메서드
     private String dateFormatter (LocalDateTime date) {

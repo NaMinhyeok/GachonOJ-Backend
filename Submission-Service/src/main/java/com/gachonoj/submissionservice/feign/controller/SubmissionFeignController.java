@@ -1,11 +1,10 @@
 package com.gachonoj.submissionservice.feign.controller;
 
-import com.gachonoj.submissionservice.feign.dto.response.CorrectRateResponseDto;
-import com.gachonoj.submissionservice.feign.dto.response.SubmissionMemberInfoResponseDto;
-import com.gachonoj.submissionservice.feign.dto.response.SubmissionResultCountResponseDto;
+import com.gachonoj.submissionservice.feign.dto.response.*;
 import com.gachonoj.submissionservice.feign.service.SubmissionFeignService;
-import com.gachonoj.submissionservice.feign.dto.response.SubmissionCodeInfoResponseDto;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +14,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/submission")
+
 public class SubmissionFeignController {
     private final SubmissionFeignService submissionFeignService;
 
@@ -77,5 +77,22 @@ public class SubmissionFeignController {
     @GetMapping("/recent/problem")
     public Long getRecentSubmissionId(@RequestParam("memberId") Long memberId, @RequestParam("problemId") Long problemId) {
         return submissionFeignService.getRecentSubmissionId(memberId, problemId);
+    }
+
+    // 시험 상세 정보 조회
+    @GetMapping("/exam/info")
+    public SubmissionExamResultInfoResponseDto fetchSubmissionsInfo(
+            @RequestParam List<Long> problemId,
+            @RequestParam Long memberId
+    ) {
+        return submissionFeignService.fetchSubmissionsInfo(problemId, memberId);
+    }
+
+    // 시험 문제 반환
+    @Setter
+    @Getter
+    public static class FetchSubmissionsRequest {
+        private List<Long> problemId;
+        private Long memberId;
     }
 }

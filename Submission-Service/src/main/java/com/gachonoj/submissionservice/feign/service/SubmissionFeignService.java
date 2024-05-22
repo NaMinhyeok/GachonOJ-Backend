@@ -98,4 +98,17 @@ public class SubmissionFeignService {
         }
         return submissions.get(0).getSubmissionId();
     }
+
+    // 시험 상세 조회
+    public SubmissionExamResultInfoResponseDto fetchSubmissionsInfo(List<Long> problemId, Long memberId) {
+        List<SubmissionDetailDto> submissions = submissionRepository.findByMemberIdAndProblemIdIn(memberId, problemId).stream()
+                .map(submission -> new SubmissionDetailDto(
+                        submission.getProblemId(),
+                        submission.getSubmissionStatus() == Status.CORRECT,
+                        submission.getSubmissionCode()
+                ))
+                .collect(Collectors.toList());
+
+        return new SubmissionExamResultInfoResponseDto(submissions);
+    }
 }
