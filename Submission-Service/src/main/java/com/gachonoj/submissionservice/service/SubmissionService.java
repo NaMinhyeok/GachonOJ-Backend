@@ -211,7 +211,7 @@ public class SubmissionService {
                     .map(SubmissionProblemTestCaseResponseDto::getOutput)
                     .collect(Collectors.toList());
             // question의 점수 가져오기
-            Integer problemScore = problemServiceFeignClient.getProblemScore(examSubmitRequestDto.getProblemId());
+            Integer problemScore = problemServiceFeignClient.getQuestionScore(examSubmitRequestDto.getProblemId());
             // 문제의 timelimit 가져오기
             Integer problemTimeLimit = problemServiceFeignClient.getProblemTimeLimit(examSubmitRequestDto.getProblemId());
             // 코드 실행 결과

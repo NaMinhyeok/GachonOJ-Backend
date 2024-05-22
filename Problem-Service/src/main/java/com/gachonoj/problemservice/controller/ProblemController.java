@@ -226,14 +226,13 @@ public class ProblemController {
     }
 
     // 시험 결과 목록 조회
-    @GetMapping("/exam/{examId}/results")
-    public ResponseEntity<CommonResponseDto<Page<ExamResultListDto>>> getExamResultList(
+    @GetMapping("/admin/exam/{examId}/results")
+    public ResponseEntity<CommonResponseDto<ExamResultPageDto>> getExamResultList(
             @PathVariable Long examId,
             @RequestParam(defaultValue = "1") int page) {
-        Page<ExamResultListDto> results = examService.getExamResultList(examId, page - 1);
+        ExamResultPageDto results = examService.getExamResultList(examId, page - 1);
         return ResponseEntity.ok(CommonResponseDto.success(results));
     }
-
     // 시험 결과 상세 조회
     @GetMapping("/admin/result/{testId}")
     public ResponseEntity<CommonResponseDto<ExamResultDetailsResponseDto>> getExamResults(

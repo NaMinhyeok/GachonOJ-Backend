@@ -477,15 +477,21 @@ public class ExamService {
         );
     }
 
-    // 시험 목록 조회
     @Transactional(readOnly = true)
-    public Page<ExamResultListDto> getExamResultList(Long examId, int pageNo) {
+    public ExamResultPageDto getExamResultList(Long examId, int pageNo) {
         Pageable pageable = PageRequest.of(pageNo, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "testEndDate"));
         Exam exam = examRepository.findById(examId)
                 .orElseThrow(() -> new IllegalArgumentException("Exam not found with id: " + examId));
 
         Page<Test> tests = testRepository.findByExamExamId(examId, pageable);
-        return tests.map(this::convertToDto);
+        Page<ExamResultListDto> resultList = tests.map(this::convertToDto);
+
+        return new ExamResultPageDto(
+                exam.getExamTitle(),
+                exam.getExamMemo(),
+                (int) tests.getTotalElements(),
+                resultList
+        );
     }
 
     // Test 엔티티를 ExamResultListDto로 변환
@@ -500,7 +506,7 @@ public class ExamService {
         ProblemMemberInfoResponseDto memberInfo = memberServiceFeignClient.getMemberInfo(test.getMemberId());
 
         return new ExamResultListDto(
-                test.getTestId(),  // 추가: Test 엔티티의 ID (testId)
+                test.getTestId(),
                 test.getMemberId(),
                 memberInfo.getMemberName(),
                 memberInfo.getMemberNumber(),
@@ -526,11 +532,15 @@ public class ExamService {
                 .collect(Collectors.toList());
 
         SubmissionExamResultInfoResponseDto submissionsInfo = submissionServiceFeignClient.fetchSubmissionsInfo(problemIds, test.getMemberId());
+
+        if (submissionsInfo == null || submissionsInfo.getSubmissions() == null) {
+            throw new IllegalStateException("Submissions information is missing for the given test.");
+        }
+
         Map<Long, Question> questionMap = questionsList.stream()
                 .collect(Collectors.toMap(question -> question.getProblem().getProblemId(), Function.identity()));
 
         final int[] totalScore = {0};
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
 
         List<QuestionResultDetailsResponseDto> questionDtos = submissionsInfo.getSubmissions().stream()

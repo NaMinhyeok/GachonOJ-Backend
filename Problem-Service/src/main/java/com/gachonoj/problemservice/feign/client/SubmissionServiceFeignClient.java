@@ -28,8 +28,8 @@ public interface SubmissionServiceFeignClient {
     List<Long> getCorrectProblemIds(@RequestParam Long memberId);
 
     // problemId로 제출 정보 조회
-    @GetMapping("/submission/exam/result")
-    SubmissionExamResultInfoResponseDto fetchSubmissionsInfo(@RequestParam("problemId") List<Long> problemIds, @RequestParam("memberId") Long memberId);
+    @GetMapping("/submissions/info")
+    SubmissionExamResultInfoResponseDto fetchSubmissionsInfo(@RequestParam List<Long> problemIds, @RequestParam Long memberId);
     // 오답률 높은 문제 TOP 5
     @GetMapping("/submission/problem/incorrect/top5")
     List<CorrectRateResponseDto> getTop5IncorrectProblemList();
