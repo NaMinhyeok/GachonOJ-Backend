@@ -24,7 +24,7 @@ public interface ProblemServiceFeignClient {
     @GetMapping("/problem/{problemId}/title")
     String getProblemTitle(@PathVariable Long problemId);
     // 시험 문제의 점수 조회
-    @GetMapping("/problem/qustion/{problemId}/score")
+    @GetMapping("/problem/question/{problemId}/score")
     Integer getQuestionScore(@PathVariable Long problemId);
     // Test 엔티티에 TestScore 저장
     @PostMapping("/problem/test/{examId}/score")
