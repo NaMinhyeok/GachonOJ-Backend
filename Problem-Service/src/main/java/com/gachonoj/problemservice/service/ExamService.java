@@ -541,7 +541,6 @@ public class ExamService {
                 .collect(Collectors.toMap(question -> question.getProblem().getProblemId(), Function.identity()));
 
         final int[] totalScore = {0};
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss");
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
 
         List<QuestionResultDetailsResponseDto> questionDtos = submissionsInfo.getSubmissions().stream()

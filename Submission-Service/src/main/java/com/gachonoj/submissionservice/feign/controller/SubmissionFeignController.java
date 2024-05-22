@@ -4,7 +4,7 @@ import com.gachonoj.submissionservice.feign.dto.response.CorrectRateResponseDto;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionMemberInfoResponseDto;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionResultCountResponseDto;
 import com.gachonoj.submissionservice.feign.service.SubmissionFeignService;
-import com.gachonoj.submissionservice.fegin.dto.response.SubmissionCodeInfoResponseDto;
+import com.gachonoj.submissionservice.feign.dto.response.SubmissionCodeInfoResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
