@@ -5,6 +5,7 @@ import com.gachonoj.problemservice.feign.dto.response.CorrectRateResponseDto;
 import com.gachonoj.problemservice.feign.dto.response.SubmissionResultCountResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
@@ -28,8 +29,8 @@ public interface SubmissionServiceFeignClient {
     List<Long> getCorrectProblemIds(@RequestParam Long memberId);
 
     // problemId로 제출 정보 조회
-    @GetMapping("/submissions/info")
-    SubmissionExamResultInfoResponseDto fetchSubmissionsInfo(@RequestParam List<Long> problemIds, @RequestParam Long memberId);
+    @GetMapping("/submission/exam/info")
+    SubmissionExamResultInfoResponseDto fetchSubmissionsInfo(@RequestParam List<Long> problemId, @RequestParam Long memberId);
     // 오답률 높은 문제 TOP 5
     @GetMapping("/submission/problem/incorrect/top5")
     List<CorrectRateResponseDto> getTop5IncorrectProblemList();
