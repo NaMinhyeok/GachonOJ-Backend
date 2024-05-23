@@ -316,6 +316,7 @@ public class MemberService {
         // 다른 서비스에서 memberId를 외래키로 사용하고 있다면 삭제
         boardServiceFeignClient.deleteBoardByMemberId(memberId);
         aiServiceFeignClient.deleteAiByMemberId(memberId);
+        submissionServiceFeignClient.deleteSubmissionByMemberId(memberId);
     }
     // 비밀번호 변경
     @Transactional
