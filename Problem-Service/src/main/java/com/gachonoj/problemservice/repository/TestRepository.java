@@ -17,4 +17,6 @@ public interface TestRepository extends JpaRepository<Test,Long> {
     // MemberId로 응시한 시험 확인
     List<Test> findByMemberId(Long memberId);
 
+    // 멤버 ID로 응시자 목록 삭제
+    void deleteByMemberId(Long memberId);
 }

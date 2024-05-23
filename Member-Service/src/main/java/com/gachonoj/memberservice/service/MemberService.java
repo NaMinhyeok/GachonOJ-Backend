@@ -317,6 +317,7 @@ public class MemberService {
         boardServiceFeignClient.deleteBoardByMemberId(memberId);
         aiServiceFeignClient.deleteAiByMemberId(memberId);
         submissionServiceFeignClient.deleteSubmissionByMemberId(memberId);
+        problemServiceFeignClient.deleteProblemByMemberId(memberId);
     }
     // 비밀번호 변경
     @Transactional

@@ -61,4 +61,9 @@ public class ProblemFeignController {
     public Void getTestScore(@PathVariable Long examId,@RequestParam Long memberId,@RequestBody Integer testScore) {
         return problemFeignService.getTestScore(examId, memberId, testScore);
     }
+    //memberId 전송해서 해당 memberId를 외래키로 사용하고있다면 삭제하도록 한다.
+    @DeleteMapping("/member")
+    public void deleteProblemByMemberId(@RequestParam Long memberId) {
+        problemFeignService.deleteProblemByMemberId(memberId);
+    }
 }

@@ -26,4 +26,7 @@ public interface ExamRepository extends JpaRepository<Exam,Long> {
 
     // 작성중인 것 제외하고 exam 조회
     List<Exam> findByExamStatusNot(ExamStatus examStatus);
+
+    // MemberId로 시험 삭제
+    void deleteByMemberId(Long memberId);
 }
