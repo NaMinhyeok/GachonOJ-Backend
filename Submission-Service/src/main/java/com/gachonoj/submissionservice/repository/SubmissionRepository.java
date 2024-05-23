@@ -52,6 +52,8 @@ public interface SubmissionRepository extends JpaRepository<Submission,Long> {
 
     // 제출 코드에 대한 ProblemId
     List<Submission> findByMemberIdAndProblemId(Long memberId, Long problemId);
-
+    // 제출 ID로 제출 정보 조회
     Submission findBySubmissionId(Long submissionId);
+    // memberId로 제출 정보 삭제
+    void deleteByMemberId(Long memberId);
 }

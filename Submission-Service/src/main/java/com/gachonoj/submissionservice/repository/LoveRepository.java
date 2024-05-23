@@ -7,4 +7,6 @@ public interface LoveRepository extends JpaRepository<Love,Long> {
     // 제출 id와 회원 id 존재하는지 조회
     boolean existsBySubmissionSubmissionIdAndMemberId(Long submissionId, Long memberId);
     void deleteBySubmissionSubmissionIdAndMemberId(Long submissionId, Long memberId);
+
+    void deleteByMemberId(Long memberId);
 }

@@ -78,4 +78,9 @@ public class SubmissionFeignController {
     public Long getRecentSubmissionId(@RequestParam("memberId") Long memberId, @RequestParam("problemId") Long problemId) {
         return submissionFeignService.getRecentSubmissionId(memberId, problemId);
     }
+    //memberId 전송해서 해당 memberId를 외래키로 사용하고있다면 삭제하도록 한다.
+    @DeleteMapping("/member")
+    public void deleteSubmissionByMemberId(@RequestParam("memberId") Long memberId) {
+        submissionFeignService.deleteSubmissionByMemberId(memberId);
+    }
 }

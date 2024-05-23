@@ -9,6 +9,7 @@ import com.gachonoj.submissionservice.fegin.dto.response.SubmissionCodeInfoRespo
 import com.gachonoj.submissionservice.feign.dto.response.CorrectRateResponseDto;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionMemberInfoResponseDto;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionResultCountResponseDto;
+import com.gachonoj.submissionservice.repository.LoveRepository;
 import com.gachonoj.submissionservice.repository.SubmissionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SubmissionFeignService {
     private final SubmissionRepository submissionRepository;
+    private final LoveRepository loveRepository;
 
     // memberId로 제출 정보 조회
     public SubmissionMemberInfoResponseDto getMemberInfo(Long memberId) {
@@ -102,5 +104,11 @@ public class SubmissionFeignService {
             return null;
         }
         return submissions.get(0).getSubmissionId();
+    }
+    //memberId 전송해서 해당 memberId를 외래키로 사용하고있다면 삭제하도록 한다.
+    @Transactional
+    public void deleteSubmissionByMemberId(Long memberId) {
+        submissionRepository.deleteByMemberId(memberId);
+        loveRepository.deleteByMemberId(memberId);
     }
 }
