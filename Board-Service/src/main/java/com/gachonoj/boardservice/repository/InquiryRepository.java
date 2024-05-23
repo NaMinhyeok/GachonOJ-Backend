@@ -17,4 +17,6 @@ public interface InquiryRepository extends JpaRepository<Inquiry,Long> {
     Page<Inquiry> findByMemberIdOrderByInquiryCreatedDateDesc(Long memberId, Pageable pageable);
     // 관리자 대시보드 최근 답변되지않은 문의사항 목록 조회
     List<Inquiry> findTop5ByInquiryStatusOrderByInquiryCreatedDateDesc(InquiryStatus inquiryStatus);
+    //memberId 전송해서 해당 memberId를 외래키로 사용하고있다면 삭제하도록 한다.
+    void deleteByMemberId(Long memberId);
 }
