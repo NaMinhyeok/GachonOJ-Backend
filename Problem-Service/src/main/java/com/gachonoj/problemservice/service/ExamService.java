@@ -398,25 +398,30 @@ public class ExamService {
     }
 
     // 학생 시험 목록 조회
-    @Transactional(readOnly = true)
-    public List<TestOverviewResponseDto> getMemberTests(Long memberId) {
-        List<Test> tests = testRepository.findByMemberId(memberId);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
-        return tests.stream().map(test -> {
-            boolean isCompleted = test.getTestEndDate() != null;
-            // Exam의 시작 날짜를 사용
-            String formattedStartDate = (test.getExam().getExamStartDate() != null) ? formatter.format(test.getExam().getExamStartDate()) : "";
-            String formattedEndDate = (test.getExam().getExamEndDate() != null) ? formatter.format(test.getExam().getExamEndDate()) : "";
-            return new TestOverviewResponseDto(
-                    test.getTestId(),
-                    test.getExam().getExamId(),
-                    test.getExam().getExamTitle(),
-                    formattedStartDate,
-                    formattedEndDate,
-                    isCompleted,
-                    test.getTestScore()
-            );
-        }).collect(Collectors.toList());
+    @Transactional
+    public List<TestOverviewResponseDto> getMemberTestList(Long memberId, String type, String status) {
+        ExamType examType = ExamType.fromLabel(type);
+        ExamStatus examStatus = ExamStatus.fromLabel(status);
+        return getMemberTests(memberId, examType, examStatus);
+    }
+
+    private List<TestOverviewResponseDto> getMemberTests(Long memberId, ExamType examType, ExamStatus status) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH시");
+        return testRepository.findByMemberId(memberId).stream()
+                .filter(test -> test.getExam().getExamStatus() == status && test.getExam().getExamType() == examType)
+                .map(test -> {
+                    boolean isCompleted = test.getTestEndDate() != null;
+                    String formattedStartDate = (test.getExam().getExamStartDate() != null) ? formatter.format(test.getExam().getExamStartDate()) : "";
+                    String formattedEndDate = (test.getExam().getExamEndDate() != null) ? formatter.format(test.getExam().getExamEndDate()) : "";
+                    return new TestOverviewResponseDto(
+                            test.getTestId(),
+                            test.getExam().getExamId(),
+                            test.getExam().getExamTitle(),
+                            formattedStartDate,
+                            formattedEndDate,
+                            isCompleted
+                    );
+                }).collect(Collectors.toList());
     }
 
 
