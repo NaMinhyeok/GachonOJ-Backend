@@ -406,7 +406,7 @@ public class ExamService {
             boolean isCompleted = test.getTestEndDate() != null;
             // Exam의 시작 날짜를 사용
             String formattedStartDate = (test.getExam().getExamStartDate() != null) ? formatter.format(test.getExam().getExamStartDate()) : "";
-            String formattedEndDate = (test.getTestEndDate() != null) ? formatter.format(test.getTestEndDate()) : "";
+            String formattedEndDate = (test.getExam().getExamEndDate() != null) ? formatter.format(test.getExam().getExamEndDate()) : "";
             return new TestOverviewResponseDto(
                     test.getTestId(),
                     test.getExam().getExamId(),
