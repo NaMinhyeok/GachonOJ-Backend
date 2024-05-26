@@ -404,7 +404,8 @@ public class ExamService {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
         return tests.stream().map(test -> {
             boolean isCompleted = test.getTestEndDate() != null;
-            String formattedStartDate = (test.getTestStartDate() != null) ? formatter.format(test.getTestStartDate()) : "";
+            // Exam의 시작 날짜를 사용
+            String formattedStartDate = (test.getExam().getExamStartDate() != null) ? formatter.format(test.getExam().getExamStartDate()) : "";
             String formattedEndDate = (test.getTestEndDate() != null) ? formatter.format(test.getTestEndDate()) : "";
             return new TestOverviewResponseDto(
                     test.getTestId(),
