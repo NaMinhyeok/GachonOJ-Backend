@@ -18,4 +18,9 @@ public class AiFeignService {
     public void deleteAiByMemberId(Long memberId) {
         feedbackRepository.deleteByMemberId(memberId);
     }
+    // 문제에 대한 ai 분석 삭제
+    @Transactional
+    public void deleteAiByProblemId(Long problemId) {
+        feedbackRepository.deleteByProblemId(problemId);
+    }
 }

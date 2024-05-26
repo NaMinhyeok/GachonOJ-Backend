@@ -22,4 +22,9 @@ public class AiFeignController {
     public void deleteAiByMemberId(@RequestParam("memberId") Long memberId) {
         aiFeignService.deleteAiByMemberId(memberId);
     }
+    // 문제에 대한 ai 분석 삭제
+    @DeleteMapping(value = "/problem")
+    public void deleteAiByProblemId(@RequestParam("problemId") Long problemId) {
+        aiFeignService.deleteAiByProblemId(problemId);
+    }
 }

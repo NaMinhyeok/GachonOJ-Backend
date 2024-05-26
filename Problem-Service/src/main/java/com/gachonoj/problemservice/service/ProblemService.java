@@ -9,6 +9,7 @@ import com.gachonoj.problemservice.domain.entity.Testcase;
 import com.gachonoj.problemservice.domain.constant.ProblemClass;
 import com.gachonoj.problemservice.domain.constant.ProblemStatus;
 import com.gachonoj.problemservice.domain.constant.TestcaseStatus;
+import com.gachonoj.problemservice.feign.client.AiServiceFeignClient;
 import com.gachonoj.problemservice.feign.client.SubmissionServiceFeignClient;
 import com.gachonoj.problemservice.feign.dto.response.CorrectRateResponseDto;
 import com.gachonoj.problemservice.repository.BookmarkRepository;
@@ -35,6 +36,7 @@ public class ProblemService {
     private final BookmarkRepository bookmarkRepository;
     private final ExamRepository examRepository;
     private final SubmissionServiceFeignClient submissionServiceFeignClient;
+    private final AiServiceFeignClient aiServiceFeignClient;
 
 
     private static final int PAGE_SIZE = 10;
@@ -103,6 +105,8 @@ public class ProblemService {
     public void deleteProblem(Long problemId) {
         // 문제에 대한 제출 삭제
         submissionServiceFeignClient.deleteSubmissionByProblemId(problemId);
+        // 문제에 대한 ai 분석 삭제
+        aiServiceFeignClient.deleteAiByProblemId(problemId);
         // 문제가 존재하는지 확인하고, 존재한다면 삭제
         problemRepository.findById(problemId)
                 .ifPresent(problemRepository::delete);
