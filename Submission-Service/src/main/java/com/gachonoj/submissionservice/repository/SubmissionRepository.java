@@ -56,4 +56,6 @@ public interface SubmissionRepository extends JpaRepository<Submission,Long> {
     Submission findBySubmissionId(Long submissionId);
     // memberId로 제출 정보 삭제
     void deleteByMemberId(Long memberId);
+    // 시험 삭제 시 해당 시험에 대한 제출 삭제
+    void deleteByProblemIdIn(List<Long> problemIds);
 }

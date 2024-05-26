@@ -83,4 +83,9 @@ public class SubmissionFeignController {
     public void deleteSubmissionByMemberId(@RequestParam("memberId") Long memberId) {
         submissionFeignService.deleteSubmissionByMemberId(memberId);
     }
+    // 시험 삭제 시 해당 시험에 대한 제출 삭제
+    @DeleteMapping("/exam")
+    public void deleteSubmissionByProblemIds(@RequestParam("problemIds") List<Long> problemIds) {
+        submissionFeignService.deleteSubmissionByProblemIds(problemIds);
+    }
 }

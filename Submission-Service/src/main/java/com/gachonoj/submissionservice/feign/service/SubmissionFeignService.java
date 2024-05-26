@@ -111,4 +111,9 @@ public class SubmissionFeignService {
         submissionRepository.deleteByMemberId(memberId);
         loveRepository.deleteByMemberId(memberId);
     }
+    // 시험 삭제 시 해당 시험에 대한 제출 삭제
+    @Transactional
+    public void deleteSubmissionByProblemIds(List<Long> problemIds) {
+        submissionRepository.deleteByProblemIdIn(problemIds);
+    }
 }

@@ -4,6 +4,7 @@ import com.gachonoj.problemservice.feign.dto.response.SubmissionExamResultInfoRe
 import com.gachonoj.problemservice.feign.dto.response.CorrectRateResponseDto;
 import com.gachonoj.problemservice.feign.dto.response.SubmissionResultCountResponseDto;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -40,6 +41,9 @@ public interface SubmissionServiceFeignClient {
     // memberId와 problemId로 제출 정보 조회
     @GetMapping("/submission/recent/problem")
     Long getRecentSubmissionId(@RequestParam("problemId") Long problemId,@RequestParam("memberId") Long memberId);
+    // 시험 삭제 시 해당 시험에 대한 제출 삭제
+    @DeleteMapping("/submission/exam")
+    void deleteSubmissionByProblemIds(@RequestParam("problemIds") List<Long> problemIds);
 }
 
 
