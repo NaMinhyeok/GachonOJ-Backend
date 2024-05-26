@@ -5,11 +5,12 @@ import com.gachonoj.submissionservice.domain.entity.Submission;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionDetailDto;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionExamResultInfoResponseDto;
 import com.gachonoj.submissionservice.domain.entity.Submission;
-import com.gachonoj.submissionservice.fegin.dto.response.SubmissionCodeInfoResponseDto;
 import com.gachonoj.submissionservice.feign.dto.response.CorrectRateResponseDto;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionMemberInfoResponseDto;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionResultCountResponseDto;
 import com.gachonoj.submissionservice.repository.LoveRepository;
+import com.gachonoj.submissionservice.feign.dto.response.*;
+import com.gachonoj.submissionservice.feign.dto.response.SubmissionCodeInfoResponseDto;
 import com.gachonoj.submissionservice.repository.SubmissionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -104,6 +105,19 @@ public class SubmissionFeignService {
             return null;
         }
         return submissions.get(0).getSubmissionId();
+    }
+
+    // 시험 상세 조회
+    public SubmissionExamResultInfoResponseDto fetchSubmissionsInfo(List<Long> problemId, Long memberId) {
+        List<SubmissionDetailDto> submissions = submissionRepository.findByMemberIdAndProblemIdIn(memberId, problemId).stream()
+                .map(submission -> new SubmissionDetailDto(
+                        submission.getProblemId(),
+                        submission.getSubmissionStatus() == Status.CORRECT,
+                        submission.getSubmissionCode()
+                ))
+                .collect(Collectors.toList());
+
+        return new SubmissionExamResultInfoResponseDto(submissions);
     }
     //memberId 전송해서 해당 memberId를 외래키로 사용하고있다면 삭제하도록 한다.
     @Transactional

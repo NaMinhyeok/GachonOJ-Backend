@@ -34,7 +34,7 @@ public interface SubmissionRepository extends JpaRepository<Submission,Long> {
     List<Long> findProblemIdByMemberIdAndSubmissionStatus(Long memberId, Status status);
 
     // Member ID와 Problem IDs를 기반으로 제출 정보를 가져오는 메서드 추가
-    List<Submission> findByMemberIdAndProblemIdIn(Long memberId, List<Long> problemIds);
+    List<Submission> findByMemberIdAndProblemIdIn(Long memberId, List<Long> problemId);
 
     // 오답률 높은 문제 Top 5
     @Query("SELECT s.problemId FROM Submission s WHERE s.submissionStatus = 'INCORRECT' GROUP BY s.problemId ORDER BY COUNT(s.problemId) DESC LIMIT 5")
