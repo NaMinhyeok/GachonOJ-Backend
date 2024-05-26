@@ -101,6 +101,8 @@ public class ProblemService {
     // 문제 삭제
     @Transactional
     public void deleteProblem(Long problemId) {
+        // 문제에 대한 제출 삭제
+        submissionServiceFeignClient.deleteSubmissionByProblemId(problemId);
         // 문제가 존재하는지 확인하고, 존재한다면 삭제
         problemRepository.findById(problemId)
                 .ifPresent(problemRepository::delete);

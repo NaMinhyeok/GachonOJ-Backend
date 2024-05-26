@@ -88,4 +88,9 @@ public class SubmissionFeignController {
     public void deleteSubmissionByProblemIds(@RequestParam("problemIds") List<Long> problemIds) {
         submissionFeignService.deleteSubmissionByProblemIds(problemIds);
     }
+    // 문제에 대한 제출 삭제
+    @DeleteMapping("/problem")
+    public void deleteSubmissionByProblemId(@RequestParam("problemId") Long problemId) {
+        submissionFeignService.deleteSubmissionByProblemId(problemId);
+    }
 }

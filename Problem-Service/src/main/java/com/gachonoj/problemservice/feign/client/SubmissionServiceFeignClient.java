@@ -44,6 +44,9 @@ public interface SubmissionServiceFeignClient {
     // 시험 삭제 시 해당 시험에 대한 제출 삭제
     @DeleteMapping("/submission/exam")
     void deleteSubmissionByProblemIds(@RequestParam("problemIds") List<Long> problemIds);
+    // 문제에 대한 제출 삭제
+    @DeleteMapping("/submission/problem")
+    void deleteSubmissionByProblemId(@RequestParam("problemId") Long problemId);
 }
 
 

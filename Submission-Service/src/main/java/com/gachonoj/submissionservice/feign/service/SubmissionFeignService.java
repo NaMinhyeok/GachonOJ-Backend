@@ -116,4 +116,9 @@ public class SubmissionFeignService {
     public void deleteSubmissionByProblemIds(List<Long> problemIds) {
         submissionRepository.deleteByProblemIdIn(problemIds);
     }
+    // 문제에 대한 제출 삭제
+    @Transactional
+    public void deleteSubmissionByProblemId(Long problemId) {
+        submissionRepository.deleteByProblemId(problemId);
+    }
 }
