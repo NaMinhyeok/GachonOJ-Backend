@@ -18,6 +18,7 @@ public class ExamCardInfoResponseDto {
     private String examStatus;
 
 
+
     public ExamCardInfoResponseDto(Long examId, String examTitle, String examStartDate, String examEndDate, String examStatus) {
         this.examId = examId;
         this.examTitle = examTitle;
