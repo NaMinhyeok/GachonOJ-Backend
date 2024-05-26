@@ -18,4 +18,7 @@ public interface BookmarkRepository extends JpaRepository<Bookmark,Long> {
     boolean existsByMemberIdAndProblemProblemId(Long memberId, Long problemId);
     // 문제 ID로 북마크인지 확인
     boolean existsBookmarkByProblemProblemId(Long problemId);
+
+    // 멤버 ID로 북마크 삭제
+    void deleteByMemberId(Long memberId);
 }

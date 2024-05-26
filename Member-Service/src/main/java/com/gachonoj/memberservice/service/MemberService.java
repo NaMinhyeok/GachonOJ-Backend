@@ -6,6 +6,8 @@ import com.gachonoj.memberservice.domain.dto.request.*;
 import com.gachonoj.memberservice.domain.dto.response.*;
 import com.gachonoj.memberservice.domain.entity.Member;
 //import com.gachonoj.memberservice.jwt.JwtTokenProvider;
+import com.gachonoj.memberservice.feign.client.AiServiceFeignClient;
+import com.gachonoj.memberservice.feign.client.BoardServiceFeignClient;
 import com.gachonoj.memberservice.feign.client.ProblemServiceFeignClient;
 import com.gachonoj.memberservice.feign.client.SubmissionServiceFeignClient;
 import com.gachonoj.memberservice.feign.dto.response.SubmissionMemberInfoResponseDto;
@@ -45,6 +47,8 @@ public class MemberService {
     private final PasswordEncoder passwordEncoder;
     private final SubmissionServiceFeignClient submissionServiceFeignClient;
     private final ProblemServiceFeignClient problemServiceFeignClient;
+    private final BoardServiceFeignClient boardServiceFeignClient;
+    private final AiServiceFeignClient aiServiceFeignClient;
     private final S3UploadService s3UploadService;
 
     private static final int PAGE_SIZE = 10;
@@ -309,6 +313,11 @@ public class MemberService {
     @Transactional
     public void deleteMember(Long memberId) {
         memberRepository.deleteById(memberId);
+        // 다른 서비스에서 memberId를 외래키로 사용하고 있다면 삭제
+        boardServiceFeignClient.deleteBoardByMemberId(memberId);
+        aiServiceFeignClient.deleteAiByMemberId(memberId);
+        submissionServiceFeignClient.deleteSubmissionByMemberId(memberId);
+        problemServiceFeignClient.deleteProblemByMemberId(memberId);
     }
     // 비밀번호 변경
     @Transactional

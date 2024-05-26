@@ -13,4 +13,6 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
     List<Notice> findTop5ByOrderByNoticeCreatedDateDesc();
     // 공지사항 목록 조회 페이지네이션
     Page<Notice> findAllByOrderByNoticeCreatedDateDesc(Pageable pageable);
+    //memberId 전송해서 해당 memberId를 외래키로 사용하고있다면 삭제하도록 한다.
+    void deleteByMemberId(Long memberId);
 }

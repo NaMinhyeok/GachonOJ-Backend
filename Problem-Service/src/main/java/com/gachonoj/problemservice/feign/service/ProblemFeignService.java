@@ -1,15 +1,9 @@
 package com.gachonoj.problemservice.feign.service;
 
 import com.gachonoj.problemservice.domain.constant.TestcaseStatus;
-import com.gachonoj.problemservice.domain.entity.Problem;
-import com.gachonoj.problemservice.domain.entity.Question;
-import com.gachonoj.problemservice.domain.entity.Test;
-import com.gachonoj.problemservice.domain.entity.Testcase;
+import com.gachonoj.problemservice.domain.entity.*;
 import com.gachonoj.problemservice.feign.dto.response.SubmissionProblemTestCaseResponseDto;
-import com.gachonoj.problemservice.repository.ProblemRepository;
-import com.gachonoj.problemservice.repository.QuestionRepository;
-import com.gachonoj.problemservice.repository.TestRepository;
-import com.gachonoj.problemservice.repository.TestcaseRepository;
+import com.gachonoj.problemservice.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -27,6 +21,8 @@ public class ProblemFeignService {
     private final TestcaseRepository testcaseRepository;
     private final QuestionRepository questionRepository;
     private final TestRepository testRepository;
+    private final ExamRepository examRepository;
+    private final BookmarkRepository bookmarkRepository;
 
     // 북마크 갯수 조회
     public Integer getBookmarkCountByMemberId(Long memberId) {
@@ -97,5 +93,12 @@ public class ProblemFeignService {
         test.setTestScore(testScore);
         test.setTestEndDate(LocalDateTime.now());
         return null;
+    }
+    //memberId 전송해서 해당 memberId를 외래키로 사용하고있다면 삭제하도록 한다.
+    @Transactional
+    public void deleteProblemByMemberId(Long memberId){
+        examRepository.deleteByMemberId(memberId);
+        testRepository.deleteByMemberId(memberId);
+        bookmarkRepository.deleteByMemberId(memberId);
     }
 }

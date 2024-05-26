@@ -14,7 +14,6 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/submission")
-
 public class SubmissionFeignController {
     private final SubmissionFeignService submissionFeignService;
 
@@ -77,6 +76,21 @@ public class SubmissionFeignController {
     @GetMapping("/recent/problem")
     public Long getRecentSubmissionId(@RequestParam("memberId") Long memberId, @RequestParam("problemId") Long problemId) {
         return submissionFeignService.getRecentSubmissionId(memberId, problemId);
+    }
+    //memberId 전송해서 해당 memberId를 외래키로 사용하고있다면 삭제하도록 한다.
+    @DeleteMapping("/member")
+    public void deleteSubmissionByMemberId(@RequestParam("memberId") Long memberId) {
+        submissionFeignService.deleteSubmissionByMemberId(memberId);
+    }
+    // 시험 삭제 시 해당 시험에 대한 제출 삭제
+    @DeleteMapping("/exam")
+    public void deleteSubmissionByProblemIds(@RequestParam("problemIds") List<Long> problemIds) {
+        submissionFeignService.deleteSubmissionByProblemIds(problemIds);
+    }
+    // 문제에 대한 제출 삭제
+    @DeleteMapping("/problem")
+    public void deleteSubmissionByProblemId(@RequestParam("problemId") Long problemId) {
+        submissionFeignService.deleteSubmissionByProblemId(problemId);
     }
 
     // 시험 상세 정보 조회

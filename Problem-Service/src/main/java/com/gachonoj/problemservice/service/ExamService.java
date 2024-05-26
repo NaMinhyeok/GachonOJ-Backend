@@ -378,15 +378,25 @@ public class ExamService {
     // 시험 삭제
     @Transactional
     public void deleteExam(Long examId, Long requestingMemberId) {
+        // examId로 problemId 가져오기
+        List<Long> problemIds = questionRepository.findProblemIdsByExamExamId(examId);
+        // 시험 삭제 시 해당 시험에 대한 제출 삭제
+        submissionServiceFeignClient.deleteSubmissionByProblemIds(problemIds);
+
         int affectedRows = examRepository.deleteByIdAndMemberId(examId, requestingMemberId);
         if (affectedRows == 0) {
             throw new RuntimeException("No exam found or unauthorized to delete this exam");
         }
+
     }
 
     // 시험 삭제 admin
     @Transactional
     public void deleteExamByAdmin(Long examId) {
+        // examId로 problemId 가져오기
+        List<Long> problemIds = questionRepository.findProblemIdsByExamExamId(examId);
+        // 시험 삭제 시 해당 시험에 대한 제출 삭제
+        submissionServiceFeignClient.deleteSubmissionByProblemIds(problemIds);
         examRepository.deleteById(examId);
     }
     // 시험 목록 조회 & 대회 목록 조회

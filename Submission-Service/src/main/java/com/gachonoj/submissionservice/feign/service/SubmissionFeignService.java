@@ -2,6 +2,13 @@ package com.gachonoj.submissionservice.feign.service;
 
 import com.gachonoj.submissionservice.domain.constant.Status;
 import com.gachonoj.submissionservice.domain.entity.Submission;
+import com.gachonoj.submissionservice.feign.dto.response.SubmissionDetailDto;
+import com.gachonoj.submissionservice.feign.dto.response.SubmissionExamResultInfoResponseDto;
+import com.gachonoj.submissionservice.domain.entity.Submission;
+import com.gachonoj.submissionservice.feign.dto.response.CorrectRateResponseDto;
+import com.gachonoj.submissionservice.feign.dto.response.SubmissionMemberInfoResponseDto;
+import com.gachonoj.submissionservice.feign.dto.response.SubmissionResultCountResponseDto;
+import com.gachonoj.submissionservice.repository.LoveRepository;
 import com.gachonoj.submissionservice.feign.dto.response.*;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionCodeInfoResponseDto;
 import com.gachonoj.submissionservice.repository.SubmissionRepository;
@@ -20,6 +27,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SubmissionFeignService {
     private final SubmissionRepository submissionRepository;
+    private final LoveRepository loveRepository;
 
     // memberId로 제출 정보 조회
     public SubmissionMemberInfoResponseDto getMemberInfo(Long memberId) {
@@ -110,5 +118,21 @@ public class SubmissionFeignService {
                 .collect(Collectors.toList());
 
         return new SubmissionExamResultInfoResponseDto(submissions);
+    }
+    //memberId 전송해서 해당 memberId를 외래키로 사용하고있다면 삭제하도록 한다.
+    @Transactional
+    public void deleteSubmissionByMemberId(Long memberId) {
+        submissionRepository.deleteByMemberId(memberId);
+        loveRepository.deleteByMemberId(memberId);
+    }
+    // 시험 삭제 시 해당 시험에 대한 제출 삭제
+    @Transactional
+    public void deleteSubmissionByProblemIds(List<Long> problemIds) {
+        submissionRepository.deleteByProblemIdIn(problemIds);
+    }
+    // 문제에 대한 제출 삭제
+    @Transactional
+    public void deleteSubmissionByProblemId(Long problemId) {
+        submissionRepository.deleteByProblemId(problemId);
     }
 }
