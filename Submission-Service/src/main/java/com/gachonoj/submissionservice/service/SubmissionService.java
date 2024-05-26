@@ -98,7 +98,7 @@ public class SubmissionService {
         SubmissionMemberRankInfoResponseDto submissionMemberRankInfoResponseDto = memberServiceFeignClient.getMemberRank(memberId);
         // 문제 아이디로 problemScore 조회
         Integer problemScore = problemServiceFeignClient.getProblemScore(problemId);
-        // 문제 time limet 가져오기
+        // 문제 time limit 가져오기
         Integer problemTimeLimit = problemServiceFeignClient.getProblemTimeLimit(problemId);
 
 
@@ -122,7 +122,7 @@ public class SubmissionService {
         Integer needRating = submissionMemberRankInfoResponseDto.getNeedRank();
         Integer afterRating = rating;
         boolean ratingChanged = false;
-        // problemScore 가 needRating보다 크면 rating을 +1 해서 afterRating에 저장하고 ratingChaneged를 true로 설정
+        // problemScore 가 needRating보다 크면 rating을 +1 해서 afterRating에 저장하고 ratingChanged를 true로 설정
         if(problemScore>=needRating){
             afterRating++;
             ratingChanged = true;

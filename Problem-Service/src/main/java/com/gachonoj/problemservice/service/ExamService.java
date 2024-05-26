@@ -543,10 +543,20 @@ public class ExamService {
     private ExamResultListDto convertToDto(Test test) {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
 
-        String testDueTime = Duration.between(test.getTestStartDate(), test.getTestEndDate()).toHoursPart() + ":"
-                + Duration.between(test.getTestStartDate(), test.getTestEndDate()).toMinutesPart() + ":"
-                + Duration.between(test.getTestStartDate(), test.getTestEndDate()).toSecondsPart();
-        String submissionDate = test.getTestEndDate().format(dateTimeFormatter);
+        String testDueTime = "";
+        String submissionDate = "";
+
+        // testStartDate와 testEndDate가 모두 non-null인 경우에만 계산
+        if (test.getTestStartDate() != null && test.getTestEndDate() != null) {
+            testDueTime = Duration.between(test.getTestStartDate(), test.getTestEndDate()).toHoursPart() + ":"
+                    + Duration.between(test.getTestStartDate(), test.getTestEndDate()).toMinutesPart() + ":"
+                    + Duration.between(test.getTestStartDate(), test.getTestEndDate()).toSecondsPart();
+            submissionDate = test.getTestEndDate().format(dateTimeFormatter);
+        } else {
+            // 날짜 정보가 없는 경우 기본 문자열 설정
+            testDueTime = "응시하지 않음";
+            submissionDate = "응시하지 읺음";
+        }
 
         ProblemMemberInfoResponseDto memberInfo = memberServiceFeignClient.getMemberInfo(test.getMemberId());
 
