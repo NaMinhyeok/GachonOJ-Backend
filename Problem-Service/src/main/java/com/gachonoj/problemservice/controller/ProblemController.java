@@ -143,13 +143,21 @@ public class ProblemController {
 //    }
     // 참가예정 대회 & 시험 조회
     // 지난 대회 & 시험 조회
-    @GetMapping("/exam/list")
-    public ResponseEntity<CommonResponseDto<List<ExamCardInfoResponseDto>>> getExamList(HttpServletRequest request,
-                                                                                        @RequestParam String type,
-                                                                                        @RequestParam String status) {
+        @GetMapping("/exam/list")
+        public ResponseEntity<CommonResponseDto<List<ExamCardInfoResponseDto>>> getExamList(HttpServletRequest request,
+                                                                                            @RequestParam String type,
+                                                                                            @RequestParam String status) {
+            Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
+            List<ExamCardInfoResponseDto> result = examService.getExamList(memberId, type, status);
+            return ResponseEntity.ok(CommonResponseDto.success(result));
+        }
+
+    // 시험 조회 (응시 완료 여부 포함)
+    @GetMapping("/test/lists")
+    public ResponseEntity<CommonResponseDto<List<TestOverviewResponseDto>>> getMemberTests(HttpServletRequest request) {
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
-        List<ExamCardInfoResponseDto> result = examService.getExamList(memberId, type, status);
-        return ResponseEntity.ok(CommonResponseDto.success(result));
+        List<TestOverviewResponseDto> exams = examService.getMemberTests(memberId);
+        return ResponseEntity.ok(CommonResponseDto.success(exams)); // 성공적으로 데이터를 조회했다면 데이터와 함께 응답
     }
 
     // 문제 목록 조회
@@ -240,6 +248,13 @@ public class ProblemController {
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
         ExamResultDetailsResponseDto examResult = examService.getExamResults(testId);
         return ResponseEntity.ok(CommonResponseDto.success(examResult));
+    }
+
+    // 시험 점수 조회 (학생)
+    @GetMapping("/checkscore/{testId}")
+    public ResponseEntity<CommonResponseDto<Object>> getTestScore(@PathVariable Long testId) {
+        Integer score = examService.getTestScore(testId);
+        return ResponseEntity.ok(CommonResponseDto.success(score));
     }
 
     // 교수 대시보드 진행중인 시험 목록 조회

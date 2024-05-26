@@ -17,7 +17,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -30,9 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -399,6 +396,29 @@ public class ExamService {
         ExamStatus examStatus = ExamStatus.fromLabel(status);
         return getContests(memberId, examType, examStatus);
     }
+
+    // 학생 시험 목록 조회
+    @Transactional(readOnly = true)
+    public List<TestOverviewResponseDto> getMemberTests(Long memberId) {
+        List<Test> tests = testRepository.findByMemberId(memberId);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
+        return tests.stream().map(test -> {
+            boolean isCompleted = test.getTestEndDate() != null;
+            String formattedStartDate = (test.getTestStartDate() != null) ? formatter.format(test.getTestStartDate()) : "";
+            String formattedEndDate = (test.getTestEndDate() != null) ? formatter.format(test.getTestEndDate()) : "";
+            return new TestOverviewResponseDto(
+                    test.getTestId(),
+                    test.getExam().getExamId(),
+                    test.getExam().getExamTitle(),
+                    formattedStartDate,
+                    formattedEndDate,
+                    isCompleted,
+                    test.getTestScore()
+            );
+        }).collect(Collectors.toList());
+    }
+
+
     // 시험 목록 조회 & 대회 목록 조회
     private List<ExamCardInfoResponseDto> getContests(Long memberId, ExamType examType, ExamStatus status) {
         List<Long> examIds = new ArrayList<>();
@@ -413,7 +433,15 @@ public class ExamService {
                     Exam exam = examRepository.findById(examId)
                             .orElseThrow(() -> new IllegalArgumentException("Exam not found with id: " + examId));
                     String memberNickname = memberServiceFeignClient.getNicknames(exam.getMemberId());
-                    return new ExamCardInfoResponseDto(exam.getExamId(),exam.getExamTitle(),memberNickname,dateFormatter(exam.getExamStartDate()),dateFormatter(exam.getExamEndDate()),exam.getExamStatus().getLabel());
+
+                    return new ExamCardInfoResponseDto(
+                            exam.getExamId(),
+                            exam.getExamTitle(),
+                            memberNickname,
+                            dateFormatter(exam.getExamStartDate()),
+                            dateFormatter(exam.getExamEndDate()),
+                            exam.getExamStatus().getLabel()
+                    );
                 })
                 .toList();
     }
@@ -477,6 +505,7 @@ public class ExamService {
         );
     }
 
+    // 시험 결과 목록 조회
     @Transactional(readOnly = true)
     public ExamResultPageDto getExamResultList(Long examId, int pageNo) {
         Pageable pageable = PageRequest.of(pageNo, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "testEndDate"));
@@ -580,6 +609,13 @@ public class ExamService {
                 submissionDate,
                 questionDtos
         );
+    }
+
+    // 시험 점수 조회
+    public Integer getTestScore(Long testId) {
+        return testRepository.findById(testId)
+                .map(Test::getTestScore)
+                .orElseThrow(() -> new IllegalStateException("해당 테스트를 조회할 수 없습니다.: " + testId));
     }
 
 
