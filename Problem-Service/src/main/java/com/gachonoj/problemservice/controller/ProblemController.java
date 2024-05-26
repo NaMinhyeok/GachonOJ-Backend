@@ -154,9 +154,12 @@ public class ProblemController {
 
     // 시험 조회 (응시 완료 여부 포함)
     @GetMapping("/test/lists")
-    public ResponseEntity<CommonResponseDto<List<TestOverviewResponseDto>>> getMemberTests(HttpServletRequest request) {
+    public ResponseEntity<CommonResponseDto<List<TestOverviewResponseDto>>> getMemberTests(HttpServletRequest request,
+                                                                                           @RequestParam String type,
+                                                                                           @RequestParam String status
+    ) {
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
-        List<TestOverviewResponseDto> exams = examService.getMemberTests(memberId);
+        List<TestOverviewResponseDto> exams = examService.getMemberTestList(memberId, type, status);
         return ResponseEntity.ok(CommonResponseDto.success(exams)); // 성공적으로 데이터를 조회했다면 데이터와 함께 응답
     }
 

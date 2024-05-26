@@ -16,5 +16,4 @@ public class TestOverviewResponseDto {
     private String examStartDate;
     private String examEndDate;
     private boolean completed;
-    private Integer testScore;
 }
