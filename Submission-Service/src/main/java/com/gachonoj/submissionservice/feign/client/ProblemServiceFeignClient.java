@@ -29,4 +29,8 @@ public interface ProblemServiceFeignClient {
     // Test 엔티티에 TestScore 저장
     @PostMapping("/problem/test/{examId}/score")
     Void saveTestScore(@PathVariable Long examId, @RequestParam Long memberId, @RequestBody Integer testScore);
+
+    // 문제의 상태가 REGISTERED인 문제 갯수 조회
+    @GetMapping("/problem/registered/count")
+    Integer getRegisteredProblemCount(@RequestParam List<Long> problemIds);
 }

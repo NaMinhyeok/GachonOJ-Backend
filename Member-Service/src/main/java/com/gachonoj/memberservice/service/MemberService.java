@@ -279,7 +279,8 @@ public class MemberService {
             memberList = memberRepository.findByMemberRole(Role.ROLE_STUDENT, pageable);
         }
         return memberList.map(member -> {
-            Integer memberSolved = submissionServiceFeignClient.getMemberSolved(member.getMemberId());
+            SubmissionMemberInfoResponseDto submissionMemberInfoResponseDto = submissionServiceFeignClient.getMemberInfoBySubmission(member.getMemberId());
+            Integer memberSolved = submissionMemberInfoResponseDto.getSolvedProblemCount();
             return new MemberRankingResponseDto(member, memberSolved);
         });
     }

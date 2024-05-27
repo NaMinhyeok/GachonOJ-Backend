@@ -39,4 +39,6 @@ public interface ProblemRepository extends JpaRepository<Problem,Long> {
 
     // 문제 제목으로 검색 (비공개 문제 제외)
     Page<Problem> findByProblemTitleContainingAndProblemStatusNot(String search, ProblemStatus problemStatus, Pageable pageable);
+    // 문제의 상태가 REGISTERED인 문제 갯수 조회
+    Integer countByProblemIdInAndProblemStatus(List<Long> problemIds, ProblemStatus problemStatus);
 }
