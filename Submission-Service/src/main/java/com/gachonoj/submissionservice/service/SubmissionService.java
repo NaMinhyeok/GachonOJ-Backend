@@ -136,7 +136,7 @@ public class SubmissionService {
                 .submissionLang(Language.fromLabel(executeRequestDto.getLanguage()))
                 .build();
         // Member 엔티티에 memberRank 반영
-        if(isCorrect && isExist){
+        if(isCorrect && !isExist){
             memberServiceFeignClient.updateMemberRank(memberId,memberRank+problemScore);
         }
         // Submission 엔티티 저장
