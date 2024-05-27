@@ -498,11 +498,6 @@ public class ExamService {
         Exam exam = examRepository.findById(examId)
                 .orElseThrow(() -> new IllegalArgumentException("Exam not found with id: " + examId));
 
-        // 현재 시간과 시험 시작 시간 비교
-        LocalDateTime now = LocalDateTime.now();
-        if (now.isBefore(exam.getExamStartDate())) {
-            throw new IllegalStateException("지금은 참가할 수 없습니다.");
-        }
 
         String memberNickname = memberServiceFeignClient.getNicknames(exam.getMemberId());
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
