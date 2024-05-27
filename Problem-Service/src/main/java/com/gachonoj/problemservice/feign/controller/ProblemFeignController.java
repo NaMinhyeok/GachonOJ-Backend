@@ -66,4 +66,9 @@ public class ProblemFeignController {
     public void deleteProblemByMemberId(@RequestParam Long memberId) {
         problemFeignService.deleteProblemByMemberId(memberId);
     }
+    // 문제의 상태가 REGISTERED인 문제 갯수 조회
+    @GetMapping("/registered/count")
+    public Integer getRegisteredProblemCount(@RequestParam List<Long> problemIds) {
+        return problemFeignService.getRegisteredProblemCount(problemIds);
+    }
 }

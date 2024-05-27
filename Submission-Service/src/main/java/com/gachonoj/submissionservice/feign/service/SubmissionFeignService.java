@@ -2,6 +2,7 @@ package com.gachonoj.submissionservice.feign.service;
 
 import com.gachonoj.submissionservice.domain.constant.Status;
 import com.gachonoj.submissionservice.domain.entity.Submission;
+import com.gachonoj.submissionservice.feign.client.ProblemServiceFeignClient;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionDetailDto;
 import com.gachonoj.submissionservice.feign.dto.response.SubmissionExamResultInfoResponseDto;
 import com.gachonoj.submissionservice.domain.entity.Submission;
@@ -27,14 +28,18 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SubmissionFeignService {
     private final SubmissionRepository submissionRepository;
+    private final ProblemServiceFeignClient problemServiceFeignClient;
     private final LoveRepository loveRepository;
 
     // memberId로 제출 정보 조회
     public SubmissionMemberInfoResponseDto getMemberInfo(Long memberId) {
-        int solvedProblem = submissionRepository.countSolvedProblemByMemberId(memberId);
-        int tryProblem = submissionRepository.countTryProblemByMemberId(memberId);
+        List<Long> correctProblemIds = submissionRepository.findProblemIdByMemberIdAndSubmissionStatus(memberId, Status.CORRECT);
+        List<Long> incorrectProblemIds = submissionRepository.findProblemIdByMemberIdAndSubmissionStatus(memberId, Status.INCORRECT);
+        incorrectProblemIds.removeAll(correctProblemIds);
+        int solvedProblem = problemServiceFeignClient.getRegisteredProblemCount(correctProblemIds);
+        int tryProblem = problemServiceFeignClient.getRegisteredProblemCount(incorrectProblemIds);
         log.info("solvedProblem: {}, tryProblem: {}, memberId : {}", solvedProblem, tryProblem, memberId);
-        return new SubmissionMemberInfoResponseDto(submissionRepository.countSolvedProblemByMemberId(memberId), submissionRepository.countTryProblemByMemberId(memberId));
+        return new SubmissionMemberInfoResponseDto(solvedProblem, tryProblem);
     }
 
     // memberId로 푼 문제 수 조회

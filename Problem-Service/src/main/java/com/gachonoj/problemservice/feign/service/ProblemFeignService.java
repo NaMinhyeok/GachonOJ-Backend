@@ -1,5 +1,6 @@
 package com.gachonoj.problemservice.feign.service;
 
+import com.gachonoj.problemservice.domain.constant.ProblemStatus;
 import com.gachonoj.problemservice.domain.constant.TestcaseStatus;
 import com.gachonoj.problemservice.domain.entity.*;
 import com.gachonoj.problemservice.feign.dto.response.SubmissionProblemTestCaseResponseDto;
@@ -99,5 +100,9 @@ public class ProblemFeignService {
         examRepository.deleteByMemberId(memberId);
         testRepository.deleteByMemberId(memberId);
         bookmarkRepository.deleteByMemberId(memberId);
+    }
+    // 문제의 상태가 REGISTERED인 문제 갯수 조회
+    public Integer getRegisteredProblemCount(List<Long> problemIds){
+        return problemRepository.countByProblemIdInAndProblemStatus(problemIds, ProblemStatus.REGISTERED);
     }
 }
