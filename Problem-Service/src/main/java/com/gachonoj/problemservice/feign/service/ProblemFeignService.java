@@ -88,11 +88,10 @@ public class ProblemFeignService {
     }
     // Test 엔티티에 TestScore 저장
     @Transactional
-    public Void getTestScore(Long examId,Long memberId,Integer testScore){
+    public void getTestScore(Long examId,Long memberId,Integer testScore){
         Test test = testRepository.findByExamExamIdAndMemberId(examId, memberId);
         test.setTestScore(testScore);
         test.setTestEndDate(LocalDateTime.now());
-        return null;
     }
     //memberId 전송해서 해당 memberId를 외래키로 사용하고있다면 삭제하도록 한다.
     @Transactional

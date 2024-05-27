@@ -136,7 +136,7 @@ public class SubmissionService {
                 .submissionLang(Language.fromLabel(executeRequestDto.getLanguage()))
                 .build();
         // Member 엔티티에 memberRank 반영
-        if(isCorrect && isExist){
+        if(isCorrect && !isExist){
             memberServiceFeignClient.updateMemberRank(memberId,memberRank+problemScore);
         }
         // Submission 엔티티 저장
@@ -201,7 +201,7 @@ public class SubmissionService {
     @Transactional
     public void submitExam(List<ExamSubmitRequestDto> examSubmitRequestDtos, Long memberId, Long examId) {
         // 총점
-        int totalScore = 0;
+        Integer totalScore = 0;
         // 각 문제 채점
         for (ExamSubmitRequestDto examSubmitRequestDto : examSubmitRequestDtos) {
             List<String> input = problemServiceFeignClient.getTestCases(examSubmitRequestDto.getProblemId()).stream()
@@ -241,6 +241,7 @@ public class SubmissionService {
             submissionRepository.save(submission);
         }
         // Test 엔티티에 점수 반영 및 종료시간 반영
+        //TODO : 파라미터 순서가 잘못되어서 날라가고있는것 같음 추후에 수정해야됨
         problemServiceFeignClient.saveTestScore(examId, memberId, totalScore);
     }
     // 코드 저장
