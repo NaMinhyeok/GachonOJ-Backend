@@ -58,8 +58,8 @@ public class ProblemFeignController {
     }
     // Test 엔티티에 TestScore 저장
     @PostMapping("/test/{examId}/score")
-    public Void getTestScore(@PathVariable Long examId,@RequestParam Long memberId,@RequestBody Integer testScore) {
-        return problemFeignService.getTestScore(examId, memberId, testScore);
+    public void getTestScore(@PathVariable Long examId,@RequestParam Long memberId,@RequestBody Integer testScore) {
+        problemFeignService.getTestScore(examId, memberId, testScore);
     }
     //memberId 전송해서 해당 memberId를 외래키로 사용하고있다면 삭제하도록 한다.
     @DeleteMapping("/member")

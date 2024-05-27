@@ -78,7 +78,7 @@ public class SubmissionController {
     @PostMapping("/exam/submit/{examId}")
     public ResponseEntity<CommonResponseDto<Void>> submitExamCode(HttpServletRequest request, @PathVariable Long examId, @RequestBody List<ExamSubmitRequestDto> executeRequestDtos) {
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
-        submissionService.submitExam(executeRequestDtos, examId, memberId);
+        submissionService.submitExam(executeRequestDtos, memberId, examId);
         return ResponseEntity.ok(CommonResponseDto.success());
     }
     // 코드 저장
