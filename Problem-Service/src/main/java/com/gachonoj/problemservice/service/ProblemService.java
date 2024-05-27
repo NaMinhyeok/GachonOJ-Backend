@@ -148,7 +148,7 @@ public class ProblemService {
             };
         }
         if (type == null) {
-            return getAllProblemList(memberId, pageable);
+            return getAllProblemList(memberId, pageable,search,diff);
         }
         return switch (type) {
             case "bookmark" -> getBookmarkProblemList(memberId, pageable);
@@ -158,13 +158,18 @@ public class ProblemService {
         };
     }
     // 전체 문제 목록 조회 메소드
-    private Page<ProblemListResponseDto> getAllProblemList(Long memberId,Pageable pageable) {
-        Page<Problem> problems = problemRepository.findByProblemStatus(ProblemStatus.REGISTERED, pageable);
+    private Page<ProblemListResponseDto> getAllProblemList(Long memberId, Pageable pageable, String search,Integer diff) {
+        Page<Problem> problems = (search != null)
+                ? problemRepository.findByProblemTitleContainingAndProblemStatus(search, ProblemStatus.REGISTERED, pageable)
+                : problemRepository.findByProblemStatus(ProblemStatus.REGISTERED, pageable);
+        if(diff != null){
+            problems = problemRepository.findByProblemDiffAndProblemStatus(diff, ProblemStatus.REGISTERED, pageable);
+        }
         return problems.map(problem -> {
             Integer correctPeople = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
             Double correctRate = submissionServiceFeignClient.getProblemCorrectRate(problem.getProblemId());
             Boolean isBookmarked = bookmarkRepository.existsByMemberIdAndProblemProblemId(memberId, problem.getProblemId());
-            return new ProblemListResponseDto(problem, correctPeople, correctRate,isBookmarked,null);
+            return new ProblemListResponseDto(problem, correctPeople, correctRate, isBookmarked, null);
         });
     }
 
