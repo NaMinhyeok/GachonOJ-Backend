@@ -124,6 +124,9 @@ public class ExecuteService {
                     log.info("output: " + outputList.get(i) + "오답: " + outputResult.toString());
                     result.put(outputResult.toString(),"오답");
                 }
+                runProcess.onExit().thenAccept(p -> {
+                    log.info("Child process exited with exit code " + p.exitValue());
+                });
             }
 
             // /home/exec 디렉토리 삭제
