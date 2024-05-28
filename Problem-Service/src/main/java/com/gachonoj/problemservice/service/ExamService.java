@@ -531,7 +531,15 @@ public class ExamService {
                 .orElseThrow(() -> new IllegalArgumentException("Exam not found with id: " + examId));
 
         Page<Test> tests = testRepository.findByExamExamId(examId, pageable);
-        Page<ExamResultListDto> resultList = tests.map(this::convertToDto);
+        // 만약 응시 종료 시각이 없으면 응시하지 않은 시험으로 간주
+        // TODO: 페이지네이션으로 추후 변경
+        List<Test> filteredTests = tests.stream()
+                .filter(test -> test.getTestEndDate() != null)
+                .collect(Collectors.toList());
+
+        List<ExamResultListDto> resultList = filteredTests.stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
 
         return new ExamResultPageDto(
                 exam.getExamTitle(),

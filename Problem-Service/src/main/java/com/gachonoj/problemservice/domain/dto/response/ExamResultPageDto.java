@@ -14,5 +14,5 @@
         private String examTitle;
         private String examMemo;
         private int submissionTotal;
-        private Page<ExamResultListDto> results;
+        private List<ExamResultListDto> results;
     }

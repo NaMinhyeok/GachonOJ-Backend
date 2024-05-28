@@ -237,7 +237,7 @@ public class ProblemController {
     }
 
     // 시험 결과 목록 조회
-    @GetMapping("/admin/exam/{examId}/results")
+    @GetMapping("/exam/{examId}/results")
     public ResponseEntity<CommonResponseDto<ExamResultPageDto>> getExamResultList(
             @PathVariable Long examId,
             @RequestParam(defaultValue = "1") int page) {
@@ -245,7 +245,7 @@ public class ProblemController {
         return ResponseEntity.ok(CommonResponseDto.success(results));
     }
     // 시험 결과 상세 조회
-    @GetMapping("/admin/result/{testId}")
+    @GetMapping("/result/{testId}")
     public ResponseEntity<CommonResponseDto<ExamResultDetailsResponseDto>> getExamResults(
             HttpServletRequest request, @PathVariable Long testId) {
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
