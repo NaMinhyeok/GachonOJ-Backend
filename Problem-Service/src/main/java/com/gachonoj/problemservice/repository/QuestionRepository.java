@@ -22,5 +22,7 @@ public interface QuestionRepository extends JpaRepository<Question,Long> {
     Question findByProblemProblemId(Long problemId);
 
     // 시험 ID로 문제 ID 가져오기
-    List<Long> findProblemIdsByExamExamId(Long examId);
+    List<Question> findProblemIdsByExamExamId(Long examId);
+    // 시험ID로 question 삭제
+    void deleteByExamExamId(Long examId);
 }
