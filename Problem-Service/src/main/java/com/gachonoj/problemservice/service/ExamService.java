@@ -534,7 +534,7 @@ public class ExamService {
         // 만약 응시 종료 시각이 없으면 응시하지 않은 시험으로 간주
         // TODO: 페이지네이션으로 추후 변경
         List<Test> filteredTests = tests.stream()
-                .filter(test -> test.getTestEndDate() != null)
+                .filter(test -> test.getTestEndDate() != null && test.getTestStartDate() != null)
                 .collect(Collectors.toList());
 
         List<ExamResultListDto> resultList = filteredTests.stream()
@@ -544,7 +544,7 @@ public class ExamService {
         return new ExamResultPageDto(
                 exam.getExamTitle(),
                 exam.getExamMemo(),
-                (int) tests.getTotalElements(),
+                (int) filteredTests.size(),
                 resultList
         );
     }
