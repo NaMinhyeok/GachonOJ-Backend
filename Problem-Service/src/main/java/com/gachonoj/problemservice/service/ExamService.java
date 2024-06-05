@@ -17,10 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -531,11 +528,11 @@ public class ExamService {
                 .orElseThrow(() -> new IllegalArgumentException("Exam not found with id: " + examId));
 
         Page<Test> tests = testRepository.findByExamExamId(examId, pageable);
-        // 만약 응시 종료 시각이 없으면 응시하지 않은 시험으로 간주
-        // TODO: 페이지네이션으로 추후 변경
+
+        // 응시 기록이 있는 사람들만 필터링
         List<Test> filteredTests = tests.stream()
                 .filter(test -> test.getTestEndDate() != null && test.getTestStartDate() != null)
-                .collect(Collectors.toList());
+                .toList();
 
         List<ExamResultListDto> resultList = filteredTests.stream()
                 .map(this::convertToDto)
@@ -545,7 +542,7 @@ public class ExamService {
                 exam.getExamTitle(),
                 exam.getExamMemo(),
                 (int) filteredTests.size(),
-                resultList
+                (List<ExamResultListDto>) new PageImpl<>(resultList, pageable, filteredTests.size()) // Page로 변환
         );
     }
 
@@ -564,8 +561,8 @@ public class ExamService {
             submissionDate = test.getTestEndDate().format(dateTimeFormatter);
         } else {
             // 날짜 정보가 없는 경우 기본 문자열 설정
-            testDueTime = "응시하지 않음";
-            submissionDate = "응시하지 읺음";
+            testDueTime = "-";
+            submissionDate = "-";
         }
 
         ProblemMemberInfoResponseDto memberInfo = memberServiceFeignClient.getMemberInfo(test.getMemberId());
@@ -581,7 +578,6 @@ public class ExamService {
                 submissionDate
         );
     }
-
     // 시험 결과 상세 조회
     @Transactional(readOnly = true)
     public ExamResultDetailsResponseDto getExamResults(Long testId) {
