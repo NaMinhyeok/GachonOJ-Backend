@@ -27,6 +27,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -64,7 +65,6 @@ public class ExamService {
         }
     }
 
-    // 시험 문제 등록
     @Transactional
     public void registerExam(ExamRequestDto request, Long memberId) {
         // 시간 변환 YYYY.MM.DD.HH.MM.SS -> LocalDateTime
@@ -86,53 +86,62 @@ public class ExamService {
 
         examRepository.save(exam);  // 시험 정보 저장
 
-        int questionSequence = 1;
+        List<Problem> problems = createProblems(request.getTests());
+        problemRepository.saveAll(problems);  // 문제 정보 일괄 저장
 
-        for (ProblemRequestDto problemRequestDto : request.getTests()) {
+        List<Question> questions = createQuestions(exam, problems);
+        questionRepository.saveAll(questions);  // 질문 정보 일괄 저장
+
+        List<Test> tests = createTestsForCandidates(exam, request.getCandidateList());
+        testRepository.saveAll(tests);  // 테스트 정보 일괄 저장
+    }
+
+    private List<Problem> createProblems(List<ProblemRequestDto> problemRequestDtos) {
+        return problemRequestDtos.stream().map(dto -> {
             Problem problem = new Problem();  // 실제 엔티티 클래스
-            problem.setProblemTitle(problemRequestDto.getProblemTitle());
-            problem.setProblemContents(problemRequestDto.getProblemContents());
-            problem.setProblemInputContents(problemRequestDto.getProblemInputContents());
-            problem.setProblemOutputContents(problemRequestDto.getProblemOutputContents());
-            problem.setProblemClass(ProblemClass.valueOf(problemRequestDto.getProblemClass()));
-            problem.setProblemTimeLimit(problemRequestDto.getProblemTimeLimit());
-            problem.setProblemMemoryLimit(problemRequestDto.getProblemMemoryLimit());
+            problem.setProblemTitle(dto.getProblemTitle());
+            problem.setProblemContents(dto.getProblemContents());
+            problem.setProblemInputContents(dto.getProblemInputContents());
+            problem.setProblemOutputContents(dto.getProblemOutputContents());
+            problem.setProblemClass(ProblemClass.valueOf(dto.getProblemClass()));
+            problem.setProblemTimeLimit(dto.getProblemTimeLimit());
+            problem.setProblemMemoryLimit(dto.getProblemMemoryLimit());
             problem.setProblemStatus(ProblemStatus.PRIVATE);
-            problem.setProblemPrompt(problemRequestDto.getProblemPrompt());
+            problem.setProblemPrompt(dto.getProblemPrompt());
 
-            List<Testcase> testcases = new ArrayList<>();
-            for (TestcaseRequestDto testcaseDto : problemRequestDto.getTestcases()) {
+            List<Testcase> testcases = dto.getTestcases().stream().map(testcaseDto -> {
                 Testcase testcase = new Testcase();  // 실제 엔티티 클래스
                 testcase.setTestcaseInput(testcaseDto.getTestcaseInput());
                 testcase.setTestcaseOutput(testcaseDto.getTestcaseOutput());
                 testcase.setTestcaseStatus(TestcaseStatus.valueOf(testcaseDto.getTestcaseStatus()));
                 testcase.setProblem(problem);
-                testcases.add(testcase);
-            }
+                return testcase;
+            }).collect(Collectors.toList());
+
             problem.setTestcases(testcases);
+            return problem;
+        }).collect(Collectors.toList());
+    }
 
-            problemRepository.save(problem);  // 문제 정보 저장
-
-
-            // Question 엔티티 생성 및 저장
+    private List<Question> createQuestions(Exam exam, List<Problem> problems) {
+        AtomicInteger sequence = new AtomicInteger(1);
+        return problems.stream().map(problem -> {
             Question question = new Question();
             question.setExam(exam);
             question.setProblem(problem);
-            Integer questionScore = problemRequestDto.getQuestionScore();
-            if (questionScore == null) {
-                questionScore = 10;  // 기본 점수로 10 설정
-            }
-            question.setQuestionScore(questionScore);
-            question.setQuestionSequence(questionSequence++);
-            questionRepository.save(question);
-        }
-        // 각 후보자에 대한 테스트 엔터티 생성 및 저장
-        for (Long candidateId : request.getCandidateList()) {
+            question.setQuestionScore(10);  // 기본 점수로 10 설정
+            question.setQuestionSequence(sequence.getAndIncrement());
+            return question;
+        }).collect(Collectors.toList());
+    }
+
+    private List<Test> createTestsForCandidates(Exam exam, List<Long> candidateIds) {
+        return candidateIds.stream().map(candidateId -> {
             Test test = new Test();
             test.setExam(exam);
             test.setMemberId(candidateId);
-            testRepository.save(test);  // 테스트 정보 저장
-        }
+            return test;
+        }).collect(Collectors.toList());
     }
 
     // 시험 문제 수정
