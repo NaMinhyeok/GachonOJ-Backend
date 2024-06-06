@@ -65,6 +65,7 @@ public class ExamService {
         }
     }
 
+    // 시험 문제 등록
     @Transactional
     public void registerExam(ExamRequestDto request, Long memberId) {
         // 시간 변환 YYYY.MM.DD.HH.MM.SS -> LocalDateTime
@@ -86,62 +87,53 @@ public class ExamService {
 
         examRepository.save(exam);  // 시험 정보 저장
 
-        List<Problem> problems = createProblems(request.getTests());
-        problemRepository.saveAll(problems);  // 문제 정보 일괄 저장
+        int questionSequence = 1;
 
-        List<Question> questions = createQuestions(exam, problems);
-        questionRepository.saveAll(questions);  // 질문 정보 일괄 저장
-
-        List<Test> tests = createTestsForCandidates(exam, request.getCandidateList());
-        testRepository.saveAll(tests);  // 테스트 정보 일괄 저장
-    }
-
-    private List<Problem> createProblems(List<ProblemRequestDto> problemRequestDtos) {
-        return problemRequestDtos.stream().map(dto -> {
+        for (ProblemRequestDto problemRequestDto : request.getTests()) {
             Problem problem = new Problem();  // 실제 엔티티 클래스
-            problem.setProblemTitle(dto.getProblemTitle());
-            problem.setProblemContents(dto.getProblemContents());
-            problem.setProblemInputContents(dto.getProblemInputContents());
-            problem.setProblemOutputContents(dto.getProblemOutputContents());
-            problem.setProblemClass(ProblemClass.valueOf(dto.getProblemClass()));
-            problem.setProblemTimeLimit(dto.getProblemTimeLimit());
-            problem.setProblemMemoryLimit(dto.getProblemMemoryLimit());
+            problem.setProblemTitle(problemRequestDto.getProblemTitle());
+            problem.setProblemContents(problemRequestDto.getProblemContents());
+            problem.setProblemInputContents(problemRequestDto.getProblemInputContents());
+            problem.setProblemOutputContents(problemRequestDto.getProblemOutputContents());
+            problem.setProblemClass(ProblemClass.valueOf(problemRequestDto.getProblemClass()));
+            problem.setProblemTimeLimit(problemRequestDto.getProblemTimeLimit());
+            problem.setProblemMemoryLimit(problemRequestDto.getProblemMemoryLimit());
             problem.setProblemStatus(ProblemStatus.PRIVATE);
-            problem.setProblemPrompt(dto.getProblemPrompt());
+            problem.setProblemPrompt(problemRequestDto.getProblemPrompt());
 
-            List<Testcase> testcases = dto.getTestcases().stream().map(testcaseDto -> {
+            List<Testcase> testcases = new ArrayList<>();
+            for (TestcaseRequestDto testcaseDto : problemRequestDto.getTestcases()) {
                 Testcase testcase = new Testcase();  // 실제 엔티티 클래스
                 testcase.setTestcaseInput(testcaseDto.getTestcaseInput());
                 testcase.setTestcaseOutput(testcaseDto.getTestcaseOutput());
                 testcase.setTestcaseStatus(TestcaseStatus.valueOf(testcaseDto.getTestcaseStatus()));
                 testcase.setProblem(problem);
-                return testcase;
-            }).collect(Collectors.toList());
-
+                testcases.add(testcase);
+            }
             problem.setTestcases(testcases);
-            return problem;
-        }).collect(Collectors.toList());
-    }
 
-    private List<Question> createQuestions(Exam exam, List<Problem> problems) {
-        AtomicInteger sequence = new AtomicInteger(1);
-        return problems.stream().map(problem -> {
+            problemRepository.save(problem);  // 문제 정보 저장
+
+
+            // Question 엔티티 생성 및 저장
             Question question = new Question();
             question.setExam(exam);
             question.setProblem(problem);
-            question.setQuestionScore(10);  // 기본 점수로 10 설정
-            question.setQuestionSequence(sequence.getAndIncrement());
-            return question;
-        }).collect(Collectors.toList());
-    }
-
-    private List<Test> createTestsForCandidates(Exam exam, List<Long> candidateIds) {
-        return candidateIds.stream().map(candidateId -> {
+            Integer questionScore = problemRequestDto.getQuestionScore();
+            if (questionScore == null) {
+                questionScore = 10;  // 기본 점수로 10 설정
+            }
+            question.setQuestionScore(questionScore);
+            question.setQuestionSequence(questionSequence++);
+            questionRepository.save(question);
+        }
+        // 각 후보자에 대한 테스트 엔터티 생성 및 저장
+        for (Long candidateId : request.getCandidateList()) {
             Test test = new Test();
             test.setExam(exam);
             test.setMemberId(candidateId);
-            return test;
-        }).collect(Collectors.toList());
+            testRepository.save(test);  // 테스트 정보 저장
+        }
     }
 
     // 시험 문제 수정
@@ -541,7 +533,7 @@ public class ExamService {
         // 응시 기록이 있는 사람들만 필터링
         List<Test> filteredTests = tests.stream()
                 .filter(test -> test.getTestEndDate() != null && test.getTestStartDate() != null)
-                .toList();
+                .collect(Collectors.toList());
 
         List<ExamResultListDto> resultList = filteredTests.stream()
                 .map(this::convertToDto)
@@ -550,8 +542,8 @@ public class ExamService {
         return new ExamResultPageDto(
                 exam.getExamTitle(),
                 exam.getExamMemo(),
-                (int) filteredTests.size(),
-                (List<ExamResultListDto>) new PageImpl<>(resultList, pageable, filteredTests.size()) // Page로 변환
+                resultList.size(),
+                resultList // List로 변환하여 전달
         );
     }
 
@@ -559,14 +551,16 @@ public class ExamService {
     private ExamResultListDto convertToDto(Test test) {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy.MM.dd HH:mm:ss");
 
-        String testDueTime = "";
-        String submissionDate = "";
+        String testDueTime;
+        String submissionDate;
 
         // testStartDate와 testEndDate가 모두 non-null인 경우에만 계산
         if (test.getTestStartDate() != null && test.getTestEndDate() != null) {
-            testDueTime = Duration.between(test.getTestStartDate(), test.getTestEndDate()).toHoursPart() + ":"
-                    + Duration.between(test.getTestStartDate(), test.getTestEndDate()).toMinutesPart() + ":"
-                    + Duration.between(test.getTestStartDate(), test.getTestEndDate()).toSecondsPart();
+            Duration duration = Duration.between(test.getTestStartDate(), test.getTestEndDate());
+            testDueTime = String.format("%02d:%02d:%02d",
+                    duration.toHoursPart(),
+                    duration.toMinutesPart(),
+                    duration.toSecondsPart());
             submissionDate = test.getTestEndDate().format(dateTimeFormatter);
         } else {
             // 날짜 정보가 없는 경우 기본 문자열 설정
