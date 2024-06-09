@@ -29,23 +29,4 @@ public class MemberListResponseDto {
         this.memberRole = String.valueOf(member.getMemberRole());
         this.memberCreatedDate = member.getMemberCreatedDate().toString();
     }
-    // Member Role 한글 String으로 변환
-    public String getMemberRole() {
-        if (this.memberRole.equals("ROLE_STUDENT")) {
-            return "학생";
-        } else if (this.memberRole.equals("ROLE_PROFESSOR")) {
-            return "교수";
-        } else if (this.memberRole.equals("ROLE_ADMIN")) {
-            return "관리자";
-        } else {
-            return "알 수 없음";
-        }
-    }
-    // Date 형식 변경
-    // LocalDateTime을 YYYY.MM.DD로 변경
-    public String getMemberCreatedDate() {
-        LocalDateTime dateTime = LocalDateTime.parse(this.memberCreatedDate);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy.MM.dd");
-        return dateTime.format(formatter);
-    }
 }

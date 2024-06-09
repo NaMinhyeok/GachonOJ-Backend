@@ -28,13 +28,4 @@ public class ProblemDetailResponseDto {
         this.testcaseInputs = testcaseInputs;
         this.testcaseOutputs = testcaseOutputs;
     }
-
-    public ProblemDetailResponseDto(String problemTitle, String problemContents, String problemInputContents, String problemOutputContents, List<String> inputs, List<String> outputs) {
-        this.problemTitle = problemTitle;
-        this.problemContents = problemContents;
-        this.problemInputContents = problemInputContents;
-        this.problemOutputContents = problemOutputContents;
-        this.testcaseInputs = inputs;
-        this.testcaseOutputs = outputs;
-    }
 }
