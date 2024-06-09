@@ -97,6 +97,7 @@ public class BoardService {
         inquiry.updateInquiryStatus(InquiryStatus.COMPLETED);
     }
     // 메인 대시보드 공지사항 목록 조회 최대 5개
+    @Transactional(readOnly = true)
     public List<NoticeMainResponseDto> getMainNoticeList() {
         List<Notice> noticeList = noticeRepository.findTop5ByOrderByNoticeCreatedDateDesc();
         List<NoticeMainResponseDto> noticeMainResponseDtos = new ArrayList<>();
@@ -109,6 +110,7 @@ public class BoardService {
         return noticeMainResponseDtos;
     }
     // 공지사항 목록 조회
+    @Transactional(readOnly = true)
     public Page<NoticeListResponseDto> getNoticeList(int pageNo) {
         Pageable pageable = PageRequest.of(pageNo-1, PAGE_SIZE);
         Page<Notice> noticePage = noticeRepository.findAllByOrderByNoticeCreatedDateDesc(pageable);
@@ -119,6 +121,7 @@ public class BoardService {
         });
     }
     // 공지사항 상세 조회
+    @Transactional(readOnly = true)
     public NoticeDetailResponseDto getNoticeDetail(Long noticeId) {
         Notice notice = noticeRepository.findById(noticeId).orElseThrow(() -> new IllegalArgumentException("해당 공지사항이 존재하지 않습니다."));
         String createdDate = dateFormatter(notice.getNoticeUpdatedDate());
@@ -126,6 +129,7 @@ public class BoardService {
         return new NoticeDetailResponseDto(notice,createdDate,memberNickname);
     }
     // 문의사항 목록 조회 관리자
+    @Transactional(readOnly = true)
     public Page<InquiryAdminListResponseDto> getInquiryListAdmin(int pageNo) {
         Pageable pageable = PageRequest.of(pageNo-1, PAGE_SIZE);
         Page<Inquiry> inquiryPage = inquiryRepository.findAllByOrderByInquiryCreatedDateDesc(pageable);
@@ -142,6 +146,7 @@ public class BoardService {
         });
     }
     // 문의사항 목록 조회 사용자
+    @Transactional(readOnly = true)
     public Page<InquiryListResponseDto> getInquiryList(Long memberId, int pageNo) {
         Pageable pageable = PageRequest.of(pageNo-1, PAGE_SIZE);
         Page<Inquiry> inquiryPage = inquiryRepository.findByMemberIdOrderByInquiryCreatedDateDesc(memberId,pageable);
@@ -151,6 +156,7 @@ public class BoardService {
         });
     }
     // 문의사항 상세 조회 사용자
+    @Transactional(readOnly = true)
     public InquiryDetailResponseDto getInquiryDetail(Long inquiryId,Long memberId) {
         Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new IllegalArgumentException("해당 문의사항이 존재하지 않습니다."));
         String inquiryCreatedDate = dateFormatter(inquiry.getInquiryCreatedDate());
@@ -163,6 +169,7 @@ public class BoardService {
         return new InquiryDetailResponseDto(inquiry,inquiryCreatedDate);
     }
     // 문의사항 상세 조회 관리자
+    @Transactional(readOnly = true)
     public InquiryDetailAdminResponseDto getInquiryDetailAdmin(Long inquiryId) {
         Inquiry inquiry = inquiryRepository.findById(inquiryId).orElseThrow(() -> new IllegalArgumentException("해당 문의사항이 존재하지 않습니다."));
         String memberNickname = memberServiceFeignClient.getNicknames(inquiry.getMemberId());
@@ -173,6 +180,7 @@ public class BoardService {
         return new InquiryDetailAdminResponseDto(inquiry, memberNickname,inquiryCreatedDate);
     }
     // 관리자 대시보드 최근 답변되지않은 문의사항 목록 조회
+    @Transactional(readOnly = true)
     public List<InquiryAdminListResponseDto> getRecentInquiryList() {
         List<Inquiry> inquiries = inquiryRepository.findTop5ByInquiryStatusOrderByInquiryCreatedDateDesc(InquiryStatus.NONE);
         List<InquiryAdminListResponseDto> inquiryAdminListResponseDtos = new ArrayList<>();

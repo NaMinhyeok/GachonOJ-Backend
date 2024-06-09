@@ -317,14 +317,4 @@ public class ProblemService {
             return new ProblemCardResponseDto(problem, problemDiff, problem.getProblemClass().getLabel(), correctRate);
         }).toList();
     }
-    // TODO : 교수 대시보드 최근 오답률 높은 문제 분류 TOP 3 구현
-    // 교수 대시보드 최근 오답률 높은 문제 분류 TOP 3
-//    @Transactional(readOnly = true)
-//    public List<ProblemCardResponseDto> getTop3IncorrectProblemClass() {
-//        List<SubmissionResultCountResponseDto> submissionResultCountResponseDtos = submissionServiceFeignClient.getIncorrectProblemClass();
-//        // 문제 id의 problemClass를 가져오고 각 problemClass에 대한 제출 수, 오답 수를 저장해야됨
-//        // problemClass로 쿼리날려서 problemId를 리스트에 저장하고
-//        // 리스트를 통해서 정답 수, 오답 수를 저장하도록 해야되나
-//        // 이렇게 해서 compareTo 써서 비교해서 밀어내기로 하면되나?
-//    }
 }

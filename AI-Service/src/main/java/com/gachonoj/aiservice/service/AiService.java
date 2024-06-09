@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDate;
@@ -45,6 +46,7 @@ public class AiService {
     }
     // TODO : 문제번호를 받아서 해당 문제에 대한 제출 코드를 가져오고 그 코드를 AI에 넣어서 결과를 받아온다.
     //        그 결과를 다시 제출자에게 전달한다.
+    @Transactional
     public AiFeedbackResponseDto feedback(Long submissionId, Long memberId) {
         // 제출 아이디 통해서 제출 코드 가져오기
         // 제출 아이디 통해서 문제 번호도 가져오기
@@ -71,6 +73,7 @@ public class AiService {
         return new AiFeedbackResponseDto(problemId,problemTitle,memberNickname,code,aiContents);
     }
     // 토큰 사용량 조회
+    @Transactional(readOnly = true)
     public TokenUsageResponseDto tokenUsage() {
         List<Feedback> feedbacks= feedbackRepository.findByFeedbackCreatedDateBetween(LocalDate.now().atStartOfDay(), LocalDate.now().atTime(23,59,59));
         Long todayTokenUsage = feedbacks.stream().mapToLong(Feedback::getTotalTokens).sum();
