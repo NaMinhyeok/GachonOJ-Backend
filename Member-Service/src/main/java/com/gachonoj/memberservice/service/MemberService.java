@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.print.DocFlavor;
 import java.io.IOException;
 import java.net.URL;
 import java.security.SecureRandom;
@@ -39,7 +40,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
 public class MemberService {
     private final JavaMailSender mailSender;
     private final RedisService redisService;
@@ -164,33 +164,35 @@ public class MemberService {
     }
 
     // 학번 중복 검사
+    @Transactional(readOnly = true)
     public boolean validateMemberNumber(String memberNumber) {
         return memberRepository.existsByMemberNumber(memberNumber);
     }
     // 이메일 중복 검사
+    @Transactional(readOnly = true)
     public boolean validateMemberEmail(String memberEmail) {
         return memberRepository.existsByMemberEmail(memberEmail);
     }
     // 비밀번호 일치 검사
+    @Transactional(readOnly = true)
     public boolean validateMemberPassword(String memberPassword, Member member){
         return passwordEncoder.matches(memberPassword, member.getMemberPassword());
     }
-    // 회원 정보 가져오기
-    public Member loadUserByUsername(Long memberId) {
-        return memberRepository.findById(memberId).orElseThrow(() -> new IllegalArgumentException("가입되지 않은 회원입니다."));
-    }
     // 닉네임 중복 확인
+    @Transactional(readOnly = true)
     public NicknameVerificationResponseDto verifiedMemberNickname(MemberNicknameRequestDto memberNicknameRequestDto) {
         String memberNickname = memberNicknameRequestDto.getMemberNickname();
         return new NicknameVerificationResponseDto(verifyMemberNickname(memberNickname));
     }
     // 호버시 회원 정보 조회
+    @Transactional(readOnly = true)
     public HoverResponseDto getHoverInfo(Long memberId) {
         Member member = memberRepository.findByMemberId(memberId);
         Integer rating = calculateRating(member.getMemberRank());
         return new HoverResponseDto(member.getMemberEmail(), member.getMemberNickname(), rating);
     }
     // 사용자 정보 조회 ( 사용자 정보 수정 화면에서 정보 조회)
+    @Transactional(readOnly = true)
     public MemberInfoResponseDto getMemberInfo(Long memberId) {
         Member member = memberRepository.findByMemberId(memberId);
         Integer rating = calculateRating(member.getMemberRank());
@@ -198,6 +200,7 @@ public class MemberService {
     }
     // 사용자 본인 정보 수정
     // 사용자 선호 언어 조회
+    @Transactional(readOnly = true)
     public MemberLangResponseDto getMemberLang(Long memberId) {
         Member member = memberRepository.findByMemberId(memberId);
         return new MemberLangResponseDto(member.getMemberLang());
@@ -209,6 +212,7 @@ public class MemberService {
         member.updateMemberLang(memberLang);
     }
     // 대회 페이지 사용자 정보 조회
+    @Transactional(readOnly = true)
     public MemberInfoExamResponseDto getMemberInfoExam(Long memberId) {
         Member member = memberRepository.findByMemberId(memberId);
         Integer rating = calculateRating(member.getMemberRank());
@@ -235,7 +239,7 @@ public class MemberService {
         }
     }
     // 랭킹 화면 사용자 정보 조회
-    @Transactional
+    @Transactional(readOnly = true)
     public MemberInfoRankingResponseDto getMemberInfoRanking(Long memberId) {
         try {
             SubmissionMemberInfoResponseDto submissionMemberInfoResponseDto = submissionServiceFeignClient.getMemberInfoBySubmission(memberId);
@@ -249,6 +253,7 @@ public class MemberService {
         }
     }
     // 사용자 목록 조회
+    @Transactional(readOnly = true)
     public Page<MemberListResponseDto> getMemberList(String memberRole, int pageNo) {
         Pageable pageable = PageRequest.of(pageNo-1, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "memberId"));
         if(Objects.equals(memberRole, "학생")) {
@@ -267,7 +272,7 @@ public class MemberService {
     // 사용자 랭킹 목록 조회
     //TODO
     // 한번에 검색이 잘 진행이 안되고있음 왜그런지 확인해서 추후에 수정하기
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<MemberRankingResponseDto> getMemberRankingList(int pageNo,String search) {
         Pageable pageable = PageRequest.of(pageNo-1, PAGE_SIZE, Sort.by(Sort.Direction.DESC, "memberRank"));
         Page<Member> memberList;
@@ -360,6 +365,7 @@ public class MemberService {
         member.updateMemberInfo(updateMemberRequestDto.getMemberName(),updateMemberRequestDto.getMemberNickname(),updateMemberRequestDto.getMemberNumber(),role);
     }
     // 관리자 화면 사용자 정보변경을 위한 사용자 정보 조회
+    @Transactional(readOnly = true)
     public MemberInfoByAdminResponseDto getMemberInfoByAdmin(Long memberId) {
         Member member = memberRepository.findByMemberId(memberId);
         return new MemberInfoByAdminResponseDto(member.getMemberEmail(),member.getMemberName(),member.getMemberNumber(),member.getMemberNickname(),member.getMemberRole().getLabel());
@@ -371,6 +377,7 @@ public class MemberService {
     }
 
     // 응시자 추가를 위한 사용자 정보 조회
+    @Transactional(readOnly = true)
     public List<MemberInfoTestResponseDto> getMemberInfoTest(String search) {
         List<Member> members;
         if(search != null) {
@@ -408,6 +415,7 @@ public class MemberService {
         }
     }
     // 회원 정보 조회 문제 화면에서
+    @Transactional(readOnly = true)
     public MemberInfoProblemResponseDto getMemberInfoProblem(Long memberId) {
         Member member = memberRepository.findByMemberId(memberId);
         Integer rating = calculateRating(member.getMemberRank());
@@ -454,6 +462,7 @@ public class MemberService {
         return password.toString();
     }
     // 학생 선호 언어 현황
+    @Transactional(readOnly = true)
     public List<MemberLangCountResponseDto> getMemberLangCount() {
         return memberRepository.findLangCountByRole();
     }

@@ -148,6 +148,7 @@ public class SubmissionService {
     }
 
     // 금일 채점 결과 현황 조회
+    @Transactional(readOnly = true)
     public TodaySubmissionCountResponseDto getTodaySubmissionCount() {
         log.info("변환된 시간 확인하기" + LocalDate.now().atStartOfDay());
         List<Submission> submissions = submissionRepository.findBySubmissionDateBetween(LocalDate.now().atStartOfDay(), LocalDate.now().atTime(23,59,59));
@@ -165,6 +166,7 @@ public class SubmissionService {
     }
 
     // 시험 제출 정보 조회
+    @Transactional(readOnly = true)
     public List<SubmissionDetailDto> getSubmissionsDetails(Long memberId, List<Long> problemIds) {
         List<Submission> submissions = submissionRepository.findByMemberIdAndProblemIdIn(memberId, problemIds);
         return submissions.stream()
@@ -176,6 +178,7 @@ public class SubmissionService {
                 .collect(Collectors.toList());
     }
     // 제출한 코드 확인하기
+    @Transactional(readOnly = true)
     public MySubmissionResultResponseDto getSubmissionCodeBySubmissionId(Long submissionId) {
         Submission submission = submissionRepository.findBySubmissionId(submissionId);
         // 문제 제목 가져오기
@@ -186,6 +189,7 @@ public class SubmissionService {
     }
 
     // 제출 이력 조회
+    @Transactional(readOnly = true)
     public List<SubmissionRecordResponseDto> getSubmissionRecordsByMemberAndProblemId(Long memberId, Long problemId) {
         List<Submission> submissions = submissionRepository.findByMemberIdAndProblemId(memberId, problemId);
         return submissions.stream()
@@ -241,7 +245,6 @@ public class SubmissionService {
             submissionRepository.save(submission);
         }
         // Test 엔티티에 점수 반영 및 종료시간 반영
-        //TODO : 파라미터 순서가 잘못되어서 날라가고있는것 같음 추후에 수정해야됨
         problemServiceFeignClient.saveTestScore(examId, memberId, totalScore);
     }
     // 코드 저장

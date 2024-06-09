@@ -81,15 +81,6 @@ public class ProblemController {
         return ResponseEntity.ok(CommonResponseDto.success());
     }
 
-//    @GetMapping("/bookmark/list")
-//    public ResponseEntity<CommonResponseDto<Page<BookmarkProblemResponseDto>>> getBookmarkProblemList(
-//            @RequestParam(defaultValue = "1") int pageNo, HttpServletRequest request) {
-//        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
-//        // 강제로 회원 ID를 받아 사용하거나, 인증 정보에서 회원 ID를 추출해야 할 경우 로직 추가
-//        Page<BookmarkProblemResponseDto> result = problemService.getBookmarkProblemList(memberId, pageNo);
-//        return ResponseEntity.ok(CommonResponseDto.success(result));
-//    }
-
     // 북마크 등록
     @PostMapping("/bookmark/{problemId}")
     public ResponseEntity<CommonResponseDto<Void>> addBookmark(@PathVariable Long problemId, HttpServletRequest request){
@@ -106,41 +97,6 @@ public class ProblemController {
         return ResponseEntity.ok(CommonResponseDto.success());
     }
 
-//    @GetMapping("/challenging/list")
-//    public ResponseEntity<CommonResponseDto<Page<WrongProblemResponseDto>>> getIncorrectProblemList(
-//            @RequestParam(defaultValue = "1") int pageNo, HttpServletRequest request) {
-//        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
-//        // 강제로 회원 ID를 받아 사용하거나, 인증 정보에서 회원 ID를 추출해야 할 경우 로직 추가
-//        Page<WrongProblemResponseDto> result = problemService.getIncorrectProblemList(memberId, pageNo);
-//        return ResponseEntity.ok(CommonResponseDto.success(result));
-//    }
-
-//    @GetMapping("/solved/list")
-//    public ResponseEntity<CommonResponseDto<Page<SolvedProblemResponseDto>>> getSolvedProblemList(
-//            @RequestParam(defaultValue = "1") int pageNo, HttpServletRequest request) {
-//        Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
-//        // 강제로 회원 ID를 받아 사용하거나, 인증 정보에서 회원 ID를 추출해야 할 경우 로직 추가
-//        Page<SolvedProblemResponseDto> result = problemService.getSolvedProblemList(memberId, pageNo);
-//        return ResponseEntity.ok(CommonResponseDto.success(result));
-//    }
-
-//    // 참가 대회&시험 예정 조회
-//    @GetMapping("/exam/scheduled")
-//    public ResponseEntity<CommonResponseDto<List<ScheduledContestResponseDto>>> getScheduledContests(@RequestHeader("X-Authorization-Id") String authorizationId,
-//                                                                                                     @RequestParam(required = false) String type) {
-//        Long memberId = Long.parseLong(authorizationId);
-//        List<ScheduledContestResponseDto> result = examService.getScheduledContests(memberId,type);
-//        return ResponseEntity.ok(CommonResponseDto.success(result));
-//    }
-//
-//    // 지난 대회&시험 조회
-//    @GetMapping("/exam/past")
-//    public ResponseEntity<CommonResponseDto<List<PastContestResponseDto>>> getPastContests(@RequestHeader("X-Authorization-Id") String authorizationId,
-//                                                                                           @RequestParam String type){
-//        Long memberId = Long.parseLong(authorizationId);
-//        List<PastContestResponseDto> result = examService.getPastContests(memberId,type);
-//        return ResponseEntity.ok(CommonResponseDto.success(result));
-//    }
     // 참가예정 대회 & 시험 조회
     // 지난 대회 & 시험 조회
         @GetMapping("/exam/list")
@@ -267,14 +223,6 @@ public class ProblemController {
         List<ExamCardInfoResponseDto> result = examService.getProfessorExamCardInfo(memberId);
         return ResponseEntity.ok(CommonResponseDto.success(result));
     }
-
-    // TODO : 교수 대시보드 최근 오답률 높은 문제 분류 TOP 3 서비스 로직 만들기
-    // 교수 대시보드 최근 오답률 높은 문제 분류 TOP 3
-//    @GetMapping("/professor/incorrect/class")
-//    public ResponseEntity<CommonResponseDto<List<ProblemCardResponseDto>>> getIncorrectProblemClassList() {
-//        List<ProblemCardResponseDto> result = problemService.getTop3IncorrectProblemClass();
-//        return ResponseEntity.ok(CommonResponseDto.success(result));
-//    }
 
     // 교수 대시보드 오답률 높은 알고리즘 TOP 5
     @GetMapping("/professor/incorrect")

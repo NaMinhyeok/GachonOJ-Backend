@@ -20,13 +20,13 @@ public class AiController {
 
     private final AiService aiService;
 
+    // GPT 요청
     @GetMapping("/chat")
     public ResponseEntity<CommonResponseDto<String>> chat(@RequestBody FeedbackRequestDto feedbackRequestDto) {
         String response = aiService.chatGPT(feedbackRequestDto);
         return ResponseEntity.ok(CommonResponseDto.success(response));
     }
-    // TODO : 문제번호를 받아서 해당 문제에 대한 제출 코드를 가져오고 그 코드를 AI에 넣어서 결과를 받아온다.
-    //        그 결과를 다시 제출자에게 전달한다.
+    // GPT 제출한 코드에 대한 피드백 받기
     @GetMapping("/feedback/{submissionId}")
     public ResponseEntity<CommonResponseDto<AiFeedbackResponseDto>> feedback(@PathVariable Long submissionId, HttpServletRequest request) {
         Long memberId = Long.parseLong(request.getHeader("X-Authorization-Id"));
