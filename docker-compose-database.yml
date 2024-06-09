@@ -1,0 +1,71 @@
+version: '3.8'
+
+networks:
+  gachonoj-network:
+    external: true
+
+services:
+  aidb:
+    image: mariadb
+    container_name: aidb
+    environment:
+      - MARIADB_ROOT_PASSWORD=gachonoj2024
+      - TZ=Asia/Seoul
+    ports:
+      - "3311:3311"
+    volumes:
+      - /home/t24101/ai.cnf:/etc/mysql/my.cnf
+    networks:
+      - gachonoj-network
+
+  boarddb:
+    image: mariadb
+    container_name: boarddb
+    environment:
+      - MARIADB_ROOT_PASSWORD=gachonoj2024
+      - TZ=Asia/Seoul
+    ports:
+      - "3310:3310"
+    volumes:
+      - /home/t24101/board.cnf:/etc/mysql/my.cnf
+    networks:
+      - gachonoj-network
+
+  memberdb:
+    image: mariadb
+    container_name: memberdb
+    environment:
+      - MARIADB_ROOT_PASSWORD=gachonoj2024
+      - TZ=Asia/Seoul
+    ports:
+      - "3307:3307"
+    volumes:
+      - /home/t24101/member.cnf:/etc/mysql/my.cnf
+    networks:
+      - gachonoj-network
+
+  problemdb:
+    image: mariadb
+    container_name: problemdb
+    environment:
+      - MARIADB_ROOT_PASSWORD=gachonoj2024
+      - TZ=Asia/Seoul
+    ports:
+      - "3308:3308"
+    volumes:
+      - /home/t24101/problem.cnf:/etc/mysql/my.cnf
+    networks:
+      - gachonoj-network
+
+  submissiondb:
+    image: mariadb
+    container_name: submissiondb
+    environment:
+      - MARIADB_ROOT_PASSWORD=gachonoj2024
+      - TZ=Asia/Seoul
+    ports:
+      - "3309:3309"
+    volumes:
+      - /home/t24101/submission.cnf:/etc/mysql/my.cnf
+    networks:
+      - gachonoj-network
