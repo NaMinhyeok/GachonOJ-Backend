@@ -1,0 +1,84 @@
+version: '3'
+
+services:
+  eureka-server:
+    container_name : eureka-server
+    image: naminhyeok/gachonoj-eureka:latest
+    environment:
+      - TZ=Asia/Seoul
+    networks:
+      - gachonoj-network
+    ports:
+      - 8761:8761
+    restart: on-failure
+
+  gateway:
+    container_name : gateway
+    image: naminhyeok/gachonoj-gateway:latest
+    environment:
+      - TZ=Asia/Seoul
+    networks:
+      - gachonoj-network
+    ports:
+      - 8000:8000
+    restart: on-failure
+
+  member:
+    container_name : member
+    image: naminhyeok/gachonoj-member:latest
+    environment:
+      - TZ=Asia/Seoul
+    networks:
+      - gachonoj-network
+    ports:
+      - 8081:8081
+    restart: on-failure
+
+  problem:
+    container_name : problem
+    image: naminhyeok/gachonoj-problem:latest
+    environment:
+      - TZ=Asia/Seoul
+    networks:
+      - gachonoj-network
+    ports:
+      - 8082:8082
+    restart: on-failure
+
+  submission:
+    container_name : submission
+    image: naminhyeok/gachonoj-submission:latest
+    environment:
+      - TZ=Asia/Seoul
+    networks:
+      - gachonoj-network
+    ports:
+      - 8083:8083
+    restart: on-failure
+
+  board:
+    container_name : board
+    image: naminhyeok/gachonoj-board:latest
+    environment:
+      - TZ=Asia/Seoul
+    networks:
+      - gachonoj-network
+    ports:
+      - 8084:8084
+    restart: on-failure
+
+  ai:
+    container_name : ai
+    image: naminhyeok/gachonoj-ai:latest
+    environment:
+      - TZ=Asia/Seoul
+    networks:
+      - gachonoj-network
+    ports:
+      - 8085:8085
+    restart: on-failure
+
+
+networks:
+  gachonoj-network:
+    external : true
