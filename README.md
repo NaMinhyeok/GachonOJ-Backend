@@ -1,13 +1,13 @@
 
 
 <div align="center">
-<a href="http://cecloud.gachon.ac.kr:65001/">
+<a href="http://www.gachonoj.site:8080/">
 <img width="100%" src="https://github.com/gcu-LastDance/GachonOJ-Backend/assets/112960401/975fc37e-ed23-4b15-968a-d06ca072ab94" alt="GachonOJ 이동하기"/>
 </a>
 
 
 
-[![](https://img.shields.io/badge/-gachonoj-important?style=flat&logo=airplayvideo&logoColor=white&labelColor=black&color=%233145FF)](http://cecloud.gachon.ac.kr:65001/)
+[![](https://img.shields.io/badge/-gachonoj-important?style=flat&logo=airplayvideo&logoColor=white&labelColor=black&color=%233145FF)](http://www.gachonoj.site:8080/)
 [![](https://img.shields.io/badge/back_release-v1.0.0-critical?style=flat&logo=github&logoColor=balck&labelColor=black&color=white)
 ](https://github.com/gcu-LastDance/GachonOJ-Backend/releases)
 
