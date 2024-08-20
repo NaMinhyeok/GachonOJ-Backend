@@ -142,7 +142,6 @@ public class BoardService {
             } else {
                 return new InquiryAdminListResponseDto(inquiry,memberNickname,createdDate);
             }
-
         });
     }
     // 문의사항 목록 조회 사용자
