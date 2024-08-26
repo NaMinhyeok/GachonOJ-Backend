@@ -1,6 +1,7 @@
 package com.gachonoj.memberservice.feign.service;
 
 import com.gachonoj.memberservice.domain.entity.Member;
+import com.gachonoj.memberservice.feign.dto.response.MemberNicknamesDto;
 import com.gachonoj.memberservice.feign.dto.response.ProblemMemberInfoResponseDto;
 import com.gachonoj.memberservice.feign.dto.response.SubmissionMemberRankInfoResponseDto;
 import com.gachonoj.memberservice.repository.MemberRepository;
@@ -9,6 +10,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -46,5 +52,13 @@ public class MemberFeignService {
                 member.getMemberName(),
                 member.getMemberEmail()
         );
+    }
+
+    // 사용자 닉네임 조회 IN 절 이용
+    public List<MemberNicknamesDto> getNicknames(List<Long> memberIds) {
+        List<Member> members = memberRepository.findByMemberIdIn(memberIds);
+        return members.stream()
+                .map(member -> new MemberNicknamesDto(member.getMemberId(), member.getMemberNickname()))
+                .collect(Collectors.toList());
     }
 }

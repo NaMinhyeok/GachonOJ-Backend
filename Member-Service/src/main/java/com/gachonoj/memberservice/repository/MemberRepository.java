@@ -12,6 +12,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
@@ -34,4 +35,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     // 학생 선호 언어 현황(각 언어마다 갯수) 조회
     @Query("SELECT new com.gachonoj.memberservice.domain.dto.response.MemberLangCountResponseDto(m.memberLang, COUNT(m.memberLang)) FROM Member m WHERE m.memberRole = 'ROLE_STUDENT' GROUP BY m.memberLang")
     List<MemberLangCountResponseDto> findLangCountByRole();
+
+    // 멤버 아이디로 닉네임 조회 IN 절 이용
+    List<Member> findByMemberIdIn(List<Long> memberIds);
 }

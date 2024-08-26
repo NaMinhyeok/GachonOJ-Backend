@@ -9,6 +9,7 @@ import com.gachonoj.boardservice.domain.entity.Inquiry;
 import com.gachonoj.boardservice.domain.entity.Notice;
 import com.gachonoj.boardservice.domain.entity.Reply;
 import com.gachonoj.boardservice.feign.client.MemberServiceFeignClient;
+import com.gachonoj.boardservice.feign.dto.MemberNicknamesDto;
 import com.gachonoj.boardservice.repository.InquiryRepository;
 import com.gachonoj.boardservice.repository.NoticeRepository;
 import com.gachonoj.boardservice.repository.ReplyRepository;
@@ -24,6 +25,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -101,11 +103,16 @@ public class BoardService {
     public List<NoticeMainResponseDto> getMainNoticeList() {
         List<Notice> noticeList = noticeRepository.findTop5ByOrderByNoticeCreatedDateDesc();
         List<NoticeMainResponseDto> noticeMainResponseDtos = new ArrayList<>();
+        List<Long> memberIds = noticeList.stream().map(Notice::getMemberId).toList();
+        List<MemberNicknamesDto> memberNicknamesDtos = memberServiceFeignClient.getNicknames(memberIds);
         for (Notice notice : noticeList) {
-            String memberNickname = memberServiceFeignClient.getNicknames(notice.getMemberId());
+            String memberNickname = memberNicknamesDtos.stream()
+                    .filter(memberNicknamesDto -> memberNicknamesDto.getMemberId().equals(notice.getMemberId()))
+                    .findFirst()
+                    .map(MemberNicknamesDto::getMemberNickname)
+                    .orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
             String createdDate = dateFormatter(notice.getNoticeUpdatedDate());
-            NoticeMainResponseDto responseDto = new NoticeMainResponseDto(notice,createdDate, memberNickname);
-            noticeMainResponseDtos.add(responseDto);
+            noticeMainResponseDtos.add(new NoticeMainResponseDto(notice,createdDate,memberNickname));
         }
         return noticeMainResponseDtos;
     }
@@ -114,10 +121,15 @@ public class BoardService {
     public Page<NoticeListResponseDto> getNoticeList(int pageNo) {
         Pageable pageable = PageRequest.of(pageNo-1, PAGE_SIZE);
         Page<Notice> noticePage = noticeRepository.findAllByOrderByNoticeCreatedDateDesc(pageable);
+        List<MemberNicknamesDto> memberNicknames = memberServiceFeignClient.getNicknames(noticePage.stream().map(Notice::getMemberId).toList());
         return noticePage.map(notice -> {
-            String memberNickname = memberServiceFeignClient.getNicknames(notice.getMemberId());
             String createdDate = dateFormatter(notice.getNoticeUpdatedDate());
-            return new NoticeListResponseDto(notice, createdDate, memberNickname);
+            String memberNickname = memberNicknames.stream()
+                    .filter(memberNicknamesDto -> memberNicknamesDto.getMemberId().equals(notice.getMemberId()))
+                    .findFirst()
+                    .map(MemberNicknamesDto::getMemberNickname)
+                    .orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
+            return new NoticeListResponseDto(notice,createdDate,memberNickname);
         });
     }
     // 공지사항 상세 조회
@@ -133,9 +145,15 @@ public class BoardService {
     public Page<InquiryAdminListResponseDto> getInquiryListAdmin(int pageNo) {
         Pageable pageable = PageRequest.of(pageNo-1, PAGE_SIZE);
         Page<Inquiry> inquiryPage = inquiryRepository.findAllByOrderByInquiryCreatedDateDesc(pageable);
+        List<Long> memberIds = inquiryPage.stream().map(Inquiry::getMemberId).toList();
+        List<MemberNicknamesDto> memberNicknames = memberServiceFeignClient.getNicknames(memberIds);
         return inquiryPage.map(inquiry -> {
-            String memberNickname = memberServiceFeignClient.getNicknames(inquiry.getMemberId());
             String createdDate = dateFormatter(inquiry.getInquiryCreatedDate());
+            String memberNickname = memberNicknames.stream()
+                    .filter(memberNicknamesDto -> memberNicknamesDto.getMemberId().equals(inquiry.getMemberId()))
+                    .findFirst()
+                    .map(MemberNicknamesDto::getMemberNickname)
+                    .orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
             if(inquiry.getInquiryStatus()== InquiryStatus.COMPLETED && inquiry.getReply() != null){
                 String replyUpdateDate = dateFormatter(inquiry.getReply().getReplyUpdatedDate());
                 return new InquiryAdminListResponseDto(inquiry,memberNickname,createdDate,replyUpdateDate);
@@ -183,8 +201,14 @@ public class BoardService {
     public List<InquiryAdminListResponseDto> getRecentInquiryList() {
         List<Inquiry> inquiries = inquiryRepository.findTop5ByInquiryStatusOrderByInquiryCreatedDateDesc(InquiryStatus.NONE);
         List<InquiryAdminListResponseDto> inquiryAdminListResponseDtos = new ArrayList<>();
+        List<Long> memberIds = inquiries.stream().map(Inquiry::getMemberId).toList();
+        List<MemberNicknamesDto> memberNicknames = memberServiceFeignClient.getNicknames(memberIds);
         for (Inquiry inquiry : inquiries) {
-            String memberNickname = memberServiceFeignClient.getNicknames(inquiry.getMemberId());
+            String memberNickname = memberNicknames.stream()
+                    .filter(memberNicknamesDto -> memberNicknamesDto.getMemberId().equals(inquiry.getMemberId()))
+                    .findFirst()
+                    .map(MemberNicknamesDto::getMemberNickname)
+                    .orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
             String createdDate = dateFormatter(inquiry.getInquiryCreatedDate());
             InquiryAdminListResponseDto responseDto = new InquiryAdminListResponseDto(inquiry, memberNickname, createdDate, InquiryStatus.NONE);
             inquiryAdminListResponseDtos.add(responseDto);

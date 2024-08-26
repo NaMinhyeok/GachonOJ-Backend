@@ -1,11 +1,15 @@
 package com.gachonoj.memberservice.feign.controller;
 
+import com.gachonoj.memberservice.feign.dto.response.MemberNicknamesDto;
 import com.gachonoj.memberservice.feign.dto.response.ProblemMemberInfoResponseDto;
 import com.gachonoj.memberservice.feign.dto.response.SubmissionMemberRankInfoResponseDto;
 import com.gachonoj.memberservice.feign.service.MemberFeignService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -32,5 +36,10 @@ public class MemberFeignController {
     @GetMapping("/{memberId}/info")
     public ProblemMemberInfoResponseDto getMemberInfo(@PathVariable Long memberId) {
         return memberFeignService.getMemberInfo(memberId);
+    }
+    // 사용자 닉네임 조회 IN 절 이용
+    @GetMapping("/nickname")
+    public List<MemberNicknamesDto> getNicknames(@RequestParam List<Long> memberIds) {
+        return memberFeignService.getNicknames(memberIds);
     }
 }
