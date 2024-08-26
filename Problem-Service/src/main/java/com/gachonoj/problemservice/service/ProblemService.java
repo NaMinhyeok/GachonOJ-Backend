@@ -168,7 +168,7 @@ public class ProblemService {
         return problems.map(problem -> {
             Integer correctPeople = submissionServiceFeignClient.getCorrectSubmission(problem.getProblemId());
             Double correctRate = submissionServiceFeignClient.getProblemCorrectRate(problem.getProblemId());
-            Boolean isBookmarked = bookmarkRepository.existsByMemberIdAndProblemProblemId(memberId, problem.getProblemId());
+            Boolean isBookmarked = problem.getBookmarks().stream().anyMatch(bookmark -> bookmark.getMemberId().equals(memberId));
             return new ProblemListResponseDto(problem, correctPeople, correctRate, isBookmarked, null);
         });
     }
@@ -208,7 +208,7 @@ public class ProblemService {
         // 문제의 정답률
         Double correctRate = submissionServiceFeignClient.getProblemCorrectRate(problem.getProblemId());
         // 북마크 여부 판단
-        Boolean isBookmarked = bookmarkRepository.existsBookmarkByProblemProblemId(problem.getProblemId());
+        Boolean isBookmarked = problem.getBookmarks().stream().anyMatch(bookmark -> bookmark.getMemberId().equals(memberId));
         // 제출 ID 가져오기
         Long submissionId = submissionServiceFeignClient.getRecentSubmissionId(problem.getProblemId(),memberId);
         return new ProblemListResponseDto(problem, correctPeople, correctRate,isBookmarked,submissionId);
@@ -273,7 +273,7 @@ public class ProblemService {
     //문제 응시 화면 문제 상세 조회
     @Transactional(readOnly = true)
     public ProblemDetailResponseDto getProblemDetail(Long problemId) {
-        Problem problem = problemRepository.findById(problemId)
+        Problem problem = problemRepository.findProblemByProblemId(problemId)
                 .orElseThrow(() -> new IllegalArgumentException("Problem not found with id: " + problemId));
         List<Testcase> visibleTestcases = problem.getTestcases().stream()
                 .filter(testcase -> testcase.getTestcaseStatus() == TestcaseStatus.VISIBLE)
