@@ -30,7 +30,7 @@ public class Inquiry {
     private LocalDateTime inquiryCreatedDate;
     @LastModifiedDate
     private LocalDateTime inquiryUpdatedDate;
-    @OneToOne(mappedBy = "inquiry", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "inquiry", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private Reply reply;
 
     public Inquiry(String inquiryTitle, String inquiryContents, Long memberId) {

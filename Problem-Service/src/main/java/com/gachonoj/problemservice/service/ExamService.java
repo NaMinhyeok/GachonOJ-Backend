@@ -349,7 +349,7 @@ public class ExamService {
                 .collect(Collectors.toList());
 
         // 후보자 목록 가져오기
-        List<Long> candidateList = testRepository.findByExamExamId(examId).stream()
+        List<Long> candidateList = exam.getTests().stream()
                 .map(Test::getMemberId)
                 .collect(Collectors.toList());
 
